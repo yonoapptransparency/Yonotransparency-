@@ -1,0 +1,289 @@
+import { createClient } from '@supabase/supabase-js';
+
+// @ts-ignore
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+// @ts-ignore
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export interface Banner {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  link: string;
+}
+
+export interface GlobalSettings {
+  site_title: string;
+  meta_description: string;
+  logo_url: string;
+  favicon_url: string;
+  helpline_whatsapp: string;
+  helpline_telegram: string;
+  support_email: string;
+  disclaimer_text: string;
+  ethics_discrimination_text: string;
+  ticker_text: string;
+  animations_enabled: boolean;
+  about_content?: string;
+  contact_content?: string;
+  privacy_content?: string;
+  terms_content?: string;
+  important_notice?: string;
+  categories: string[];
+  banners: Banner[];
+}
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  cover_url: string;
+  download_url: string;
+  category: string;
+}
+
+export interface AppConfig {
+  id: string;
+  name: string;
+  slug: string;
+  seo_title?: string;
+  seo_description?: string;
+  category: string;
+  version: string;
+  file_size: string;
+  developer: string;
+  icon_url: string;
+  screenshots: string[];
+  encrypted_download_url: string;
+  description_html: string;
+  red_box_msg: string;
+  yellow_box_msg: string;
+  idea_box_msg: string;
+  safety_status: 'Verified' | 'Caution' | 'Unsafe';
+  serial_number: number;
+  is_featured: boolean;
+  is_new: boolean;
+  release_notes: string;
+  rating: number;
+  created_at: string;
+  custom_admin_box_html?: string;
+  custom_admin_box_heading?: string;
+  faqs?: {question: string; answer: string}[];
+}
+
+export interface Review {
+  id: string;
+  app_id: string;
+  username: string;
+  rating: number;
+  comment: string;
+  is_approved: boolean;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  cover_url: string;
+  published_at: string;
+}
+
+export interface NewsUpdate {
+  id: string;
+  title: string;
+  content_html: string;
+  category: string;
+  published_at: string;
+}
+
+const savedApps = localStorage.getItem('yonostore_apps');
+export const mockApps: AppConfig[] = savedApps ? (() => {
+  const parsed = JSON.parse(savedApps);
+  const defaultApps = [
+    {
+      id: 'game1',
+      name: 'Subway Surfers',
+      slug: 'subway-surfers',
+      category: 'Games, Action',
+      version: '3.10.0',
+      file_size: '150 MB',
+      developer: 'SYBO Games',
+      icon_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop',
+      screenshots: [
+        'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
+      ],
+      encrypted_download_url: 'U2FsdGVkX19xxxxxx',
+      description_html: '<p>Dash as fast as you can. Dodge the oncoming trains.</p>',
+      red_box_msg: '',
+      yellow_box_msg: '',
+      idea_box_msg: '',
+      safety_status: 'Verified',
+      serial_number: 1,
+      is_new: true,
+      created_at: new Date().toISOString(),
+    }
+  ];
+  // Merge missing items
+  defaultApps.forEach(defApp => {
+    if (!parsed.find((a: any) => a.id === defApp.id)) {
+      parsed.push(defApp);
+    }
+  });
+  return parsed;
+})() : [
+  {
+    id: 'game1',
+    name: 'Subway Surfers',
+    slug: 'subway-surfers',
+    category: 'Games, Action',
+    version: '3.10.0',
+    file_size: '150 MB',
+    developer: 'SYBO Games',
+    icon_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop',
+    screenshots: [
+      'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
+    ],
+    encrypted_download_url: 'U2FsdGVkX19xxxxxx',
+    description_html: '<p>Dash as fast as you can. Dodge the oncoming trains.</p>',
+    red_box_msg: '',
+    yellow_box_msg: '',
+    idea_box_msg: '',
+    safety_status: 'Verified',
+    serial_number: 1,
+    is_new: true,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: '1',
+    name: 'Instagram SafeMod',
+    slug: 'instagram-safemod',
+    category: 'Social',
+    version: '2.4.1',
+    file_size: '45.2 MB',
+    developer: 'Meta Privacy Team',
+    icon_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop',
+    screenshots: [
+      'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
+    ],
+    encrypted_download_url: 'U2FsdGVkX19xxxxxx',
+    description_html: '<p>A privacy-focused version of Instagram that restricts tracking and excessive permissions.</p>',
+    red_box_msg: '',
+    yellow_box_msg: '',
+    idea_box_msg: 'Always ensure your device permissions are set to strictly necessary.',
+    safety_status: 'Verified',
+    serial_number: 1,
+    is_featured: true,
+    is_new: true,
+    release_notes: '* Fixed tracking bugs.\n* Enhanced encryption layer.',
+    rating: 4.8,
+    created_at: '2026-05-11T10:00:00Z'
+  },
+  {
+    id: '2',
+    name: 'Suspicious Messaging App',
+    slug: 'suspicious-msg',
+    category: 'Communication',
+    version: '1.0',
+    file_size: '12 MB',
+    developer: 'Unknown',
+    icon_url: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=128&h=128&fit=crop',
+    screenshots: [],
+    encrypted_download_url: '',
+    description_html: '<p>This app requests unnecessary permissions like contact lists and precise location.</p>',
+    red_box_msg: 'Do NOT install without a sandbox.',
+    yellow_box_msg: 'Rejected by safety moderators.',
+    idea_box_msg: '',
+    safety_status: 'Unsafe',
+    serial_number: 2,
+    is_featured: false,
+    is_new: false,
+    release_notes: '',
+    rating: 1.2,
+    created_at: '2026-04-10T10:00:00Z'
+  }
+];
+
+export const saveMockApps = (apps: AppConfig[]) => {
+  localStorage.setItem('yonostore_apps', JSON.stringify(apps));
+  mockApps.splice(0, mockApps.length, ...apps);
+};
+
+const savedSettings = localStorage.getItem('yonostore_settings');
+export const mockSettings: GlobalSettings = savedSettings ? JSON.parse(savedSettings) : {
+  site_title: 'YonoStore',
+  meta_description: 'The definitive transparency app store for privacy-conscious users.',
+  logo_url: '',
+  favicon_url: '',
+  helpline_whatsapp: '+1234567890',
+  helpline_telegram: '@yonostore',
+  support_email: 'support@yonostore.com',
+  disclaimer_text: 'YonoStore provides transparency reviews. Download applications at your own risk. We strictly verify safety, but you remain responsible for your device security.',
+  ethics_discrimination_text: 'We are committed to providing equal access to safe applications without discrimination.',
+  ticker_text: 'LIVE: Instagram SafeMod updated to v2.4.1 • All apps verified by the Transparency Team • Join our Telegram for updates •',
+  animations_enabled: true,
+  about_content: '<p>SafeApp Store was founded with a single mission: to provide a transparent and secure environment for discovering and downloading mobile applications.</p><p>In an era where privacy is often compromised, we take a different approach. Every application on our platform undergoes a rigorous manual review process.</p>',
+  contact_content: '<p>Have questions or feedback? We\'d love to hear from you. Our team typically responds within 24-48 hours.</p>',
+  privacy_content: '<h2>1. Information We Collect</h2><p>We collect information to provide better services to all our users. The types of information we collect include usage data and device info.</p>',
+  terms_content: '<h2>1. Acceptance of Terms</h2><p>By accessing and using this application, you agree to be bound by these Terms and Conditions.</p>',
+  important_notice: 'Please note: Download apps at your own risk. We verify safety, but you are responsible for your device security.',
+  categories: ['All Apps', 'Categories', 'Top Charts', 'Games', 'Tools'],
+  banners: [
+    { id: "1", title: "Hot Deals: 50% Off", subtitle: "Limited time offer on subscriptions", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80", link: "/" },
+    { id: "2", title: "Top Games Collection", subtitle: "Experience gaming like never before", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80", link: "/" },
+    { id: "3", title: "Flipkart Big Billion Days", subtitle: "Shop apps with exclusive rewards", image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80", link: "/" }
+  ]
+};
+
+export const saveMockSettings = (settings: GlobalSettings) => {
+  localStorage.setItem('yonostore_settings', JSON.stringify(settings));
+  Object.assign(mockSettings, settings);
+};
+
+const savedBooks = localStorage.getItem('yonostore_books');
+export const mockBooks: Book[] = savedBooks ? JSON.parse(savedBooks) : [
+  {
+    id: '1',
+    title: 'The Art of Privacy',
+    author: 'Elena Vance',
+    description: 'A comprehensive guide to digital self-defense.',
+    cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80',
+    download_url: 'https://example.com/book1.pdf',
+    category: 'Security'
+  },
+  {
+    id: '2',
+    title: 'Zero Trust Architecture',
+    author: 'Mark Miller',
+    description: 'Understanding the modern security paradigm.',
+    cover_url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80',
+    download_url: 'https://example.com/book2.pdf',
+    category: 'Technical'
+  }
+];
+
+export const saveMockBooks = (books: Book[]) => {
+  localStorage.setItem('yonostore_books', JSON.stringify(books));
+  mockBooks.splice(0, mockBooks.length, ...books);
+};
+
+const savedBlogs = localStorage.getItem('yonostore_blogs');
+export const mockBlogs: BlogPost[] = savedBlogs ? JSON.parse(savedBlogs) : [
+  {
+    id: '1',
+    title: 'The Future of Mobile Security',
+    content: 'As mobile devices become central to our lives, securing them is more important than ever...',
+    author: 'Admin Team',
+    cover_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80',
+    published_at: new Date().toISOString()
+  }
+];
+
+export const saveMockBlogs = (blogs: BlogPost[]) => {
+  localStorage.setItem('yonostore_blogs', JSON.stringify(blogs));
+  mockBlogs.splice(0, mockBlogs.length, ...blogs);
+};
