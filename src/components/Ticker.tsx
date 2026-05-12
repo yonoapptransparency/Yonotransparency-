@@ -11,16 +11,16 @@ export default function Ticker() {
       <div className="flex whitespace-nowrap overflow-hidden pl-10 w-full relative">
         {/* We use two motion.div elements to create a seamless loop */}
         <motion.div
-          className="inline-block whitespace-nowrap min-w-full font-mono text-xs sm:text-sm font-medium tracking-wide"
+          className="inline-block whitespace-nowrap min-w-full font-mono text-xs sm:text-sm font-black uppercase tracking-widest magic-text"
           animate={{ x: [0, -1000] }}
           transition={{
             repeat: Infinity,
             ease: "linear",
-            duration: 20
+            duration: 25
           }}
         >
-          <span className="mx-8">{mockSettings.ticker_text}</span>
-          <span className="mx-8">{mockSettings.ticker_text}</span>
+          <span className="mx-12">{mockSettings.ticker_text}</span>
+          <span className="mx-12">{mockSettings.ticker_text}</span>
         </motion.div>
       </div>
     </div>

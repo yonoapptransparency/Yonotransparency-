@@ -12,7 +12,7 @@ export default function About() {
         <h1 className="text-3xl font-bold mb-8">About {mockSettings.site_title}</h1>
         
         <div 
-          className="space-y-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400 markdown-body"
+          className="space-y-6 text-lg leading-relaxed text-black dark:text-slate-400 markdown-body font-medium"
           dangerouslySetInnerHTML={{ __html: mockSettings.about_content || '' }}
         />
 

@@ -6,6 +6,7 @@ import { cn } from '../lib/utils';
 import { useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import SecureDownloadButton from '../components/SecureDownloadButton';
 
 export default function DownloadPage() {
   const { slug } = useParams();
@@ -90,8 +91,8 @@ export default function DownloadPage() {
       
       {/* Header section */}
       <div className="text-center mb-10 max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">Download {app.name}</h1>
-        <p className="text-slate-600 dark:text-slate-400">
+        <h1 className="text-4xl font-black mb-4 text-black dark:text-white uppercase tracking-tighter">Download {app.name}</h1>
+        <p className="text-black dark:text-slate-400 font-bold uppercase tracking-tight">
           You are about to download the requested application. Please review the security and transparency notes below before proceeding.
         </p>
       </div>
@@ -99,18 +100,18 @@ export default function DownloadPage() {
       {/* SEO Optimized FAQs */}
       {app.faqs && app.faqs.length > 0 && (
         <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <Info className="w-5 h-5 text-pink-500" /> Frequently Asked Questions
+          <h2 className="text-xl font-black mb-6 flex items-center gap-2 text-black uppercase tracking-tight">
+            <Info className="w-5 h-5 text-red-600" /> Frequently Asked Questions
           </h2>
           <div className="space-y-3">
             {app.faqs.map((faq, idx) => (
-              <details key={idx} className="group bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl overflow-hidden pointer-events-auto">
-                <summary className="font-semibold p-4 cursor-pointer select-none flex items-center justify-between text-slate-800 dark:text-white group-open:text-pink-600 dark:group-open:text-pink-400 min-h-[48px]">
+              <details key={idx} className="group bg-white dark:bg-white/5 border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden pointer-events-auto">
+                <summary className="font-black p-4 cursor-pointer select-none flex items-center justify-between text-slate-900 dark:text-white group-open:text-red-600 dark:group-open:text-red-400 min-h-[48px] uppercase tracking-tight">
                   {faq.question}
-                  <span className="text-2xl leading-none transition-transform group-open:rotate-45 ml-4">+</span>
+                  <span className="text-2xl leading-none transition-transform group-open:rotate-45 ml-4 text-slate-900 dark:text-slate-300 opacity-50 group-open:opacity-100 group-open:text-red-600 border border-slate-300 dark:border-slate-700 rounded-full w-8 h-8 flex items-center justify-center">+</span>
                 </summary>
                 <div 
-                  className="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-300 prose prose-sm prose-slate dark:prose-invert max-w-none text-left"
+                  className="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 prose prose-sm prose-slate dark:prose-invert max-w-none text-left font-bold"
                   dangerouslySetInnerHTML={{ __html: faq.answer }}
                 />
               </details>
@@ -120,13 +121,14 @@ export default function DownloadPage() {
       )}
 
       {/* Main Download Action with Speedometer */}
-      <div className="glass-panel p-8 text-center mb-12 flex flex-col md:flex-row items-center justify-between border border-slate-200 dark:border-pink-500/20 bg-slate-100 dark:bg-pink-500/5 max-w-4xl mx-auto gap-8">
+      <div className="bg-white dark:bg-zinc-900/60 p-8 text-center mb-12 flex flex-col md:flex-row items-center justify-between border-2 border-white dark:border-white/5 rounded-[3rem] max-w-4xl mx-auto gap-8 shadow-2xl backdrop-blur-3xl">
         <div className="flex items-center gap-6">
-          <div className="w-24 h-24 bg-slate-200 dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-300 dark:border-slate-300 dark:border-white/10 shrink-0">
+          <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-2xl border-4 border-white shrink-0">
             {app.icon_url ? <img src={app.icon_url} alt="" className="w-full h-full object-cover"/> : null}
           </div>
           <div className="text-left">
-            <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-mono">
+            <h2 className="text-2xl font-black text-black dark:text-white uppercase tracking-tighter mb-1">{app.name}</h2>
+            <div className="text-sm text-black dark:text-slate-400 font-black uppercase tracking-widest">
               Size: {app.file_size} • Version: {app.version}
             </div>
             {/* Visual Safety Speedometer */}
@@ -135,62 +137,46 @@ export default function DownloadPage() {
               <div className="flex items-center h-2 w-32 bg-slate-300 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div className={cn(
                   "h-full transition-all duration-1000",
-                  app.safety_status === 'Verified' ? "w-[95%] bg-pink-500" :
-                  app.safety_status === 'Caution' ? "w-[50%] bg-amber-500" : "w-[10%] bg-rose-500"
+                  app.safety_status === 'Verified' ? "w-[95%] bg-green-500" :
+                  app.safety_status === 'Caution' ? "w-[50%] bg-yellow-500" : "w-[10%] bg-red-500"
                 )} />
               </div>
               <span className={cn(
                 "text-xs font-bold",
-                app.safety_status === 'Verified' ? "text-pink-600 dark:text-pink-400" :
-                app.safety_status === 'Caution' ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"
+                app.safety_status === 'Verified' ? "text-green-600 dark:text-green-400" :
+                app.safety_status === 'Caution' ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"
               )}>{app.safety_status}</span>
             </div>
           </div>
         </div>
         
-        <button 
-          onClick={handleDownload}
-          disabled={downloading}
-          className={cn(
-            "w-full sm:w-80 min-h-[56px] font-bold py-4 px-8 rounded-full flex items-center justify-center gap-3 transition-all shadow-xl text-lg shrink-0",
-            downloading 
-              ? "bg-pink-500/50 text-white cursor-not-allowed" 
-              : "bg-pink-500 hover:bg-pink-600 text-white shadow-pink-500/25 hover:shadow-pink-500/40 hover:-translate-y-1"
-          )}
-        >
-          {downloading ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <Download className="w-6 h-6" />
-          )}
-          {downloading ? 'Preparing Secure Link...' : 'Download Now'}
-        </button>
+        <SecureDownloadButton appId={app.id} status={app.safety_status as 'Verified' | 'Caution' | 'Unsafe'} />
       </div>
 
       {/* Strict Section Order 1: Admin Alert Boxes */}
       <div className="space-y-4 mb-12 max-w-4xl mx-auto flex flex-col gap-4">
         {app.red_box_msg && (
-          <div className="bg-rose-100 dark:bg-rose-500/10 border-l-4 border-rose-500 p-6 rounded-r-xl">
-            <h3 className="font-bold text-rose-700 dark:text-rose-500 flex items-center gap-2 mb-2">
+          <div className="bg-red-600 text-white p-6 rounded-3xl shadow-xl shadow-red-600/20 border-l-8 border-red-800">
+            <h3 className="font-black text-white flex items-center gap-2 mb-2 uppercase tracking-widest">
               <ShieldAlert className="w-5 h-5" /> Safety Warning
             </h3>
-            <p className="text-rose-900 dark:text-rose-100/80">{app.red_box_msg}</p>
+            <p className="text-white font-bold">{app.red_box_msg}</p>
           </div>
         )}
         {app.yellow_box_msg && (
-          <div className="bg-amber-100 dark:bg-amber-500/10 border-l-4 border-amber-500 p-6 rounded-r-xl">
-            <h3 className="font-bold text-amber-700 dark:text-amber-500 flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-5 h-5" /> Notice
+          <div className="bg-amber-100 dark:bg-amber-500/10 border-l-4 border-amber-600 p-6 rounded-r-xl shadow-lg border border-amber-200">
+            <h3 className="font-black text-amber-800 dark:text-amber-500 flex items-center gap-2 mb-2 uppercase tracking-widest">
+              <AlertTriangle className="w-5 h-5 text-amber-600" /> Notice
             </h3>
-            <p className="text-amber-900 dark:text-amber-100/80">{app.yellow_box_msg}</p>
+            <p className="text-amber-900 dark:text-amber-100/80 font-medium">{app.yellow_box_msg}</p>
           </div>
         )}
         {app.idea_box_msg && (
-          <div className="bg-pink-100 dark:bg-pink-500/10 border-l-4 border-pink-500 p-6 rounded-r-xl">
-            <h3 className="font-bold text-pink-700 dark:text-pink-400 flex items-center gap-2 mb-2">
-              <Info className="w-5 h-5" /> Idea / Tip
+          <div className="bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-600 p-6 rounded-r-xl shadow-lg border border-blue-100">
+            <h3 className="font-black text-blue-800 dark:text-blue-400 flex items-center gap-2 mb-2 uppercase tracking-widest">
+              <Info className="w-5 h-5 text-blue-600" /> Idea / Tip
             </h3>
-            <p className="text-pink-900 dark:text-pink-100/80">{app.idea_box_msg}</p>
+            <p className="text-blue-900 dark:text-blue-100/80 font-medium">{app.idea_box_msg}</p>
           </div>
         )}
         {app.custom_admin_box_html && (
@@ -208,9 +194,9 @@ export default function DownloadPage() {
 
       {/* Strict Section Order 2: Massive Description */}
       <div className="glass-panel p-8 mb-12 max-w-4xl mx-auto">
-        <h2 className="text-xl font-bold mb-6 border-b border-slate-300 dark:border-slate-300 dark:border-white/10 pb-4 text-slate-900 dark:text-white">Application Details</h2>
+        <h2 className="text-2xl font-black mb-6 border-b border-black/10 dark:border-white/10 pb-4 text-black dark:text-white uppercase tracking-tight">Application Details</h2>
         <div 
-          className="prose prose-slate dark:prose-invert prose-pink max-w-none text-slate-700 dark:text-slate-300 leading-relaxed pointer-events-none"
+          className="prose prose-slate dark:prose-invert prose-pink max-w-none text-black dark:text-slate-300 leading-relaxed font-medium pointer-events-none"
           dangerouslySetInnerHTML={{ __html: app.description_html || '<p>No description provided.</p>' }}
         />
       </div>
@@ -229,11 +215,11 @@ export default function DownloadPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Name / Alias</label>
-              <input required type="text" className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500" />
+              <input required type="text" className="w-full bg-white/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Rating (1-5)</label>
-              <select required className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 appearance-none">
+              <select required className="w-full bg-white/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 appearance-none">
                 <option value="5">5 - Excellent and Safe</option>
                 <option value="4">4 - Good</option>
                 <option value="3">3 - Average</option>
@@ -243,7 +229,7 @@ export default function DownloadPage() {
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Review</label>
-              <textarea required rows={3} className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"></textarea>
+              <textarea required rows={3} className="w-full bg-white/50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
             </div>
           </div>
           <button type="submit" className="mt-4 bg-slate-200 dark:bg-white/10 hover:bg-white/20 px-6 py-2 rounded-lg font-medium transition-colors">
@@ -268,48 +254,51 @@ export default function DownloadPage() {
 
       {/* Discover More Slider */}
       <div className="max-w-6xl mx-auto mt-24 mb-10">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-300 dark:border-white/10 pb-4 mb-6">
-          <h2 className="text-xl font-bold flex items-center gap-2">Discover More New Apps</h2>
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4 mb-6">
+          <h2 className="text-xl font-black flex items-center gap-2 uppercase tracking-tighter">Discover More New Apps</h2>
           <div className="flex gap-2">
-             <button className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-100 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-slate-200 dark:bg-white/10"><ChevronLeft className="w-5 h-5"/></button>
-             <button className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-100 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-slate-200 dark:bg-white/10"><ChevronRight className="w-5 h-5"/></button>
+             <button className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-full bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10"><ChevronLeft className="w-5 h-5"/></button>
+             <button className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-full bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10"><ChevronRight className="w-5 h-5"/></button>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {mockApps.filter(a => a.is_new && a.id !== app.id).slice(0, 4).map(discoverApp => (
-            <Link key={discoverApp.id} to={`/app/${discoverApp.slug}`} className="glass-panel p-4 flex flex-col items-center text-center hover:-translate-y-1 transition-transform pointer-events-auto border border-slate-200 dark:border-slate-300 dark:border-white/10">
-              <div className="w-16 h-16 rounded-xl overflow-hidden mb-3 bg-slate-200 dark:bg-slate-800">
+            <Link key={discoverApp.id} to={`/app/${discoverApp.slug}`} className="bg-white/50 dark:bg-zinc-900/40 backdrop-blur-xl p-4 flex flex-col items-center text-center hover:-translate-y-1 transition-transform pointer-events-auto border border-white/20 dark:border-white/5 rounded-3xl shadow-lg">
+              <div className="w-16 h-16 rounded-3xl overflow-hidden mb-3 bg-white dark:bg-slate-800 shadow-lg border border-white">
                  {discoverApp.icon_url && <img src={discoverApp.icon_url} alt="" className="w-full h-full object-cover"/>}
               </div>
-              <h4 className="font-bold text-sm truncate w-full">{discoverApp.name}</h4>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{discoverApp.developer}</div>
+              <h4 className="font-black text-xs uppercase tracking-tighter truncate w-full">{discoverApp.name}</h4>
+              <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">{discoverApp.developer}</div>
             </Link>
           ))}
         </div>
       </div>
       
       {/* 4.4 THE "WHITE-THEME" TRANSPARENCY PORTAL */}
-      <div className="w-screen relative left-1/2 -translate-x-1/2 mt-20 white-theme-portal">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-6 uppercase tracking-widest text-slate-900 border-b-2 border-black/10 pb-4 inline-block">Platform Transparency & Safety</h2>
+      <div className="w-screen relative left-1/2 -translate-x-1/2 mt-20 mb-20 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-white/10">
+        <div className="py-24 px-6 sm:px-12 md:px-24 shadow-inner relative overflow-hidden">
           
-          <div className="grid md:grid-cols-2 gap-8 text-left mt-8">
-            <div>
-              <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-slate-800">
-                <CheckCircle2 className="w-5 h-5 text-pink-600" /> Platform Disclaimer
-              </h3>
-              <p className="text-slate-700 leading-relaxed text-sm">
-                {mockSettings.disclaimer_text}
-              </p>
-            </div>
+          <div className="max-w-5xl mx-auto text-center relative z-10">
+            <h2 className="text-3xl sm:text-5xl font-black mb-12 uppercase tracking-tighter border-b-4 border-red-600 pb-6 inline-block text-slate-900 dark:text-white">YONOSTORE Transparency Box</h2>
             
-            <div>
-              <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-slate-800">
-                <Shield className="w-5 h-5 text-blue-600" /> Ethics & Discrimination
-              </h3>
-              <p className="text-slate-700 leading-relaxed text-sm">
-                {mockSettings.ethics_discrimination_text}
-              </p>
+            <div className="grid md:grid-cols-2 gap-12 text-left mt-12 bg-white dark:bg-slate-800 p-8 rounded-[3rem] border-2 border-slate-200 dark:border-slate-700 shadow-xl">
+              <div className="space-y-4">
+                <h3 className="font-black text-2xl mb-3 flex items-center gap-3 uppercase tracking-tighter text-black dark:text-white">
+                  <CheckCircle2 className="w-8 h-8 text-red-600" /> Platform Disclaimer
+                </h3>
+                <p className="leading-relaxed text-sm font-bold uppercase tracking-tight text-slate-700 dark:text-slate-300">
+                  {mockSettings.disclaimer_text}
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="font-black text-2xl mb-3 flex items-center gap-3 uppercase tracking-tighter text-black dark:text-white">
+                  <Shield className="w-8 h-8 text-blue-600" /> Ethics & Discrimination
+                </h3>
+                <p className="leading-relaxed text-sm font-bold uppercase tracking-tight text-slate-700 dark:text-slate-300">
+                  {mockSettings.ethics_discrimination_text}
+                </p>
+              </div>
             </div>
           </div>
         </div>

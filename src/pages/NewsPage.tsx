@@ -21,8 +21,8 @@ export default function NewsPage() {
         <meta name="description" content="Read the latest news and updates." />
       </Helmet>
       <div className="mb-8 px-1">
-        <h1 className="text-3xl font-bold mb-4 flex items-center gap-3">
-          <Newspaper className="w-8 h-8 text-pink-500" /> Latest News
+        <h1 className="text-3xl font-black mb-4 flex items-center gap-3 text-black dark:text-white uppercase tracking-tight">
+          <Newspaper className="w-8 h-8 text-red-600" /> Latest News
         </h1>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -50,11 +50,11 @@ export default function NewsPage() {
               <img src={item.logo_url} alt={item.title} className="w-full h-full object-cover" />
             </div>
             <div className="p-4 flex flex-col flex-1">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">{item.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-3">{item.description}</p>
+              <h3 className="text-lg font-black text-black dark:text-white mb-2 line-clamp-2 uppercase tracking-tight">{item.title}</h3>
+              <p className="text-sm text-slate-800 dark:text-slate-400 mb-4 line-clamp-3 font-medium">{item.description}</p>
               
               <div className="mt-auto pt-4 border-t border-slate-200 dark:border-white/10">
-                <Link to={`/news/${item.slug}`} className="flex items-center justify-between text-pink-600 dark:text-pink-400 font-medium hover:text-pink-700 dark:hover:text-pink-300">
+                <Link to={`/news/${item.slug}`} className="flex items-center justify-between text-red-600 dark:text-red-400 font-black uppercase text-xs tracking-widest hover:text-red-700 dark:hover:text-red-300">
                   <span>Read Article</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>

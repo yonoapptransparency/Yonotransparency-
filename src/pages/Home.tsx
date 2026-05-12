@@ -54,19 +54,50 @@ export default function Home() {
         <meta property="og:description" content={mockSettings.meta_description} />
         <meta property="og:image" content={mockSettings.logo_url} />
       </Helmet>
-      {/* Search Header Style */}
-      <div className="mb-6 px-1">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-            <Search className="h-5 w-5 text-slate-400" />
+      {/* Premium Hero Section from Screenshot */}
+      <div className="text-center py-12 px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-semibold mb-6"
+        >
+          <ShieldCheck className="w-4 h-4" />
+          Verified Transparency
+        </motion.div>
+        
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-4xl sm:text-5xl font-black tracking-tighter text-black dark:text-white mb-4 uppercase"
+        >
+          App Transparency <br />
+          <span className="text-red-600">Portal</span>
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-black dark:text-slate-400 max-w-xl mx-auto text-lg mb-10 font-black uppercase tracking-tight"
+        >
+          Independent reviews & download links for apps you can trust.
+        </motion.p>
+
+        {/* Search Header Style - Matching Screenshot */}
+        <div className="max-w-2xl mx-auto mb-10 px-1">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
+              <Search className="h-5 w-5 text-slate-400 group-focus-within:text-red-500 transition-colors" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-12 pr-4 py-4 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/50 dark:border-white/5 rounded-2xl text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all shadow-xl shadow-black/5"
+              placeholder="Search apps..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className="block w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-white/5 border border-transparent dark:border-white/5 rounded-full text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500/30 transition-all"
-            placeholder="Search apps & games"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
       </div>
 
@@ -108,19 +139,19 @@ export default function Home() {
         const isHomeTab = activeTab.toLowerCase() === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || activeTab.toLowerCase() === 'all apps' || activeTab.toLowerCase() === 'home' || activeTab.toLowerCase() === 'apps';
         return isHomeTab && (
         <div className="animate-fade-in">
-          <h2 className="text-lg font-bold mb-4 px-2 mt-4">New Applications</h2>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 px-1 mb-8">
+          <h2 className="text-xl font-black mb-6 px-2 mt-8 uppercase tracking-tighter text-black dark:text-white border-l-4 border-red-600 pl-4">New Applications</h2>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-6 px-1 mb-12">
             {filteredApps.filter(app => app.is_new).map((app) => (
-              <Link key={app.id} to={`/app/${app.slug}`} className="flex flex-col gap-2 group">
-                <div className="aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm relative">
-                  <img src={app.icon_url || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop"} alt={app.name} className="w-full h-full object-cover group-active:scale-95 transition-transform" />
+              <Link key={app.id} to={`/app/${app.slug}`} className="flex flex-col gap-3 group">
+                <div className="aspect-square rounded-3xl overflow-hidden bg-white dark:bg-white/5 border border-white dark:border-white/10 shadow-xl group-hover:shadow-red-500/10 transition-all relative">
+                  <img src={app.icon_url || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop"} alt={app.name} className="w-full h-full object-cover group-hover:scale-110 group-active:scale-95 transition-transform" />
                   {app.is_new && (
-                    <span className="absolute top-1 right-1 bg-pink-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-tight shadow-sm z-10">New</span>
+                    <span className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-lg z-10">New</span>
                   )}
                 </div>
-                <div className="px-1 mt-1">
-                  <h3 className="text-[13px] leading-tight font-bold truncate text-slate-900 dark:text-white">{app.name}</h3>
-                  <div className="text-[11px] text-slate-500 truncate">{app.category}</div>
+                <div className="px-1">
+                  <h3 className="text-[14px] leading-tight font-black truncate text-black dark:text-white uppercase tracking-tighter">{app.name}</h3>
+                  <div className="text-[11px] font-black text-black dark:text-slate-400 uppercase tracking-widest">{app.category}</div>
                 </div>
               </Link>
             ))}
@@ -129,7 +160,7 @@ export default function Home() {
             )}
           </div>
 
-          <h2 className="text-lg font-bold mt-4 mb-4 px-2">All Applications</h2>
+          <h2 className="text-xl font-black mt-12 mb-6 px-2 uppercase tracking-tighter text-black dark:text-white border-l-4 border-red-600 pl-4">All Applications</h2>
           <div className="space-y-2">
             {filteredApps.map((app, index) => (
                <AppListItem key={app.id} app={app} index={index + 1} />
@@ -143,10 +174,10 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-4 animate-fade-in">
            {mockSettings.categories?.filter(c => c.toLowerCase() !== (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') && c.toLowerCase() !== 'top charts' && c.toLowerCase() !== 'categories').map((cat) => (
              <button key={cat} onClick={() => setActiveTab(cat)} className="flex items-center gap-4 p-6 glass-panel text-left active:scale-[0.98] transition-transform">
-                <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500">
+                <div className="w-10 h-10 rounded-full bg-red-600/10 flex items-center justify-center text-red-600">
                    <ShieldCheck className="w-6 h-6" />
                 </div>
-                <span className="font-bold">{cat}</span>
+                <span className="font-black text-black dark:text-white uppercase tracking-tight text-lg">{cat}</span>
              </button>
            ))}
         </div>

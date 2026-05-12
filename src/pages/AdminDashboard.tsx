@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, LogOut, Save, Upload, Type, Link as LinkIcon, ToggleLeft, Layers, Newspaper as BookIcon, Plus, Trash2 } from 'lucide-react';
-import { mockSettings, mockApps, mockNews, mockBlogs, saveMockSettings, saveMockApps, saveMockNews, saveMockBlogs } from '../lib/supabase';
+import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, LogOut, Save, Upload, Type, Link as LinkIcon, ToggleLeft, Layers, Newspaper as BookIcon, Plus, Trash2, Video as VideoIcon } from 'lucide-react';
+import { mockSettings, mockApps, mockNews, mockBlogs, mockVideos, saveMockSettings, saveMockApps, saveMockNews, saveMockBlogs, saveMockVideos } from '../lib/supabase';
 
 function FaqEditor({ initialFaqs }: { initialFaqs: {question: string, answer: string}[] }) {
   const [faqs, setFaqs] = React.useState(initialFaqs || []);
@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   const [newsList, setNewsList] = useState(mockNews);
   const [banners, setBanners] = useState(mockSettings.banners || []);
   const [blogs, setBlogs] = useState(mockBlogs);
+  const [videosList, setVideosList] = useState(mockVideos);
   const [categoriesList, setCategoriesList] = useState<string[]>(mockSettings.categories || []);
   const [newCatInput, setNewCatInput] = useState('');
 
@@ -272,6 +273,39 @@ export default function AdminDashboard() {
     setBlogs(blogs.filter(b => b.id !== id));
   };
 
+  const handleVideosChange = (id: string, field: string, value: string) => {
+    setVideosList(videosList.map(v => v.id === id ? { ...v, [field]: value } : v));
+  };
+
+  const handleAddVideo = () => {
+    const newVideo = {
+      id: Math.random().toString(36).substr(2, 9),
+      slug: 'new-video-' + Math.random().toString(36).substr(2, 4),
+      title: 'New Video',
+      description: 'Video description...',
+      youtube_url: 'https://youtube.com/watch?v=...',
+      seo_title: 'Video SEO Title',
+      seo_description: 'Video SEO Meta Description',
+      seo_keywords: '',
+      created_at: new Date().toISOString()
+    };
+    setVideosList([...videosList, newVideo]);
+  };
+
+  const handleDeleteVideo = (id: string) => {
+    setVideosList(videosList.filter(v => v.id !== id));
+  };
+
+  const handleSaveVideos = () => {
+    setSaving(true);
+    triggerHaptic();
+    saveMockVideos(videosList);
+    setTimeout(() => {
+      setSaving(false);
+      alert('Videos saved successfully.');
+    }, 1000);
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8 flex justify-between items-center bg-pink-100 dark:bg-pink-500/10 border border-pink-200 dark:border-pink-500/20 p-6 rounded-2xl">
@@ -309,6 +343,12 @@ export default function AdminDashboard() {
             className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-all min-h-[48px] ${activeTab === 'blogs' ? 'bg-pink-500/20 text-pink-400' : 'hover:bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'}`}
           >
             <FileText className="w-5 h-5" /> Manage Blogs
+          </button>
+          <button 
+            onClick={() => { triggerHaptic(); setActiveTab('videos'); }}
+            className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-all min-h-[48px] ${activeTab === 'videos' ? 'bg-pink-500/20 text-pink-400' : 'hover:bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'}`}
+          >
+            <VideoIcon className="w-5 h-5" /> Manage Videos
           </button>
           <button 
             onClick={() => { triggerHaptic(); setActiveTab('categories'); }}
@@ -488,6 +528,10 @@ export default function AdminDashboard() {
                         <div>
                           <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Massive Description (TipTap Editor HTML)</label>
                           <textarea name="description_html" defaultValue={editApp?.description_html || '<p>A new application.</p>'} rows={6} className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
+                        
+                        <div className="border border-slate-300 dark:border-white/10 rounded-xl p-4 bg-slate-100 dark:bg-white/5">
+                          <FaqEditor initialFaqs={editApp?.faqs || []} />
                         </div>
 
                         <button type="submit" disabled={saving} className="min-h-[48px] w-full sm:w-auto px-8 bg-pink-500 hover:bg-pink-600 text-slate-900 dark:text-white font-bold rounded-lg transition-all flex justify-center items-center gap-2">
@@ -742,6 +786,73 @@ export default function AdminDashboard() {
               <div className="mt-8 flex justify-end">
                 <button onClick={handleSaveBlogs} disabled={saving} className="bg-pink-500 hover:bg-pink-600 text-slate-900 dark:text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2">
                   {saving ? 'Saving...' : <><Save className="w-5 h-5"/> Save Blog Posts</>}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'videos' && (
+            <div className="animate-fade-in space-y-6">
+              <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-300 dark:border-white/10 shadow-sm">
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <VideoIcon className="w-6 h-6 text-pink-500" /> Manage Videos
+                </h2>
+                <button
+                  onClick={handleAddVideo}
+                  className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Add Video
+                </button>
+              </div>
+              
+              <div className="grid gap-6">
+                {videosList.map((item) => (
+                  <div key={item.id} className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 p-6 rounded-xl shadow-sm relative group overflow-hidden">
+                    <button 
+                      onClick={() => handleDeleteVideo(item.id)}
+                      className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-10"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="space-y-4 relative z-0">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Title</label>
+                          <input type="text" value={item.title} onChange={e => handleVideosChange(item.id, 'title', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Slug (URL)</label>
+                          <input type="text" value={item.slug} onChange={e => handleVideosChange(item.id, 'slug', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">YouTube URL</label>
+                          <input type="text" value={item.youtube_url} onChange={e => handleVideosChange(item.id, 'youtube_url', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Description</label>
+                          <textarea value={item.description} onChange={e => handleVideosChange(item.id, 'description', e.target.value)} rows={3} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Title</label>
+                          <input type="text" value={item.seo_title} onChange={e => handleVideosChange(item.id, 'seo_title', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Description</label>
+                          <textarea value={item.seo_description} onChange={e => handleVideosChange(item.id, 'seo_description', e.target.value)} rows={2} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Keywords</label>
+                          <input type="text" value={item.seo_keywords || ''} onChange={e => handleVideosChange(item.id, 'seo_keywords', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 flex justify-end">
+                <button onClick={handleSaveVideos} className="bg-pink-500 hover:bg-pink-600 text-slate-900 dark:text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2">
+                  <Save className="w-5 h-5"/> Save Videos
                 </button>
               </div>
             </div>

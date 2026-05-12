@@ -83,42 +83,37 @@ export default function AppDetails() {
         
         <div className="flex-1 flex flex-col items-center sm:items-start w-full">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-2">
-            <h1 className="text-3xl font-bold tracking-tight">{app.name}</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-black dark:text-white uppercase">{app.name}</h1>
             {app.is_new && (
-              <div className="px-2 py-1 bg-pink-500/10 border border-pink-500/30 text-pink-600 dark:text-pink-400 text-xs font-bold rounded-lg flex items-center gap-1 animate-pulse">
+              <div className="px-2 py-1 bg-red-600/10 border border-red-600/30 text-red-700 dark:text-red-400 text-xs font-black rounded-lg flex items-center gap-1 animate-pulse uppercase tracking-widest">
                 <Sparkles className="w-3 h-3" /> Recently Added
               </div>
             )}
-            <div className={cn(
-              "px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-lg",
-              app.safety_status === 'Verified' ? "bg-pink-500/20 text-pink-400 border border-pink-500/30" : 
-              app.safety_status === 'Caution' ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : 
-              "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-            )}>
-              {app.safety_status === 'Verified' && <ShieldCheck className="w-3.5 h-3.5" />}
-              {(app.safety_status === 'Caution' || app.safety_status === 'Unsafe') && <ShieldAlert className="w-3.5 h-3.5" />}
-              {app.safety_status}
-            </div>
+            {app.safety_status === 'Verified' && (
+              <div className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-400 text-xs font-black rounded-full flex items-center gap-1.5 shadow-lg shadow-green-500/10 uppercase tracking-widest">
+                <ShieldCheck className="w-3.5 h-3.5" /> Verified Transparency
+              </div>
+            )}
           </div>
           
-          <div className="text-slate-400 text-lg mb-6">{app.developer}</div>
+          <div className="text-black dark:text-slate-400 text-lg mb-6 font-black uppercase tracking-tight">{app.developer}</div>
           
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full mb-8">
-            <div className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-              <div className="text-slate-500 text-xs mb-1">Version</div>
-              <div className="font-semibold">{app.version}</div>
+            <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3 text-center border border-white dark:border-white/5 shadow-sm">
+              <div className="text-black dark:text-slate-400 text-xs mb-1 font-black uppercase tracking-widest">Version</div>
+              <div className="font-black text-black dark:text-white">{app.version}</div>
             </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-              <div className="text-slate-500 text-xs mb-1">Size</div>
-              <div className="font-semibold">{app.file_size}</div>
+            <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3 text-center border border-white dark:border-white/5 shadow-sm">
+              <div className="text-black dark:text-slate-400 text-xs mb-1 font-black uppercase tracking-widest">Size</div>
+              <div className="font-black text-black dark:text-white">{app.file_size}</div>
             </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-              <div className="text-slate-500 text-xs mb-1">Category</div>
-              <div className="font-semibold">{app.category}</div>
+            <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3 text-center border border-white dark:border-white/5 shadow-sm">
+              <div className="text-black dark:text-slate-400 text-xs mb-1 font-black uppercase tracking-widest">Category</div>
+              <div className="font-black text-black dark:text-white">{app.category}</div>
             </div>
-            <div className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
-              <div className="text-slate-500 text-xs mb-1">Rating</div>
-              <div className="font-semibold flex items-center justify-center gap-1">
+            <div className="bg-white/10 dark:bg-white/5 rounded-xl p-3 text-center border border-white dark:border-white/5 shadow-sm">
+              <div className="text-black dark:text-slate-400 text-xs mb-1 font-black uppercase tracking-widest">Rating</div>
+              <div className="font-black text-black dark:text-white flex items-center justify-center gap-1">
                 <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> {app.rating ? app.rating.toFixed(1) : 'N/A'}
               </div>
             </div>
@@ -126,42 +121,27 @@ export default function AppDetails() {
 
           <Link 
             to={`/download/${app.slug}`} 
-            className="w-full sm:w-auto bg-pink-500 hover:bg-pink-600 text-white font-semibold py-4 px-8 rounded-full flex items-center justify-center gap-2 transition-all shadow-lg shadow-pink-500/20"
+            className="w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-10 rounded-full flex items-center justify-center gap-3 transition-all shadow-xl shadow-red-600/30 active:scale-95 group"
           >
-            Proceed to Download Page <ArrowRight className="w-5 h-5" />
+            <span className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Download Now</span> <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
           </Link>
         </div>
       </div>
       
-      {app.screenshots && app.screenshots.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-xl font-bold mb-4">Screenshots</h2>
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-            {app.screenshots.filter(Boolean).map((img, i) => (
-              <img 
-                key={i} 
-                src={img} 
-                alt={`${app.name} screenshot ${i + 1}`} 
-                className="h-64 sm:h-80 w-auto object-cover rounded-xl border border-white/10 snap-center shadow-lg pointer-events-none"
-              />
-            ))}
-          </div>
-        </div>
-      )}
       {app.faqs && app.faqs.length > 0 && (
         <div className="mb-12 max-w-4xl mx-auto">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <Info className="w-5 h-5 text-pink-500" /> Frequently Asked Questions
+          <h2 className="text-2xl font-black mb-6 flex items-center gap-2 text-slate-900 dark:text-white uppercase tracking-tighter">
+            <Info className="w-6 h-6 text-red-600 drop-shadow-sm" /> Frequently Asked Questions
           </h2>
           <div className="space-y-3">
             {app.faqs.map((faq, idx) => (
-              <details key={idx} className="group bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl overflow-hidden pointer-events-auto">
-                <summary className="font-semibold p-4 cursor-pointer select-none flex items-center justify-between text-slate-800 dark:text-white group-open:text-pink-600 dark:group-open:text-pink-400 min-h-[48px]">
+              <details key={idx} className="group bg-white dark:bg-white/5 border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden pointer-events-auto">
+                <summary className="font-black p-4 cursor-pointer select-none flex items-center justify-between text-slate-900 dark:text-white group-open:text-red-600 dark:group-open:text-red-400 min-h-[48px] uppercase tracking-tight">
                   {faq.question}
-                  <span className="text-2xl leading-none transition-transform group-open:rotate-45 ml-4">+</span>
+                  <span className="text-2xl leading-none transition-transform group-open:rotate-45 ml-4 text-slate-900 dark:text-slate-300 opacity-50 group-open:opacity-100 group-open:text-red-600 border border-slate-300 dark:border-slate-700 rounded-full w-8 h-8 flex items-center justify-center">+</span>
                 </summary>
                 <div 
-                  className="px-4 pb-4 pt-2 text-slate-600 dark:text-slate-300 prose prose-sm prose-slate dark:prose-invert max-w-none text-left"
+                  className="px-4 pb-4 pt-2 text-slate-700 dark:text-slate-300 prose prose-sm prose-slate dark:prose-invert max-w-none text-left font-bold"
                   dangerouslySetInnerHTML={{ __html: faq.answer }}
                 />
               </details>

@@ -16,13 +16,19 @@ async function startServer() {
   // API Route: Secure Link
   app.get("/api/secure-download", (req, res) => {
     const { id } = req.query;
+    if (!id || typeof id !== 'string') {
+      res.status(400).json({ error: 'Access Denied: Missing App ID' });
+      return;
+    }
+
+    // Since we don't have a real database setup, we need a way to mock fetching it
+    // In actual production, this would do a server-side DB query to get encrypted_download_url
+    // Read the mockapps from localStorage or just use a fallback mock here
+    // For the preview, we'll redirect them to a mock download endpoint
+    const mockSecureUrl = `https://example.com/download-secure?fileId=${id}&token=${crypto.randomBytes(16).toString('hex')}`;
     
-    // In a real app we'd fetch the encrypted payload from Supabase using the 'id'
-    // Here we're using a hardcoded placeholder for demonstration
-    // We simulate generating a secure 302 redirect here
-    const mockSecureUrl = "https://example.com/download.apk";
-    
-    // Server-side redirect (302) directly to the decrypted raw file payload
+    // Server-side redirect (302) masks the real URL from the browser history
+    res.set('Cache-Control', 'no-store, max-age=0');
     res.redirect(302, mockSecureUrl);
   });
 

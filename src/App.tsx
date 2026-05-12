@@ -43,7 +43,7 @@ function Header() {
 
   const navVariants = mockSettings.animations_enabled ? {
     hidden: { y: -100, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut", delay: 0.5 } }
+    visible: { y: 0, opacity: 1, transition: { duration: 0.8, delay: 0.5 } }
   } : {
     hidden: { y: 0, opacity: 1 },
     visible: { y: 0, opacity: 1 }
@@ -59,33 +59,40 @@ function Header() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative flex justify-between items-center">
           <Link to="/" onClick={triggerHaptic} className="flex items-center gap-2 group">
-            <div className="bg-white/10 p-2 rounded-xl group-hover:bg-white/20 transition-colors">
-              {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-6 h-6 object-contain" alt="Logo" /> : <Shield className="w-6 h-6 text-pink-400" />}
+            <div className="p-1 transition-transform group-hover:scale-105 magic-text">
+              {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-10 h-10 object-contain" alt="Logo" /> : <Shield className="w-8 h-8" />}
             </div>
-            <span className="text-xl font-bold tracking-tight">{mockSettings.site_title}</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-xl font-black tracking-tighter magic-text uppercase">{mockSettings.site_title}</span>
+              <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Transparency</span>
+            </div>
           </Link>
           
           <nav className="hidden md:flex items-center gap-4 lg:gap-8 text-sm font-medium">
-            <Link to="/" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Home</Link>
-            <Link to="/new-apps" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold flex items-center gap-1">New App <span className="flex w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span></Link>
-            <Link to="/categories" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Categories</Link>
-            <Link to="/videos" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Videos</Link>
-            <Link to="/blogs" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Blogs</Link>
-            <Link to="/app-checker" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">App Checker</Link>
-            <ThemeToggle />
-            <Link to="/admin/login" onClick={triggerHaptic} className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-full transition-all min-h-[48px] min-w-[48px] flex items-center justify-center font-bold">
+            <Link to="/" onClick={triggerHaptic} className="magic-text transition-colors p-2 font-bold uppercase tracking-tight">Home</Link>
+            <Link to="/new-apps" onClick={triggerHaptic} className="magic-text transition-colors p-2 font-bold uppercase tracking-tight flex items-center gap-1">New App <span className="flex w-2 h-2 rounded-full bg-red-600 animate-pulse"></span></Link>
+            <Link to="/categories" onClick={triggerHaptic} className="magic-text transition-colors p-2 font-bold uppercase tracking-tight">Categories</Link>
+            <Link to="/videos" onClick={triggerHaptic} className="magic-text transition-colors p-2 font-bold uppercase tracking-tight">Videos</Link>
+            <Link to="/blogs" onClick={triggerHaptic} className="magic-text transition-colors p-2 font-bold uppercase tracking-tight">Blogs</Link>
+            <Link to="/app-checker" onClick={triggerHaptic} className="magic-text transition-colors p-2 font-bold uppercase tracking-tight">App Checker</Link>
+            <div className="flex items-center gap-2">
+              <SupportWidget />
+              <ThemeToggle />
+            </div>
+            <Link to="/admin/login" onClick={triggerHaptic} className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-full transition-all flex items-center justify-center font-bold shadow-lg shadow-red-600/30">
               Admin
             </Link>
           </nav>
 
           <div className="md:hidden flex items-center gap-2">
+            <SupportWidget />
             <ThemeToggle />
             <button 
-              className="flex items-center justify-center min-h-[48px] min-w-[48px] bg-slate-200 dark:bg-white/5 rounded-full border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white"
+              className="flex items-center justify-center min-h-[48px] min-w-[48px] bg-red-600 rounded-full shadow-lg active:scale-90 transition-transform"
               onClick={() => { triggerHaptic(); setMenuOpen(true); }}
               aria-label="Open menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
@@ -102,26 +109,26 @@ function Header() {
             className="fixed inset-0 z-[60] bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl flex flex-col px-6 py-8"
           >
             <div className="flex justify-between items-center mb-12">
-              <span className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-6 h-6 object-contain" alt="Logo" /> : <Shield className="w-6 h-6 text-pink-400" />} {mockSettings.site_title}
+              <span className="text-xl font-black flex items-center gap-2 magic-text uppercase tracking-tighter">
+                {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-6 h-6 object-contain" alt="Logo" /> : <Shield className="w-6 h-6 text-red-600" />} {mockSettings.site_title}
               </span>
               <button 
                 onClick={() => { triggerHaptic(); setMenuOpen(false); }}
-                className="flex items-center justify-center min-h-[48px] min-w-[48px] bg-slate-200 dark:bg-white/10 rounded-full"
+                className="flex items-center justify-center min-h-[48px] min-w-[48px] bg-red-600 text-white rounded-full shadow-lg active:scale-90 transition-transform"
                 aria-label="Close menu"
               >
-                <X className="w-5 h-5 text-slate-800 dark:text-white" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             
             <nav className="flex flex-col gap-6 text-lg font-medium">
-              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/" className="border-b border-slate-200 dark:border-white/5 pb-4 min-h-[48px] flex items-center text-slate-800 dark:text-white">Home</Link>
-              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/new-apps" className="border-b border-slate-200 dark:border-white/5 pb-4 min-h-[48px] flex items-center text-slate-800 dark:text-white gap-2">New App <span className="flex w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span></Link>
-              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/categories" className="border-b border-slate-200 dark:border-white/5 pb-4 min-h-[48px] flex items-center text-slate-800 dark:text-white">Categories</Link>
-              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/app-checker" className="border-b border-slate-200 dark:border-white/5 pb-4 min-h-[48px] flex items-center text-slate-800 dark:text-white">App Checker</Link>
-              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/blogs" className="border-b border-slate-200 dark:border-white/5 pb-4 min-h-[48px] flex items-center text-slate-800 dark:text-white">Blogs</Link>
-              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/videos" className="border-b border-slate-200 dark:border-white/5 pb-4 min-h-[48px] flex items-center text-slate-800 dark:text-white">Videos</Link>
-              <div className="flex justify-between items-center py-4 border-b border-slate-200 dark:border-white/5">
+              <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/" className="border-b border-white/10 pb-4 min-h-[48px] flex items-center magic-text font-black uppercase tracking-tight">Home</Link>
+          <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/new-apps" className="border-b border-white/10 pb-4 min-h-[48px] flex items-center magic-text font-black uppercase tracking-tight gap-2">New App <span className="flex w-2 h-2 rounded-full bg-red-600 animate-pulse"></span></Link>
+          <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/categories" className="border-b border-white/10 pb-4 min-h-[48px] flex items-center magic-text font-black uppercase tracking-tight">Categories</Link>
+          <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/app-checker" className="border-b border-white/10 pb-4 min-h-[48px] flex items-center magic-text font-black uppercase tracking-tight">App Checker</Link>
+          <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/blogs" className="border-b border-white/10 pb-4 min-h-[48px] flex items-center magic-text font-black uppercase tracking-tight">Blogs</Link>
+          <Link onClick={() => { triggerHaptic(); setMenuOpen(false); }} to="/videos" className="border-b border-white/10 pb-4 min-h-[48px] flex items-center magic-text font-black uppercase tracking-tight">Videos</Link>
+              <div className="flex justify-between items-center py-4 border-b border-white/10 px-2 bg-white/5 rounded-xl backdrop-blur-md">
                 <span className="text-slate-800 dark:text-white">Theme</span>
                 <ThemeToggle />
               </div>
@@ -136,36 +143,39 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="border-t border-white/10 py-8 mt-12">
+    <footer className="border-t border-slate-200 dark:border-white/10 py-8 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
-        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center gap-2">
-          {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-5 h-5 object-contain" alt="Logo" /> : <Shield className="w-5 h-5 text-pink-400" />} {mockSettings.site_title}
+        <h3 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2 text-black dark:text-white uppercase">
+          <div className="p-1 transition-transform">
+            {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-8 h-8 object-contain" alt="Logo" /> : <Shield className="w-8 h-8 text-red-600" />}
+          </div>
+          {mockSettings.site_title}
         </h3>
-        <p className="text-slate-600 dark:text-slate-400 text-sm mb-6 max-w-md">
+        <p className="text-black dark:text-slate-400 text-sm mb-6 max-w-md font-medium">
           {mockSettings.meta_description}
         </p>
-        <div className="flex flex-wrap justify-center gap-6 text-sm font-medium mb-8">
-          <Link to="/" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Home</Link>
-          <Link to="/about" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">About Us</Link>
-          <Link to="/contact" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Contact</Link>
-          <Link to="/videos" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Videos</Link>
-          <Link to="/blogs" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Blogs</Link>
-          <Link to="/privacy" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Privacy</Link>
-          <Link to="/terms" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Terms</Link>
+        <div className="flex flex-wrap justify-center gap-6 text-sm font-bold mb-8 uppercase tracking-tight">
+          <Link to="/" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Home</Link>
+          <Link to="/about" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">About Us</Link>
+          <Link to="/contact" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Contact</Link>
+          <Link to="/videos" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Videos</Link>
+          <Link to="/blogs" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Blogs</Link>
+          <Link to="/privacy" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Privacy</Link>
+          <Link to="/terms" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Terms</Link>
         </div>
         
         {(mockSettings.disclaimer_text || mockSettings.ethics_discrimination_text) && (
           <div className="max-w-3xl text-center space-y-4 mb-8">
             {mockSettings.disclaimer_text && (
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Platform Disclaimer</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{mockSettings.disclaimer_text}</p>
+                <h4 className="text-sm font-black text-black dark:text-slate-300 mb-1">Platform Disclaimer</h4>
+                <p className="text-xs font-bold text-black dark:text-slate-400">{mockSettings.disclaimer_text}</p>
               </div>
             )}
             {mockSettings.ethics_discrimination_text && (
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Ethics & Discrimination</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{mockSettings.ethics_discrimination_text}</p>
+                <h4 className="text-sm font-black text-black dark:text-slate-300 mb-1">Ethics & Discrimination</h4>
+                <p className="text-xs font-bold text-black dark:text-slate-400">{mockSettings.ethics_discrimination_text}</p>
               </div>
             )}
           </div>
@@ -173,14 +183,14 @@ function Footer() {
 
         {mockSettings.important_notice && (
           <div className="max-w-3xl w-full text-center mb-8">
-            <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-4">
-              <h4 className="text-sm font-bold text-rose-500 mb-1">Important Notice</h4>
-              <p className="text-xs text-rose-400 font-medium whitespace-pre-wrap">{mockSettings.important_notice}</p>
+            <div className="bg-red-600/10 border border-red-600/30 rounded-2xl p-6">
+              <h4 className="text-sm font-black text-red-600 mb-2 uppercase tracking-widest">Important Notice</h4>
+              <p className="text-sm text-black dark:text-red-400 font-bold whitespace-pre-wrap">{mockSettings.important_notice}</p>
             </div>
           </div>
         )}
 
-        <div className="text-slate-500 text-xs">
+        <div className="text-black dark:text-slate-500 text-xs font-black uppercase tracking-tight">
           &copy; 2026 {mockSettings.site_title}. All rights reserved.
         </div>
       </div>
@@ -301,7 +311,6 @@ export default function App() {
         <Footer />
         <BottomNav />
         <BackToTop />
-        <SupportWidget />
       </div>
       </Router>
     </HelmetProvider>
@@ -316,25 +325,21 @@ function BottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200 dark:border-white/10 md:hidden">
-      <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
-        <Link to="/?tab=Games" onClick={triggerHaptic} className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400">
-          <Gamepad2 className="w-6 h-6" />
-          <span className="text-[10px] font-medium tracking-tight">Games</span>
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/50 dark:bg-black/50 backdrop-blur-md border-t border-black/5 dark:border-white/5 md:hidden">
+      <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
+        <Link to="/?tab=Games" onClick={triggerHaptic} className="flex flex-col items-center gap-1 group">
+          <Gamepad2 className="w-6 h-6 fill-current text-black dark:text-white transition-transform group-active:scale-90" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-black dark:text-white">Games</span>
         </Link>
-        <Link to="/?tab=All Apps" onClick={triggerHaptic} className="flex flex-col items-center gap-1 text-pink-600 dark:text-pink-400">
-          <div className="bg-pink-500/10 p-2 rounded-2xl">
-            <LayoutGrid className="w-6 h-6" />
+        <Link to="/?tab=All Apps" onClick={triggerHaptic} className="flex flex-col items-center gap-1">
+          <div className="bg-red-600 text-white p-3 rounded-2xl shadow-xl shadow-red-600/30 -mt-6 border-4 border-white dark:border-zinc-900 active:scale-90 transition-transform">
+            <LayoutGrid className="w-6 h-6 fill-current" />
           </div>
-          <span className="text-[10px] font-bold tracking-tight">Apps</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-red-600">Explore</span>
         </Link>
-        <Link to="/" onClick={triggerHaptic} className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400">
-          <SearchIcon className="w-6 h-6" />
-          <span className="text-[10px] font-medium tracking-tight">Search</span>
-        </Link>
-        <Link to="/news" onClick={triggerHaptic} className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400 font-medium">
-          <Newspaper className="w-6 h-6" />
-          <span className="text-[10px] font-medium tracking-tight">News</span>
+        <Link to="/news" onClick={triggerHaptic} className="flex flex-col items-center gap-1 group font-medium">
+          <Newspaper className="w-6 h-6 fill-current text-black dark:text-white transition-transform group-active:scale-90" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-black dark:text-white">News</span>
         </Link>
       </div>
     </div>

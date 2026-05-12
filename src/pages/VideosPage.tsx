@@ -22,11 +22,11 @@ export default function VideosPage() {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-            <VideoIcon className="w-8 h-8 text-pink-500" />
+          <h1 className="text-4xl font-black tracking-tighter text-black dark:text-white flex items-center gap-3 uppercase">
+            <VideoIcon className="w-8 h-8 text-red-600" />
             Videos
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">
+          <p className="text-black dark:text-slate-400 mt-2 font-bold uppercase tracking-widest text-xs">
             Watch the latest app reviews, tutorials, and tech updates.
           </p>
         </div>
@@ -64,16 +64,16 @@ export default function VideosPage() {
             </div>
             
             <div className="p-6">
-              <h3 className="font-bold text-xl text-slate-900 dark:text-white group-hover:text-pink-500 dark:group-hover:text-pink-400 transition-colors line-clamp-2 mb-2">
+              <h3 className="font-black text-xl text-black dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors line-clamp-2 mb-2 uppercase tracking-tight">
                 {video.title}
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-3 mb-4">
+              <p className="text-black dark:text-slate-400 text-sm line-clamp-3 mb-4 font-medium uppercase tracking-tight">
                 {video.description}
               </p>
               
-              <div className="flex items-center justify-between text-xs text-slate-500 shrink-0">
+              <div className="flex items-center justify-between text-xs text-black shrink-0 font-black uppercase tracking-widest">
                 <span>{new Date(video.created_at).toLocaleDateString()}</span>
-                <Link to={`/videos/${video.slug}`} className="text-pink-600 font-medium hover:underline">Watch Video →</Link>
+                <Link to={`/videos/${video.slug}`} className="text-red-600 font-black hover:underline uppercase tracking-widest">Watch Video →</Link>
               </div>
             </div>
           </motion.div>

@@ -13,11 +13,11 @@ export default function Blogs() {
 
   return (
     <div className="animate-fade-in max-w-4xl mx-auto py-8">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-3 bg-pink-500/10 rounded-xl text-pink-500">
-          <FileText className="w-6 h-6" />
+      <div className="flex items-center gap-4 mb-10 border-b border-slate-200 dark:border-white/5 pb-6">
+        <div className="p-4 bg-red-600/10 rounded-2xl text-red-600">
+          <FileText className="w-8 h-8" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Our Blog</h1>
+        <h1 className="text-4xl font-black uppercase tracking-tighter text-black dark:text-white">Our Portal Blogs</h1>
       </div>
 
       {blogs.length === 0 ? (
@@ -34,9 +34,9 @@ export default function Blogs() {
                   <Calendar className="w-4 h-4" />
                   {new Date(blog.published_at).toLocaleDateString()}
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-white line-clamp-2">{blog.title}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-4">{blog.content}</p>
-                <div className="text-sm font-medium text-slate-600 dark:text-slate-300">By {blog.author}</div>
+                <h3 className="text-xl font-black mb-2 text-black dark:text-white line-clamp-2 uppercase tracking-tight">{blog.title}</h3>
+                <p className="text-sm text-black dark:text-slate-400 line-clamp-3 mb-4 font-medium uppercase tracking-tight">{blog.content}</p>
+                <div className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">By {blog.author}</div>
               </div>
             </div>
           ))}

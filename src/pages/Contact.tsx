@@ -12,7 +12,7 @@ export default function Contact() {
       >
         <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
         <div 
-          className="text-slate-600 dark:text-slate-400 mb-8 markdown-body"
+          className="text-black dark:text-slate-400 mb-8 markdown-body font-medium"
           dangerouslySetInnerHTML={{ __html: mockSettings.contact_content || '' }}
         />
 

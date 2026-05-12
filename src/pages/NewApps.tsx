@@ -21,16 +21,16 @@ export default function NewApps() {
   };
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { ease: "easeOut", duration: 0.5 } }
+    show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
   return (
     <div className="max-w-3xl mx-auto pb-20 select-none">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center justify-center gap-2">
-          <Sparkles className="w-6 h-6 text-pink-400" /> New Apps
+      <div className="text-center mb-10 pt-10">
+        <h1 className="text-4xl font-black tracking-tighter mb-2 flex items-center justify-center gap-2 text-black dark:text-white uppercase">
+          <Sparkles className="w-8 h-8 text-red-600" /> New Applications
         </h1>
-        <p className="text-slate-400">The latest, hand-checked software arrivals.</p>
+        <p className="text-black dark:text-slate-400 font-black uppercase tracking-widest text-xs">The latest, hand-checked software arrivals.</p>
       </div>
 
       <motion.div 
@@ -48,7 +48,7 @@ export default function NewApps() {
             >
               {/* "NEW" Ribbon / Glowing Badge */}
               <div className="absolute top-0 right-0">
-                <div className="bg-pink-500 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-bl-xl shadow-lg shadow-pink-500/30 animate-pulse tracking-wider">
+                <div className="bg-red-600 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-bl-xl shadow-lg shadow-red-600/30 animate-pulse tracking-wider">
                   NEW
                 </div>
               </div>
@@ -65,16 +65,16 @@ export default function NewApps() {
 
               <div className="flex-1 min-w-0 pr-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold truncate">{app.name}</h3>
-                  {app.safety_status === 'Verified' && <ShieldCheck className="w-4 h-4 text-pink-400 shrink-0" />}
-                  {(app.safety_status === 'Caution' || app.safety_status === 'Unsafe') && <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />}
+                  <h3 className="text-xl font-black truncate text-black dark:text-white group-hover:text-red-600 transition-colors uppercase tracking-tight">{app.name}</h3>
+                  {app.safety_status === 'Verified' && <ShieldCheck className="w-4 h-4 text-red-600 shrink-0" />}
+                  {(app.safety_status === 'Caution' || app.safety_status === 'Unsafe') && <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />}
                 </div>
-                <div className="text-sm text-slate-400 mb-3">{app.developer} • {app.file_size}</div>
+                <div className="text-sm font-black text-black dark:text-slate-400 mb-3 uppercase tracking-wider">{app.developer} • {app.file_size}</div>
                 
                 {app.release_notes && (
-                  <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-3 mt-2">
-                    <div className="text-xs font-semibold text-pink-400 mb-1 uppercase tracking-wider">What's New</div>
-                    <div className="text-sm text-pink-100/90 whitespace-pre-wrap">{app.release_notes}</div>
+                  <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl p-3 mt-2">
+                    <div className="text-xs font-black text-red-600 mb-1 uppercase tracking-widest">What's New</div>
+                    <div className="text-sm text-black dark:text-red-100/90 whitespace-pre-wrap font-medium">{app.release_notes}</div>
                   </div>
                 )}
               </div>
