@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { mockApps, mockSettings } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { ShieldCheck, ShieldAlert, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function NewApps() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const newApps = mockApps
     .filter(app => app.is_new)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())

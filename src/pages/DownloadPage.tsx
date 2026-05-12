@@ -1,6 +1,6 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockApps, mockSettings } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { Shield, ShieldAlert, ShieldCheck, Download, MessageSquare, AlertTriangle, Info, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect, FormEvent } from 'react';
@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import SecureDownloadButton from '../components/SecureDownloadButton';
 
 export default function DownloadPage() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const { slug } = useParams();
   const app = mockApps.find(a => a.slug === slug);
   const [downloading, setDownloading] = useState(false);

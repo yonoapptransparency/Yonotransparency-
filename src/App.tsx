@@ -1,9 +1,9 @@
+import { DataProvider, useData } from './contexts/DataContext';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Menu, Search, Shield, Info, Download, ArrowRight, X, Gamepad2, LayoutGrid, Search as SearchIcon, Newspaper } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockSettings } from './lib/supabase';
 import Home from './pages/Home';
 import AppDetails from './pages/AppDetails';
 import DownloadPage from './pages/DownloadPage';
@@ -24,6 +24,7 @@ import VideosPage from './pages/VideosPage';
 import VideoDetailPage from './pages/VideoDetailPage';
 
 function Header() {
+  const { settings } = useData();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -41,7 +42,7 @@ function Header() {
     }
   };
 
-  const navVariants = mockSettings.animations_enabled ? {
+  const navVariants = settings.animations_enabled ? {
     hidden: { y: -100, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.8, delay: 0.5 } }
   } : {
@@ -60,10 +61,10 @@ function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative flex justify-between items-center">
           <Link to="/" onClick={triggerHaptic} className="flex items-center gap-2 group">
             <div className="p-1 transition-transform group-hover:scale-105 magic-text">
-              {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-10 h-10 object-contain" alt="Logo" /> : <Shield className="w-8 h-8" />}
+              {settings.logo_url ? <img src={settings.logo_url} className="w-10 h-10 object-contain" alt="Logo" /> : <Shield className="w-8 h-8" />}
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-xl font-black tracking-tighter magic-text uppercase">{mockSettings.site_title}</span>
+              <span className="text-xl font-black tracking-tighter magic-text uppercase">{settings.site_title}</span>
               <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Transparency</span>
             </div>
           </Link>
@@ -110,7 +111,7 @@ function Header() {
           >
             <div className="flex justify-between items-center mb-12">
               <span className="text-xl font-black flex items-center gap-2 magic-text uppercase tracking-tighter">
-                {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-6 h-6 object-contain" alt="Logo" /> : <Shield className="w-6 h-6 text-red-600" />} {mockSettings.site_title}
+                {settings.logo_url ? <img src={settings.logo_url} className="w-6 h-6 object-contain" alt="Logo" /> : <Shield className="w-6 h-6 text-red-600" />} {settings.site_title}
               </span>
               <button 
                 onClick={() => { triggerHaptic(); setMenuOpen(false); }}
@@ -142,17 +143,18 @@ function Header() {
 }
 
 function Footer() {
+  const { settings } = useData();
   return (
     <footer className="border-t border-slate-200 dark:border-white/10 py-8 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
         <h3 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2 text-black dark:text-white uppercase">
           <div className="p-1 transition-transform">
-            {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-8 h-8 object-contain" alt="Logo" /> : <Shield className="w-8 h-8 text-red-600" />}
+            {settings.logo_url ? <img src={settings.logo_url} className="w-8 h-8 object-contain" alt="Logo" /> : <Shield className="w-8 h-8 text-red-600" />}
           </div>
-          {mockSettings.site_title}
+          {settings.site_title}
         </h3>
         <p className="text-black dark:text-slate-400 text-sm mb-6 max-w-md font-medium">
-          {mockSettings.meta_description}
+          {settings.meta_description}
         </p>
         <div className="flex flex-wrap justify-center gap-6 text-sm font-bold mb-8 uppercase tracking-tight">
           <Link to="/" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Home</Link>
@@ -164,34 +166,34 @@ function Footer() {
           <Link to="/terms" className="text-black dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors">Terms</Link>
         </div>
         
-        {(mockSettings.disclaimer_text || mockSettings.ethics_discrimination_text) && (
+        {(settings.disclaimer_text || settings.ethics_discrimination_text) && (
           <div className="max-w-3xl text-center space-y-4 mb-8">
-            {mockSettings.disclaimer_text && (
+            {settings.disclaimer_text && (
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                 <h4 className="text-sm font-black text-black dark:text-slate-300 mb-1">Platform Disclaimer</h4>
-                <p className="text-xs font-bold text-black dark:text-slate-400">{mockSettings.disclaimer_text}</p>
+                <p className="text-xs font-bold text-black dark:text-slate-400">{settings.disclaimer_text}</p>
               </div>
             )}
-            {mockSettings.ethics_discrimination_text && (
+            {settings.ethics_discrimination_text && (
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                 <h4 className="text-sm font-black text-black dark:text-slate-300 mb-1">Ethics & Discrimination</h4>
-                <p className="text-xs font-bold text-black dark:text-slate-400">{mockSettings.ethics_discrimination_text}</p>
+                <p className="text-xs font-bold text-black dark:text-slate-400">{settings.ethics_discrimination_text}</p>
               </div>
             )}
           </div>
         )}
 
-        {mockSettings.important_notice && (
+        {settings.important_notice && (
           <div className="max-w-3xl w-full text-center mb-8">
             <div className="bg-red-600/10 border border-red-600/30 rounded-2xl p-6">
               <h4 className="text-sm font-black text-red-600 mb-2 uppercase tracking-widest">Important Notice</h4>
-              <p className="text-sm text-black dark:text-red-400 font-bold whitespace-pre-wrap">{mockSettings.important_notice}</p>
+              <p className="text-sm text-black dark:text-red-400 font-bold whitespace-pre-wrap">{settings.important_notice}</p>
             </div>
           </div>
         )}
 
         <div className="text-black dark:text-slate-500 text-xs font-black uppercase tracking-tight">
-          &copy; 2026 {mockSettings.site_title}. All rights reserved.
+          &copy; 2026 {settings.site_title}. All rights reserved.
         </div>
       </div>
     </footer>
@@ -234,7 +236,8 @@ function BackToTop() {
   );
 }
 
-export default function App() {
+function AppContent() {
+  const { settings, loading } = useData();
   const triggerHaptic = () => {
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(50);
@@ -242,7 +245,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    document.title = mockSettings.site_title;
+    document.title = settings.site_title;
     
     const updateMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? 'property' : 'name';
@@ -255,9 +258,9 @@ export default function App() {
       meta.setAttribute("content", content);
     };
 
-    updateMeta("description", mockSettings.meta_description);
-    updateMeta("og:title", mockSettings.site_title, true);
-    updateMeta("og:description", mockSettings.meta_description, true);
+    updateMeta("description", settings.meta_description);
+    updateMeta("og:title", settings.site_title, true);
+    updateMeta("og:description", settings.meta_description, true);
     updateMeta("og:type", "website", true);
     
     // Add canonical link for SEO
@@ -269,22 +272,25 @@ export default function App() {
     }
     canonical.href = window.location.href;
     
-    if (mockSettings.favicon_url) {
+    if (settings.favicon_url) {
       let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
       if (!link) {
         link = document.createElement('link');
         link.rel = 'icon';
         document.head.appendChild(link);
       }
-      link.href = mockSettings.favicon_url;
+      link.href = settings.favicon_url;
     }
-  }, []);
+  }, [settings]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
-    <HelmetProvider>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <Ticker />
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <Ticker />
         <Header />
         
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 pb-24">
@@ -312,7 +318,16 @@ export default function App() {
         <BottomNav />
         <BackToTop />
       </div>
-      </Router>
+    </Router>
+  );
+}
+
+export default function App() {
+  return (
+    <HelmetProvider>
+      <DataProvider>
+        <AppContent />
+      </DataProvider>
     </HelmetProvider>
   );
 }

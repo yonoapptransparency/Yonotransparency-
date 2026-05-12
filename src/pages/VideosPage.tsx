@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockVideos } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { Video as VideoIcon, PlayCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function VideosPage() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredVideos = mockVideos.filter(video => 

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockApps, mockSettings } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { Search, ShieldAlert, ShieldCheck, Sparkles, ArrowRight, TrendingUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
 import { FlipkartBanner, PlayStoreTabs, TopChartItem, AppListItem } from '../components/PlayStoreUI';
 
 export default function Home() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,16 +22,7 @@ export default function Home() {
     } else {
       setActiveTab(mockSettings.categories?.[0] || 'All Apps');
     }
-  }, [searchParams, location]);
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedApps = localStorage.getItem('yonostore_apps');
-      if (savedApps) setApps(JSON.parse(savedApps));
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [searchParams, location, mockSettings]);
 
   const triggerHaptic = () => {
     if (window.navigator && window.navigator.vibrate) {
@@ -38,7 +30,7 @@ export default function Home() {
     }
   };
 
-  const filteredApps = apps
+  const filteredApps = mockApps
     .filter(app => app.name.toLowerCase().includes(searchTerm.toLowerCase()) || app.category.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => a.serial_number - b.serial_number);
 

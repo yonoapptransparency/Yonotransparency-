@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { mockBlogs, mockSettings } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { FileText, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Blogs() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const [blogs] = useState(mockBlogs);
 
   useEffect(() => {

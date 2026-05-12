@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, LogOut, Save, Upload, Type, Link as LinkIcon, ToggleLeft, Layers, Newspaper as BookIcon, Plus, Trash2, Video as VideoIcon } from 'lucide-react';
-import { mockSettings, mockApps, mockNews, mockBlogs, mockVideos, saveMockSettings, saveMockApps, saveMockNews, saveMockBlogs, saveMockVideos } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 
 function FaqEditor({ initialFaqs }: { initialFaqs: {question: string, answer: string}[] }) {
   const [faqs, setFaqs] = React.useState(initialFaqs || []);
@@ -41,6 +41,7 @@ function FaqEditor({ initialFaqs }: { initialFaqs: {question: string, answer: st
 }
 
 export default function AdminDashboard() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [saving, setSaving] = useState(false);
   const [appsList, setAppsList] = useState(mockApps);
@@ -52,13 +53,20 @@ export default function AdminDashboard() {
   const [categoriesList, setCategoriesList] = useState<string[]>(mockSettings.categories || []);
   const [newCatInput, setNewCatInput] = useState('');
 
+  React.useEffect(() => setAppsList(mockApps), [mockApps]);
+  React.useEffect(() => setNewsList(mockNews), [mockNews]);
+  React.useEffect(() => setBanners(mockSettings.banners || []), [mockSettings.banners]);
+  React.useEffect(() => setBlogs(mockBlogs), [mockBlogs]);
+  React.useEffect(() => setVideosList(mockVideos), [mockVideos]);
+  React.useEffect(() => setCategoriesList(mockSettings.categories || []), [mockSettings.categories]);
+
   const triggerHaptic = () => {
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(50);
     }
   };
 
-  const handleSaveCategories = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveCategories = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     const updatedSettings = {
@@ -66,17 +74,11 @@ export default function AdminDashboard() {
       categories: categoriesList,
     };
     
-    Object.assign(mockSettings, updatedSettings);
-    localStorage.setItem('yonostore_settings', JSON.stringify(mockSettings));
+    await saveMockSettings(updatedSettings);
     
-    // Dispatch event to notify other tabs/components
-    window.dispatchEvent(new Event('storage'));
-    
-    setTimeout(() => {
-      setSaving(false);
-      triggerHaptic();
-      alert('Categories saved successfully! Homepage will automatically use the first category as the "Home" view.');
-    }, 500);
+    setSaving(false);
+    triggerHaptic();
+    alert('Categories saved successfully! Homepage will automatically use the first category as the "Home" view.');
   };
 
   const addCategory = () => {

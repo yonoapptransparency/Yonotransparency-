@@ -1,11 +1,12 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockApps } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { ShieldCheck, ShieldAlert, ArrowRight, Star, Sparkles, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useEffect } from 'react';
 
 export default function AppDetails() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const { slug } = useParams();
   const app = mockApps.find(a => a.slug === slug);
   

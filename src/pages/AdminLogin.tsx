@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
+import { auth } from '../lib/firebase';
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 
 export default function AdminLogin() {
-  const [password, setPassword] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthenticated(true);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (password === 'admin123') { // Placeholder password
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
       setAuthenticated(true);
-    } else {
-      setError(true);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -30,27 +42,16 @@ export default function AdminLogin() {
         </div>
         <h1 className="text-2xl font-bold text-center mb-8">Admin Access</h1>
         
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Master Password</label>
-            <input 
-              type="password" 
-              required
-              className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(false); }}
-            />
-          </div>
-          
-          {error && <div className="text-rose-400 text-sm text-center">Invalid password</div>}
+        <div className="space-y-6">
+          {error && <div className="text-rose-400 text-sm text-center">{error}</div>}
           
           <button 
-            type="submit"
+            onClick={handleLogin}
             className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-lg transition-all shadow-lg"
           >
-            Authenticate
+            Authenticate with Google
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

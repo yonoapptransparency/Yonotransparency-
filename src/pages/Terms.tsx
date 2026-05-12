@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { mockSettings } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 
 export default function Terms() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   return (
     <div className="max-w-4xl mx-auto py-12 px-4">
       <motion.div

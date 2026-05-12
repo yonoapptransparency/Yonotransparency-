@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockNews } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
@@ -13,6 +13,7 @@ interface Comment {
 }
 
 export default function NewsDetailPage() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const { slug } = useParams();
   const newsItem = mockNews.find(n => n.slug === slug);
   const [commentText, setCommentText] = useState('');

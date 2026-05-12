@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, AlertTriangle, ShieldAlert, Loader2 } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, ShieldAlert, Loader2, Download } from 'lucide-react';
 
 interface SecureDownloadButtonProps {
   appId: string;
@@ -10,6 +10,18 @@ interface SecureDownloadButtonProps {
 export default function SecureDownloadButton({ appId, status, downloadUrl }: SecureDownloadButtonProps) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  const getFinalUrl = () => {
+    if (downloadUrl && downloadUrl !== 'U2FsdGVkX19xxxxxx' && downloadUrl.trim() !== '') {
+      return downloadUrl.startsWith('http') ? downloadUrl : `https://${downloadUrl}`;
+    }
+    const encodedUrl = downloadUrl 
+      ? btoa(encodeURIComponent(downloadUrl).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16))))
+      : '';
+    const urlParam = encodedUrl ? `&url=${encodeURIComponent(encodedUrl)}` : '';
+    return `/api/v1/secure-fetch?id=${appId}${urlParam}`;
+  };
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -19,22 +31,18 @@ export default function SecureDownloadButton({ appId, status, downloadUrl }: Sec
         setCountdown(countdown - 1);
       }, 1000);
     } else if (isVerifying && countdown === 0) {
-      if (downloadUrl && downloadUrl !== 'U2FsdGVkX19xxxxxx' && downloadUrl.trim() !== '') {
-        // Open the URL in a new tab to avoid AI Studio iframe restrictions
-        // Add https prefix if missing
-        const finalUrl = downloadUrl.startsWith('http') ? downloadUrl : `https://${downloadUrl}`;
-        window.open(finalUrl, '_blank');
-        setIsVerifying(false);
-      } else {
-        // Fallback to API mock route if no valid URL is present
-        const encodedUrl = downloadUrl 
-          ? btoa(encodeURIComponent(downloadUrl).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16))))
-          : '';
-        const urlParam = encodedUrl ? `&url=${encodeURIComponent(encodedUrl)}` : '';
-        
-        // Open in new tab since it will redirect to an external mockup page
-        window.open(`/api/v1/secure-fetch?id=${appId}${urlParam}`, '_blank');
-        setIsVerifying(false);
+      setIsVerifying(false);
+      setReady(true);
+      
+      // Attempt automatic redirect to download
+      const finalUrl = getFinalUrl();
+      // Try replacing the window location for direct downloads
+      // Using window.location.href avoids popup blockers for direct file links,
+      // but if the URL is an external web page, AI Studio iframe sandbox might block it.
+      try {
+         window.location.href = finalUrl;
+      } catch (e) {
+         console.warn("Direct navigation blocked by iframe sandbox.");
       }
     }
     
@@ -44,7 +52,7 @@ export default function SecureDownloadButton({ appId, status, downloadUrl }: Sec
   }, [isVerifying, countdown, appId, downloadUrl]);
 
   const handleDownload = () => {
-    if (isVerifying) return;
+    if (isVerifying || ready) return;
     
     // 1. Trigger Mobile Haptics
     if (window.navigator && window.navigator.vibrate) {
@@ -55,6 +63,20 @@ export default function SecureDownloadButton({ appId, status, downloadUrl }: Sec
     setIsVerifying(true);
     setCountdown(3);
   };
+
+  if (ready) {
+    return (
+      <a 
+        href={getFinalUrl()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full sm:w-96 min-h-[64px] bg-green-600 hover:bg-green-500 text-white font-black py-4 px-10 rounded-full flex items-center justify-center gap-3 transition-all shadow-xl shadow-green-600/30 active:scale-95 group uppercase tracking-tight text-xl cursor-pointer pointer-events-auto border-b-4 border-green-800 shrink-0"
+      >
+        <Download className="w-6 h-6 text-white drop-shadow-sm" /> 
+        <span className="text-white drop-shadow-sm">Click to Download</span>
+      </a>
+    );
+  }
 
   return (
     <button 

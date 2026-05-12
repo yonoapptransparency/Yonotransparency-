@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
 import { Newspaper, Search, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import { mockNews } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
 export default function NewsPage() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   
   const filteredNews = mockNews.filter(item => 

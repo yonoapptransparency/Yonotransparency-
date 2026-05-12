@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockVideos } from '../lib/supabase';
+import { useData } from '../contexts/DataContext';
 import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
 
 interface Comment {
@@ -12,6 +12,7 @@ interface Comment {
 }
 
 export default function VideoDetailPage() {
+  const { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos, saveApps: saveMockApps, saveSettings: saveMockSettings, saveNews: saveMockNews, saveBlogs: saveMockBlogs, saveVideos: saveMockVideos } = useData();
   const { slug } = useParams();
   const videoItem = mockVideos.find(v => v.slug === slug);
   const [commentText, setCommentText] = useState('');
