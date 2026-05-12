@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { Menu, Search, Shield, Info, Download, ArrowRight, X, Gamepad2, LayoutGrid, Search as SearchIcon, BookOpen } from 'lucide-react';
+import { Menu, Search, Shield, Info, Download, ArrowRight, X, Gamepad2, LayoutGrid, Search as SearchIcon, Newspaper } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockSettings } from './lib/supabase';
@@ -17,8 +17,11 @@ import Ticker from './components/Ticker';
 import SupportWidget from './components/SupportWidget';
 import ThemeToggle from './components/ThemeToggle';
 import NewApps from './pages/NewApps';
-import Books from './pages/Books';
+import NewsPage from './pages/NewsPage';
+import NewsDetailPage from './pages/NewsDetailPage';
 import Blogs from './pages/Blogs';
+import VideosPage from './pages/VideosPage';
+import VideoDetailPage from './pages/VideoDetailPage';
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -66,6 +69,7 @@ function Header() {
             <Link to="/" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Home</Link>
             <Link to="/new-apps" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold flex items-center gap-1">New App <span className="flex w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span></Link>
             <Link to="/categories" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Categories</Link>
+            <Link to="/videos" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Videos</Link>
             <Link to="/blogs" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">Blogs</Link>
             <Link to="/app-checker" onClick={triggerHaptic} className="text-slate-700 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors p-2 font-semibold">App Checker</Link>
             <ThemeToggle />
@@ -95,15 +99,15 @@ function Header() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-3xl flex flex-col px-6 py-8"
+            className="fixed inset-0 z-[60] bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl flex flex-col px-6 py-8"
           >
             <div className="flex justify-between items-center mb-12">
-              <span className="text-xl font-bold flex items-center gap-2">
+              <span className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                 {mockSettings.logo_url ? <img src={mockSettings.logo_url} className="w-6 h-6 object-contain" alt="Logo" /> : <Shield className="w-6 h-6 text-pink-400" />} {mockSettings.site_title}
               </span>
               <button 
                 onClick={() => { triggerHaptic(); setMenuOpen(false); }}
-                className="flex items-center justify-center min-h-[48px] min-w-[48px] bg-white/10 rounded-full"
+                className="flex items-center justify-center min-h-[48px] min-w-[48px] bg-slate-200 dark:bg-white/10 rounded-full"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5 text-slate-800 dark:text-white" />
@@ -144,6 +148,7 @@ function Footer() {
           <Link to="/" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Home</Link>
           <Link to="/about" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">About Us</Link>
           <Link to="/contact" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Contact</Link>
+          <Link to="/videos" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Videos</Link>
           <Link to="/blogs" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Blogs</Link>
           <Link to="/privacy" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Privacy</Link>
           <Link to="/terms" className="text-slate-600 dark:text-slate-300 hover:text-pink-500 dark:hover:text-white transition-colors">Terms</Link>
@@ -282,7 +287,10 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/books" element={<Books />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/news/:slug" element={<NewsDetailPage />} />
+            <Route path="/videos" element={<VideosPage />} />
+            <Route path="/videos/:slug" element={<VideoDetailPage />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
@@ -324,9 +332,9 @@ function BottomNav() {
           <SearchIcon className="w-6 h-6" />
           <span className="text-[10px] font-medium tracking-tight">Search</span>
         </Link>
-        <Link to="/books" onClick={triggerHaptic} className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400 font-medium">
-          <BookOpen className="w-6 h-6" />
-          <span className="text-[10px] font-medium tracking-tight">Books</span>
+        <Link to="/news" onClick={triggerHaptic} className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-pink-400 font-medium">
+          <Newspaper className="w-6 h-6" />
+          <span className="text-[10px] font-medium tracking-tight">News</span>
         </Link>
       </div>
     </div>

@@ -27,6 +27,7 @@ export interface GlobalSettings {
   ethics_discrimination_text: string;
   ticker_text: string;
   animations_enabled: boolean;
+  seo_keywords?: string;
   about_content?: string;
   contact_content?: string;
   privacy_content?: string;
@@ -36,14 +37,20 @@ export interface GlobalSettings {
   banners: Banner[];
 }
 
-export interface Book {
+export interface NewsItem {
   id: string;
+  slug: string;
   title: string;
-  author: string;
+  logo_url: string;
   description: string;
-  cover_url: string;
-  download_url: string;
-  category: string;
+  ceo_name: string;
+  ceo_description: string;
+  seo_title: string;
+  seo_description: string;
+  seo_keywords?: string;
+  og_image_url?: string;
+  content: string;
+  link: string;
 }
 
 export interface AppConfig {
@@ -52,6 +59,9 @@ export interface AppConfig {
   slug: string;
   seo_title?: string;
   seo_description?: string;
+  seo_keywords?: string;
+  og_image_url?: string;
+  canonical_url?: string;
   category: string;
   version: string;
   file_size: string;
@@ -99,6 +109,18 @@ export interface NewsUpdate {
   content_html: string;
   category: string;
   published_at: string;
+}
+
+export interface VideoItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  youtube_url: string;
+  seo_title: string;
+  seo_description: string;
+  seo_keywords?: string;
+  created_at: string;
 }
 
 const savedApps = localStorage.getItem('yonostore_apps');
@@ -226,6 +248,7 @@ export const mockSettings: GlobalSettings = savedSettings ? JSON.parse(savedSett
   ethics_discrimination_text: 'We are committed to providing equal access to safe applications without discrimination.',
   ticker_text: 'LIVE: Instagram SafeMod updated to v2.4.1 • All apps verified by the Transparency Team • Join our Telegram for updates •',
   animations_enabled: true,
+  seo_keywords: 'app store, safe apps, secure download, verified apps, yonostore, app privacy',
   about_content: '<p>SafeApp Store was founded with a single mission: to provide a transparent and secure environment for discovering and downloading mobile applications.</p><p>In an era where privacy is often compromised, we take a different approach. Every application on our platform undergoes a rigorous manual review process.</p>',
   contact_content: '<p>Have questions or feedback? We\'d love to hear from you. Our team typically responds within 24-48 hours.</p>',
   privacy_content: '<h2>1. Information We Collect</h2><p>We collect information to provide better services to all our users. The types of information we collect include usage data and device info.</p>',
@@ -244,31 +267,26 @@ export const saveMockSettings = (settings: GlobalSettings) => {
   Object.assign(mockSettings, settings);
 };
 
-const savedBooks = localStorage.getItem('yonostore_books');
-export const mockBooks: Book[] = savedBooks ? JSON.parse(savedBooks) : [
+const savedNews = localStorage.getItem('yonostore_news');
+export const mockNews: NewsItem[] = savedNews ? JSON.parse(savedNews) : [
   {
     id: '1',
-    title: 'The Art of Privacy',
-    author: 'Elena Vance',
-    description: 'A comprehensive guide to digital self-defense.',
-    cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80',
-    download_url: 'https://example.com/book1.pdf',
-    category: 'Security'
-  },
-  {
-    id: '2',
-    title: 'Zero Trust Architecture',
-    author: 'Mark Miller',
-    description: 'Understanding the modern security paradigm.',
-    cover_url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80',
-    download_url: 'https://example.com/book2.pdf',
-    category: 'Technical'
+    slug: 'tech-innovations-2026',
+    title: 'Technology Innovations in 2026',
+    logo_url: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&q=80',
+    description: 'A deep dive into the most exciting technical leaps of this year.',
+    ceo_name: 'Elena Vance',
+    ceo_description: 'An experienced technical leader with 10+ years of building secure systems.',
+    seo_title: 'Tech Innovations 2026 - Latest News',
+    seo_description: 'Read the latest updates about tech innovations in 2026.',
+    content: 'A comprehensive guide to digital transformations this year...',
+    link: 'https://example.com/news/1'
   }
 ];
 
-export const saveMockBooks = (books: Book[]) => {
-  localStorage.setItem('yonostore_books', JSON.stringify(books));
-  mockBooks.splice(0, mockBooks.length, ...books);
+export const saveMockNews = (newsList: NewsItem[]) => {
+  localStorage.setItem('yonostore_news', JSON.stringify(newsList));
+  mockNews.splice(0, mockNews.length, ...newsList);
 };
 
 const savedBlogs = localStorage.getItem('yonostore_blogs');
@@ -286,4 +304,23 @@ export const mockBlogs: BlogPost[] = savedBlogs ? JSON.parse(savedBlogs) : [
 export const saveMockBlogs = (blogs: BlogPost[]) => {
   localStorage.setItem('yonostore_blogs', JSON.stringify(blogs));
   mockBlogs.splice(0, mockBlogs.length, ...blogs);
+};
+
+const savedVideos = localStorage.getItem('yonostore_videos');
+export const mockVideos: VideoItem[] = savedVideos ? JSON.parse(savedVideos) : [
+  {
+    id: '1',
+    slug: 'intro-video',
+    title: 'Intro to YonoStore',
+    description: 'A brief introduction to the YonoStore platform and its offerings.',
+    youtube_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    seo_title: 'YonoStore Introduction Video',
+    seo_description: 'Watch the YonoStore introduction video.',
+    created_at: new Date().toISOString()
+  }
+];
+
+export const saveMockVideos = (videos: VideoItem[]) => {
+  localStorage.setItem('yonostore_videos', JSON.stringify(videos));
+  mockVideos.splice(0, mockVideos.length, ...videos);
 };

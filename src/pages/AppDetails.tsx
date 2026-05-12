@@ -11,42 +11,16 @@ export default function AppDetails() {
   
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (app) {
-      document.title = app.seo_title || `${app.name} - Verified & Safe`;
-      
-      const updateMeta = (name: string, content: string, isProperty = false) => {
-        const attr = isProperty ? 'property' : 'name';
-        let meta = document.querySelector(`meta[${attr}="${name}"]`);
-        if (!meta) {
-          meta = document.createElement('meta');
-          meta.setAttribute(attr, name);
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute("content", content);
-      };
-
-      const defaultDesc = `Download ${app.name} completely verified for privacy and security. ${app.safety_status} status.`;
-      const desc = app.seo_description || defaultDesc;
-
-      updateMeta("description", desc);
-      updateMeta("og:title", app.seo_title || app.name, true);
-      updateMeta("og:description", desc, true);
-      updateMeta("og:image", app.icon_url, true);
-      updateMeta("og:type", "article", true);
-      
-      let canonical = document.querySelector("link[rel='canonical']") as HTMLLinkElement;
-      if (!canonical) {
-        canonical = document.createElement('link');
-        canonical.rel = 'canonical';
-        document.head.appendChild(canonical);
-      }
-      canonical.href = window.location.href;
-    }
-  }, [slug, app]);
+  }, [slug]);
 
   if (!app) {
     return <Navigate to="/" />;
   }
+
+  const defaultDesc = `Download ${app.name} completely verified for privacy and security. ${app.safety_status} status.`;
+  const desc = app.seo_description || defaultDesc;
+  const title = app.seo_title || `${app.name} - Verified & Safe`;
+  const ogImage = app.og_image_url || app.icon_url;
 
   const faqSchema = app.faqs && app.faqs.length > 0 ? {
     "@context": "https://schema.org",
@@ -61,11 +35,35 @@ export default function AppDetails() {
     }))
   } : null;
 
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": app.name,
+    "description": app.seo_description || `${app.name} details`,
+    "applicationCategory": app.category,
+    "operatingSystem": "All",
+    "softwareVersion": app.version,
+    "image": app.og_image_url || app.icon_url,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  };
+
   return (
     <div className="animate-fade-in max-w-4xl mx-auto select-none">
       <Helmet>
-        <title>{app.seo_title || `${app.name} - Verified & Safe`}</title>
-        <meta name="description" content={app.seo_description || `Download ${app.name} completely verified for privacy and security. ${app.safety_status} status.`} />
+        <title>{title}</title>
+        <meta name="description" content={desc} />
+        {app.seo_keywords && <meta name="keywords" content={app.seo_keywords} />}
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={desc} />
+        <meta property="og:image" content={ogImage} />
+        {app.canonical_url && <link rel="canonical" href={app.canonical_url} />}
+        <script type="application/ld+json">
+          {JSON.stringify(softwareSchema)}
+        </script>
         {faqSchema && (
           <script type="application/ld+json">
             {JSON.stringify(faqSchema)}

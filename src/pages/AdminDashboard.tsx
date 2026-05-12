@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, LogOut, Save, Upload, Type, Link as LinkIcon, ToggleLeft, Layers, Book as BookIcon, Plus, Trash2 } from 'lucide-react';
-import { mockSettings, mockApps, mockBooks, mockBlogs, saveMockSettings, saveMockApps, saveMockBooks, saveMockBlogs } from '../lib/supabase';
+import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, LogOut, Save, Upload, Type, Link as LinkIcon, ToggleLeft, Layers, Newspaper as BookIcon, Plus, Trash2 } from 'lucide-react';
+import { mockSettings, mockApps, mockNews, mockBlogs, saveMockSettings, saveMockApps, saveMockNews, saveMockBlogs } from '../lib/supabase';
 
 function FaqEditor({ initialFaqs }: { initialFaqs: {question: string, answer: string}[] }) {
   const [faqs, setFaqs] = React.useState(initialFaqs || []);
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [appsList, setAppsList] = useState(mockApps);
   const [editingAppId, setEditingAppId] = useState<string | null>(null);
-  const [books, setBooks] = useState(mockBooks);
+  const [newsList, setNewsList] = useState(mockNews);
   const [banners, setBanners] = useState(mockSettings.banners || []);
   const [blogs, setBlogs] = useState(mockBlogs);
   const [categoriesList, setCategoriesList] = useState<string[]>(mockSettings.categories || []);
@@ -99,6 +99,7 @@ export default function AdminDashboard() {
       meta_description: formData.get('meta_description') !== null ? (formData.get('meta_description') as string) : mockSettings.meta_description,
       logo_url: formData.get('logo_url') !== null ? (formData.get('logo_url') as string) : mockSettings.logo_url,
       favicon_url: formData.get('favicon_url') !== null ? (formData.get('favicon_url') as string) : mockSettings.favicon_url,
+      seo_keywords: formData.get('seo_keywords') !== null ? (formData.get('seo_keywords') as string) : mockSettings.seo_keywords,
       about_content: formData.get('about_content') !== null ? (formData.get('about_content') as string) : mockSettings.about_content,
       contact_content: formData.get('contact_content') !== null ? (formData.get('contact_content') as string) : mockSettings.contact_content,
       privacy_content: formData.get('privacy_content') !== null ? (formData.get('privacy_content') as string) : mockSettings.privacy_content,
@@ -134,6 +135,9 @@ export default function AdminDashboard() {
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       seo_title: formData.get('seo_title') as string || name,
       seo_description: formData.get('seo_description') as string || '',
+      seo_keywords: formData.get('seo_keywords') as string || '',
+      og_image_url: formData.get('og_image_url') as string || '',
+      canonical_url: formData.get('canonical_url') as string || '',
       icon_url: formData.get('icon_url') as string || '',
       category: formData.getAll('category_list').length > 0 ? formData.getAll('category_list').join(', ') : mockSettings.categories?.[0] || 'General',
       version: '1.0',
@@ -185,15 +189,15 @@ export default function AdminDashboard() {
   const handleSaveBooks = () => {
     setSaving(true);
     triggerHaptic();
-    saveMockBooks(books);
+    saveMockNews(newsList);
     setTimeout(() => {
       setSaving(false);
       alert('Books saved successfully. Go to Book Section to see.');
     }, 1000);
   };
 
-  const handleBookChange = (id: string, field: string, value: string) => {
-    setBooks(books.map(b => b.id === id ? { ...b, [field]: value } : b));
+  const handleNewsChange = (id: string, field: string, value: string) => {
+    setNewsList(newsList.map(n => n.id === id ? { ...n, [field]: value } : n));
   };
 
   const handleBannerChange = (id: string, field: string, value: string) => {
@@ -215,21 +219,27 @@ export default function AdminDashboard() {
     setBanners(banners.filter(b => b.id !== id));
   };
 
-  const handleAddBook = () => {
-    const newBook = {
+  const handleAddNews = () => {
+    const newItem = {
       id: Math.random().toString(36).substr(2, 9),
-      title: 'New Book Title',
-      author: 'Author Name',
-      description: 'Book description...',
-      cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80',
-      download_url: '#',
-      category: 'General'
+      slug: 'new-news',
+      title: 'New News',
+      logo_url: '',
+      description: 'News description...',
+      ceo_name: 'CEO Name',
+      ceo_description: 'CEO Description',
+      seo_title: 'News SEO Title',
+      seo_description: 'News SEO Meta Description',
+      seo_keywords: '',
+      og_image_url: '',
+      content: 'Detailed markdown content here...',
+      link: ''
     };
-    setBooks([...books, newBook]);
+    setNewsList([...newsList, newItem]);
   };
 
-  const handleDeleteBook = (id: string) => {
-    setBooks(books.filter(b => b.id !== id));
+  const handleDeleteNews = (id: string) => {
+    setNewsList(newsList.filter(n => n.id !== id));
   };
 
   const handleSaveBlogs = () => {
@@ -289,8 +299,8 @@ export default function AdminDashboard() {
             <FileText className="w-5 h-5" /> Manage Apps
           </button>
           <button 
-            onClick={() => { triggerHaptic(); setActiveTab('books'); }}
-            className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-all min-h-[48px] ${activeTab === 'books' ? 'bg-pink-500/20 text-pink-400' : 'hover:bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'}`}
+            onClick={() => { triggerHaptic(); setActiveTab('news'); }}
+            className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-all min-h-[48px] ${activeTab === 'news' ? 'bg-pink-500/20 text-pink-400' : 'hover:bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'}`}
           >
             <BookIcon className="w-5 h-5" /> Manage Books
           </button>
@@ -336,8 +346,8 @@ export default function AdminDashboard() {
                   <div className="text-2xl font-bold">{mockApps.length}</div>
                 </div>
                 <div className="bg-slate-100 dark:bg-white/5 p-4 rounded-xl border border-slate-300 dark:border-white/10">
-                  <div className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total Books</div>
-                  <div className="text-2xl font-bold">{books.length}</div>
+                  <div className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total News</div>
+                  <div className="text-2xl font-bold">{newsList.length}</div>
                 </div>
                 <div className="bg-slate-100 dark:bg-white/5 p-4 rounded-xl border border-slate-300 dark:border-white/10">
                   <div className="text-slate-600 dark:text-slate-400 text-sm mb-1">Pending Reviews</div>
@@ -397,6 +407,18 @@ export default function AdminDashboard() {
                           <div>
                             <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Description</label>
                             <input type="text" name="seo_description" defaultValue={editApp?.seo_description} className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 min-h-[48px]" />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Keywords (Comma Separated)</label>
+                            <input type="text" name="seo_keywords" defaultValue={editApp?.seo_keywords} placeholder="e.g., vpn, privacy, security app" className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 min-h-[48px]" />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO OG Image URL (Open Graph)</label>
+                            <input type="text" name="og_image_url" defaultValue={editApp?.og_image_url} placeholder="Image URL to show when links are shared on social media" className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 min-h-[48px]" />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Canonical URL</label>
+                            <input type="url" name="canonical_url" defaultValue={editApp?.canonical_url} placeholder="If this content is syndicated, put original URL here to prevent SEO penalty" className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 min-h-[48px]" />
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Serial Number (Sort Order)</label>
@@ -598,49 +620,94 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab === 'books' && (
-            <div className="animate-fade-in">
-              <div className="flex justify-between items-center mb-6 border-b border-slate-300 dark:border-white/10 pb-4">
-                <h2 className="text-xl font-bold">Manage Books & PDF Library</h2>
-                <button 
-                  onClick={handleAddBook}
-                  className="bg-pink-500 hover:bg-pink-600 text-slate-900 dark:text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2"
+                    {activeTab === 'news' && (
+            <div className="animate-fade-in space-y-6">
+              <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-300 dark:border-white/10 shadow-sm">
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <BookIcon className="w-6 h-6 text-pink-500" /> Manage News
+                </h2>
+                <button
+                  onClick={handleAddNews}
+                  className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
-                  <Plus className="w-4 h-4" /> Add New Book
+                  <Plus className="w-4 h-4" /> Add News
                 </button>
               </div>
-              
-              <div className="space-y-4">
-                {books.map((book) => (
-                  <div key={book.id} className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 p-4 rounded-xl flex gap-4">
-                    <img src={book.cover_url || undefined} className="w-20 h-28 object-cover rounded-lg" alt="" />
-                    <div className="flex-1 space-y-2">
-                      <div className="grid grid-cols-2 gap-4">
-                        <input type="text" value={book.title} onChange={(e) => handleBookChange(book.id, 'title', e.target.value)} className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded p-2 text-sm" placeholder="Book Title" />
-                        <input type="text" value={book.author} onChange={(e) => handleBookChange(book.id, 'author', e.target.value)} className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded p-2 text-sm" placeholder="Author" />
+
+              <div className="grid gap-6">
+                {newsList.map((item) => (
+                  <div key={item.id} className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl p-6 relative">
+                    <button 
+                      onClick={() => handleDeleteNews(item.id)}
+                      className="absolute top-4 right-4 text-rose-500 hover:text-rose-600 transition-colors p-2"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Title</label>
+                          <input type="text" value={item.title} onChange={e => handleNewsChange(item.id, 'title', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Slug</label>
+                          <input type="text" value={item.slug} onChange={e => handleNewsChange(item.id, 'slug', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Logo URL</label>
+                          <input type="text" value={item.logo_url} onChange={e => handleNewsChange(item.id, 'logo_url', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Description</label>
+                          <textarea value={item.description} onChange={e => handleNewsChange(item.id, 'description', e.target.value)} rows={3} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">CEO Name</label>
+                          <input type="text" value={item.ceo_name} onChange={e => handleNewsChange(item.id, 'ceo_name', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">CEO Description</label>
+                          <textarea value={item.ceo_description} onChange={e => handleNewsChange(item.id, 'ceo_description', e.target.value)} rows={2} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
                       </div>
-                      <textarea value={book.description} onChange={(e) => handleBookChange(book.id, 'description', e.target.value)} className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded p-2 text-xs" rows={2} placeholder="Description"></textarea>
-                      <div className="flex gap-2">
-                        <input type="text" value={book.category} onChange={(e) => handleBookChange(book.id, 'category', e.target.value)} className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded p-2 text-xs flex-1" placeholder="Category" />
-                        <input type="text" value={book.download_url} onChange={(e) => handleBookChange(book.id, 'download_url', e.target.value)} className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded p-2 text-xs flex-1" placeholder="Download / Link URL" />
-                        <button onClick={() => handleDeleteBook(book.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Title</label>
+                          <input type="text" value={item.seo_title} onChange={e => handleNewsChange(item.id, 'seo_title', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Description</label>
+                          <textarea value={item.seo_description} onChange={e => handleNewsChange(item.id, 'seo_description', e.target.value)} rows={2} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">SEO Keywords</label>
+                          <input type="text" value={item.seo_keywords || ''} onChange={e => handleNewsChange(item.id, 'seo_keywords', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">OG Image URL</label>
+                          <input type="text" value={item.og_image_url || ''} onChange={e => handleNewsChange(item.id, 'og_image_url', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Full Content (Markdown)</label>
+                          <textarea value={item.content} onChange={e => handleNewsChange(item.id, 'content', e.target.value)} rows={6} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500"></textarea>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Source Link (Optional)</label>
+                          <input type="text" value={item.link} onChange={e => handleNewsChange(item.id, 'link', e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 rounded-lg py-2 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500" />
+                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
               <div className="mt-8 flex justify-end">
-                <button onClick={handleSaveBooks} disabled={saving} className="bg-pink-500 hover:bg-pink-600 text-slate-900 dark:text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2">
-                  {saving ? 'Saving...' : <><Save className="w-5 h-5"/> Save Books</>}
+                <button onClick={() => saveMockNews(newsList)} className="bg-pink-500 hover:bg-pink-600 text-slate-900 dark:text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2">
+                  <Save className="w-5 h-5"/> Save News
                 </button>
               </div>
             </div>
-          )}
-
-          {activeTab === 'blogs' && (
+          )}\n\n          {activeTab === 'blogs' && (
             <div className="animate-fade-in">
               <div className="flex justify-between items-center mb-6 border-b border-slate-300 dark:border-white/10 pb-4">
                 <h2 className="text-xl font-bold">Manage Blog Posts</h2>
@@ -695,6 +762,10 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Global SEO Description</label>
                       <input type="text" name="meta_description" defaultValue={mockSettings.meta_description} className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 min-h-[48px]" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Global SEO Keywords (comma separated)</label>
+                      <input type="text" name="seo_keywords" defaultValue={mockSettings.seo_keywords} className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 min-h-[48px]" />
                     </div>
                     
                     <div>

@@ -33,6 +33,22 @@ export default function DownloadPage() {
     }))
   } : null;
 
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": app.name,
+    "description": app.seo_description || `${app.name} - Download`,
+    "applicationCategory": app.category,
+    "operatingSystem": "All",
+    "softwareVersion": app.version,
+    "image": app.og_image_url || app.icon_url,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  };
+
   const handleDownload = () => {
     setDownloading(true);
     // Ping API route which will do redirect, here we just mock that delay
@@ -57,6 +73,14 @@ export default function DownloadPage() {
       <Helmet>
         <title>Download {app.seo_title || `${app.name} - Verified & Safe`}</title>
         <meta name="description" content={`Download page for ${app.name}. ${app.seo_description || `Completely verified for privacy and security. ${app.safety_status} status.`}`} />
+        {app.seo_keywords && <meta name="keywords" content={app.seo_keywords} />}
+        <meta property="og:title" content={`Download ${app.seo_title || app.name}`} />
+        <meta property="og:description" content={app.seo_description || `Download page for ${app.name}. Completely verified for privacy and security.`} />
+        <meta property="og:image" content={app.og_image_url || app.icon_url} />
+        {app.canonical_url && <link rel="canonical" href={app.canonical_url} />}
+        <script type="application/ld+json">
+          {JSON.stringify(softwareSchema)}
+        </script>
         {faqSchema && (
           <script type="application/ld+json">
             {JSON.stringify(faqSchema)}

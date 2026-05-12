@@ -32,11 +32,11 @@ export default function AdminLogin() {
         
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Master Password</label>
+            <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Master Password</label>
             <input 
               type="password" 
               required
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg p-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(false); }}
             />

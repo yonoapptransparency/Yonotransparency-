@@ -49,6 +49,10 @@ export default function Home() {
       <Helmet>
         <title>{mockSettings.site_title}</title>
         <meta name="description" content={mockSettings.meta_description} />
+        {mockSettings.seo_keywords && <meta name="keywords" content={mockSettings.seo_keywords} />}
+        <meta property="og:title" content={mockSettings.site_title} />
+        <meta property="og:description" content={mockSettings.meta_description} />
+        <meta property="og:image" content={mockSettings.logo_url} />
       </Helmet>
       {/* Search Header Style */}
       <div className="mb-6 px-1">

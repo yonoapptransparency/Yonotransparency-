@@ -86,14 +86,14 @@ export function AppListItem({ app, index }: { app: any, key?: string | number, i
   return (
     <Link 
       to={`/app/${app.slug}`}
-      className="flex items-center gap-4 p-4 mb-3 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors rounded-3xl active:scale-[0.98] border border-white/80 dark:border-white/10 shadow-sm"
+      className="flex items-center gap-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-2xl active:scale-[0.98] -mx-2 px-2"
     >
       {index !== undefined && (
-        <div className="w-6 text-[15px] font-bold text-slate-400 dark:text-slate-500 text-center shrink-0">
+        <div className="w-6 text-[15px] font-medium text-slate-500 dark:text-slate-400 text-center shrink-0">
           {index}
         </div>
       )}
-      <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-800 shadow-inner">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-800 shadow-sm border border-slate-200/50 dark:border-white/5">
         <img 
           src={app.icon_url || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop"} 
           alt={app.name} 
@@ -119,8 +119,8 @@ export function AppListItem({ app, index }: { app: any, key?: string | number, i
       </div>
       
       <div className="shrink-0 pl-2">
-        <button className="bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/20 text-slate-800 dark:text-white px-5 py-[0.35rem] text-sm font-bold rounded-full transition-colors">
-          Get
+        <button className="border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 px-6 py-1.5 text-[13px] font-bold rounded-full transition-colors truncate min-w-[70px]">
+          Install
         </button>
       </div>
     </Link>
@@ -131,13 +131,13 @@ export function TopChartItem({ rank, app }: TopChartItemProps) {
   return (
     <Link 
       to={`/app/${app.slug}`}
-      className="flex items-center gap-4 p-4 mb-3 bg-white/40 dark:bg-slate-800/40 backdrop-blur-md hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors rounded-3xl active:scale-[0.98] border border-white/80 dark:border-white/10 shadow-sm"
+      className="flex items-center gap-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-2xl active:scale-[0.98] -mx-2 px-2"
     >
-      <div className="w-6 text-[15px] font-bold text-slate-400 dark:text-slate-500 text-center shrink-0">
+      <div className="w-6 text-[15px] font-medium text-slate-500 dark:text-slate-400 text-center shrink-0">
         {rank}
       </div>
       
-      <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-800 shadow-inner">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-800 shadow-sm border border-slate-200/50 dark:border-white/5">
         <img 
           src={app.icon_url || "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop"} 
           alt={app.name} 
@@ -163,8 +163,8 @@ export function TopChartItem({ rank, app }: TopChartItemProps) {
       </div>
       
       <div className="shrink-0 pl-2">
-        <button className="bg-slate-900/5 dark:bg-white/10 hover:bg-slate-900/10 dark:hover:bg-white/20 text-slate-800 dark:text-white px-5 py-[0.35rem] text-sm font-bold rounded-full transition-colors">
-          Get
+        <button className="border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 px-6 py-1.5 text-[13px] font-bold rounded-full transition-colors truncate min-w-[70px]">
+          Install
         </button>
       </div>
     </Link>
