@@ -201,8 +201,9 @@ function Footer() {
 }
 
 function SyncStatus() {
-  const { isConnected, refreshAll } = useData();
+  const { isConnected, refreshAll, lastSyncTime, testCloudConnection, isLive } = useData();
   const [syncing, setSyncing] = useState(false);
+  const [testing, setTesting] = useState(false);
   
   const handleForceSync = async () => {
     if (syncing) return;
@@ -217,6 +218,18 @@ function SyncStatus() {
     }
   };
 
+  const handleTestConnection = async () => {
+    if (testing) return;
+    setTesting(true);
+    const success = await testCloudConnection();
+    if (success) {
+      alert("Real-time OK: The cloud acknowledged your test signal. Your connection is healthy!");
+    } else {
+      alert("Real-time ERROR: Failed to send signal to cloud. Please check if your device allows WebSockets or try another network.");
+    }
+    setTesting(false);
+  };
+
   const handleClearCache = () => {
     if (window.confirm("Hard Reset: This will clear local memory and reload. Continue?")) {
       localStorage.clear();
@@ -225,21 +238,36 @@ function SyncStatus() {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <button 
-        onClick={handleForceSync}
-        disabled={syncing}
-        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter transition-all hover:scale-105 active:scale-95 ${isConnected === true ? 'bg-green-500/10 text-green-500' : isConnected === false ? 'bg-red-500/10 text-red-500' : 'bg-slate-500/10 text-slate-500'}`}
-      >
-        <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-blue-500 animate-spin' : isConnected === true ? 'bg-green-500' : isConnected === false ? 'bg-red-500' : 'bg-slate-500 animate-pulse'}`}></div>
-        {syncing ? 'Syncing...' : isConnected === true ? 'Cloud Active' : isConnected === false ? 'Tap to Sync' : 'Connecting...'}
-      </button>
-      <button 
-        onClick={handleClearCache}
-        className="text-[9px] text-slate-500 hover:text-slate-700 underline decoration-slate-500/20"
-      >
-        Reset Cache
-      </button>
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex items-center gap-2">
+        <button 
+          onClick={handleForceSync}
+          disabled={syncing}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter transition-all hover:scale-105 active:scale-95 ${isConnected === true ? (isLive ? 'bg-green-500/10 text-green-500' : 'bg-amber-500/10 text-amber-500') : isConnected === false ? 'bg-red-500/10 text-red-500' : 'bg-slate-500/10 text-slate-500'}`}
+        >
+          <div className={`w-1.5 h-1.5 rounded-full ${syncing ? 'bg-blue-500 animate-spin' : isConnected === true ? (isLive ? 'bg-green-500' : 'bg-amber-500') : isConnected === false ? 'bg-red-500' : 'bg-slate-500 animate-pulse'}`}></div>
+          {syncing ? 'Syncing...' : isConnected === true ? (isLive ? 'Cloud: Live' : 'Cloud: Cache') : isConnected === false ? 'Offline' : 'Connecting...'}
+        </button>
+        {lastSyncTime && (
+          <span className="text-[8px] text-slate-400 font-bold">Updated: {lastSyncTime}</span>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={handleTestConnection}
+          disabled={testing}
+          className="text-[9px] text-blue-500 hover:text-blue-600 font-black uppercase tracking-widest flex items-center gap-1"
+        >
+          {testing ? 'Testing...' : 'Test Connection'}
+        </button>
+        <button 
+          onClick={handleClearCache}
+          className="text-[9px] text-slate-500 hover:text-slate-700 underline decoration-slate-500/20"
+        >
+          Reset Cache
+        </button>
+      </div>
     </div>
   );
 }

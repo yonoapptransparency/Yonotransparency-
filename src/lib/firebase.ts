@@ -6,8 +6,8 @@ import firebaseConfig from '../../firebase-applet-config.json';
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// Initialize Firestore with long polling and stream-disabling for maximum compatibility in restricted networks
+// Use initializeFirestore to enable force long polling, which is essential for mobile networks
+// that often disrupt standard WebSockets/Streaming.
 export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-  useFetchStreams: false // Disabling fetch streams often fixes connection issues in sandboxes
-}, firebaseConfig.firestoreDatabaseId === "(default)" ? undefined : firebaseConfig.firestoreDatabaseId);
+  experimentalForceLongPolling: true
+}, firebaseConfig.firestoreDatabaseId === '(default)' ? undefined : firebaseConfig.firestoreDatabaseId);

@@ -71,13 +71,16 @@ interface DataContextType {
   videos: VideoItem[];
   loading: boolean;
   syncVersion: number;
+  lastSyncTime: string | null;
   refreshAll: () => Promise<void>;
+  testCloudConnection: () => Promise<boolean>;
   saveApps: (apps: AppConfig[]) => Promise<void>;
   saveSettings: (settings: GlobalSettings) => Promise<void>;
   saveNews: (news: NewsItem[]) => Promise<void>;
   saveBlogs: (blogs: BlogPost[]) => Promise<void>;
   saveVideos: (videos: VideoItem[]) => Promise<void>;
   isConnected: boolean | null;
+  isLive: boolean;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -105,7 +108,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [isLive, setIsLive] = useState(false);
   const [syncVersion, setSyncVersion] = useState(0);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
   useEffect(() => {
     let resolvedCount = 0;
@@ -163,7 +168,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setSyncVersion(v => v + 1);
           if (!fromCache) {
             setIsConnected(true);
+            setIsLive(true);
             receivedServerUpdate = true;
+            setLastSyncTime(new Date().toLocaleTimeString());
+          } else {
+            setIsLive(false);
           }
         }
         checkLoaded();
@@ -178,9 +187,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setSettings(data);
           localStorage.setItem('yonostore_settings', JSON.stringify(data));
           setSyncVersion(v => v + 1);
-          if (!fromCache) {
+          if (!snap.metadata.fromCache) {
             setIsConnected(true);
+            setIsLive(true);
             receivedServerUpdate = true;
+          } else {
+            setIsLive(false);
           }
         }
         checkLoaded();
@@ -245,15 +257,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const saveApps = async (newApps: AppConfig[]) => {
     try {
-      // Update local state immediately (Optimistic UI)
-      setApps(newApps);
-      localStorage.setItem('yonostore_apps', JSON.stringify(newApps));
-      
       const docRef = doc(db, 'store_data', 'apps');
       const now = new Date().toISOString();
       
       console.log("Cloud: Pushing Apps update...");
       await withServerConfirmation(() => setDoc(docRef, { items: newApps, last_updated: now }));
+      
+      setApps(newApps);
+      localStorage.setItem('yonostore_apps', JSON.stringify(newApps));
       console.log("Cloud: Apps update acknowledged by server.");
     } catch (err) {
       console.error("Save Apps Error:", err);
@@ -262,15 +273,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
   const saveSettings = async (newSettings: GlobalSettings) => {
     try {
-      // Optimistic update
       const now = new Date().toISOString();
       const settingsWithTime = { ...newSettings, last_updated: now };
-      setSettings(settingsWithTime);
-      localStorage.setItem('yonostore_settings', JSON.stringify(settingsWithTime));
 
       const docRef = doc(db, 'store_data', 'settings');
       console.log("Cloud: Pushing Settings update...");
       await withServerConfirmation(() => setDoc(docRef, settingsWithTime));
+
+      setSettings(settingsWithTime);
+      localStorage.setItem('yonostore_settings', JSON.stringify(settingsWithTime));
       console.log("Cloud: Settings update acknowledged by server.");
     } catch (err) {
       console.error("Save Settings Error:", err);
@@ -279,12 +290,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
    const saveNews = async (newNews: NewsItem[]) => {
     try {
-      setNews(newNews);
-      localStorage.setItem('yonostore_news', JSON.stringify(newNews));
-      
       const docRef = doc(db, 'store_data', 'news');
       console.log("Cloud: Pushing News update...");
       await withServerConfirmation(() => setDoc(docRef, { items: newNews }));
+
+      setNews(newNews);
+      localStorage.setItem('yonostore_news', JSON.stringify(newNews));
       console.log("Cloud: News update acknowledged by server.");
     } catch (err) {
       console.error("Save News Error:", err);
@@ -293,12 +304,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
   const saveBlogs = async (newBlogs: BlogPost[]) => {
     try {
-      setBlogs(newBlogs);
-      localStorage.setItem('yonostore_blogs', JSON.stringify(newBlogs));
-      
       const docRef = doc(db, 'store_data', 'blogs');
       console.log("Cloud: Pushing Blogs update...");
       await withServerConfirmation(() => setDoc(docRef, { items: newBlogs }));
+
+      setBlogs(newBlogs);
+      localStorage.setItem('yonostore_blogs', JSON.stringify(newBlogs));
       console.log("Cloud: Blogs update acknowledged by server.");
     } catch (err) {
       console.error("Save Blogs Error:", err);
@@ -307,16 +318,37 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
   const saveVideos = async (newVideos: VideoItem[]) => {
     try {
-      setVideos(newVideos);
-      localStorage.setItem('yonostore_videos', JSON.stringify(newVideos));
-      
       const docRef = doc(db, 'store_data', 'videos');
       console.log("Cloud: Pushing Videos update...");
       await withServerConfirmation(() => setDoc(docRef, { items: newVideos }));
+
+      setVideos(newVideos);
+      localStorage.setItem('yonostore_videos', JSON.stringify(newVideos));
       console.log("Cloud: Videos update acknowledged by server.");
     } catch (err) {
       console.error("Save Videos Error:", err);
       handleFirestoreError(err, OperationType.WRITE, 'store_data/videos');
+    }
+  };
+
+  const testCloudConnection = async () => {
+    console.log("Connectivity Test: Starting...");
+    const testId = Math.random().toString(36).substring(7);
+    const testDoc = doc(db, 'store_data', 'connectivity_test');
+    
+    try {
+      // Step 1: Write a unique value to the cloud
+      await withServerConfirmation(() => setDoc(testDoc, { 
+        last_test: testId, 
+        timestamp: new Date().toISOString(),
+        client_info: navigator.userAgent
+      }), 10000);
+      
+      console.log("Connectivity Test: Write success. Verification passed.");
+      return true;
+    } catch (err) {
+      console.error("Connectivity Test: Write failed.", err);
+      return false;
     }
   };
 
@@ -367,13 +399,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       videos, 
       loading, 
       syncVersion,
+      lastSyncTime,
       refreshAll,
+      testCloudConnection,
       saveApps, 
       saveSettings, 
       saveNews, 
       saveBlogs, 
       saveVideos,
-      isConnected
+      isConnected,
+      isLive
     }}>
       {children}
     </DataContext.Provider>
