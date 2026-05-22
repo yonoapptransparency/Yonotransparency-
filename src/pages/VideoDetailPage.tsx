@@ -13,7 +13,7 @@ interface Comment {
 }
 
 export default function VideoDetailPage() {
-  const { videos: mockVideos, settings: mockSettings, loading, videosSyncedWithServer } = useData();
+  const { videos: mockVideos, settings: mockSettings, loading, videosSyncedWithServer, serverVideosFetched } = useData();
   const { slug } = useParams();
   const videoItem = mockVideos.find(v => v.slug?.toLowerCase() === slug?.toLowerCase());
   const [commentText, setCommentText] = useState('');
@@ -45,11 +45,25 @@ export default function VideoDetailPage() {
     setCommentText('');
   };
 
-  if (loading || (!videoItem && !videosSyncedWithServer)) {
+  // Initial loading phase (waiting for setup/cache checks)
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
         <div className="w-10 h-10 border-3 border-red-600/20 border-t-red-600 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(220,38,38,0.2)]"></div>
         <p className="text-[10px] font-black uppercase tracking-[0.6em] text-red-600 italic animate-pulse">Loading secure transmission...</p>
+      </div>
+    );
+  }
+
+  // Graceful interstitial for slow database cold-starts or deep links on first visit
+  if (!videoItem && !serverVideosFetched) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 min-h-[40vh] text-center px-4 max-w-sm mx-auto">
+        <div className="w-10 h-10 border-3 border-red-500/20 border-t-red-500 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(239,68,68,0.2)]"></div>
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 mt-2">Syncing Transmission Feed</h3>
+        <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+          Verifying secure transmission logs with the secure database gateway. Establishing secure cloud connection...
+        </p>
       </div>
     );
   }

@@ -19,7 +19,7 @@ export default function AdminLogin() {
   useEffect(() => {
     // Check if we are on a Netlify preview domain or wrong domain which might cause auth issues
     const host = window.location.hostname;
-    const isMainDomain = host === 'yonoinfo.netlify.app' || host === 'yonoinfo.in' || host === 'localhost' || host === '127.0.0.1';
+    const isMainDomain = host === 'yonoinfo.netlify.app' || host === 'yonoinfo.in' || host === 'localhost' || host === '127.0.0.1' || host.includes('vercel.app');
     
     // Check if we are on an AI Studio preview domain
     const isAiStudio = host.includes('run.app');

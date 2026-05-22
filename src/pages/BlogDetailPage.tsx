@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
 
 export default function BlogDetailPage() {
-  const { blogs: mockBlogs, settings: mockSettings, loading, blogsSyncedWithServer } = useData();
+  const { blogs: mockBlogs, settings: mockSettings, loading, blogsSyncedWithServer, serverBlogsFetched } = useData();
   const { slug } = useParams();
   const blog = mockBlogs.find(b => b.slug?.toLowerCase() === slug?.toLowerCase());
   
@@ -15,11 +15,25 @@ export default function BlogDetailPage() {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  if (loading || (!blog && !blogsSyncedWithServer)) {
+  // Initial loading phase (waiting for setup/cache checks)
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
         <div className="w-10 h-10 border-3 border-red-600/20 border-t-red-600 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(220,38,38,0.2)]"></div>
         <p className="text-[10px] font-black uppercase tracking-[0.6em] text-red-600 italic animate-pulse">Loading editorial feed...</p>
+      </div>
+    );
+  }
+
+  // Graceful interstitial for slow database cold-starts or deep links on first visit
+  if (!blog && !serverBlogsFetched) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 min-h-[40vh] text-center px-4 max-w-sm mx-auto">
+        <div className="w-10 h-10 border-3 border-red-500/20 border-t-red-500 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(239,68,68,0.2)]"></div>
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 mt-2">Syncing Editorial Feed</h3>
+        <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+          Retrieving expert editorial analysis with the secure database gateway. Establishing secure cloud connection...
+        </p>
       </div>
     );
   }

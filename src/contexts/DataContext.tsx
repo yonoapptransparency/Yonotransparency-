@@ -76,6 +76,10 @@ interface DataContextType {
   newsSyncedWithServer: boolean;
   blogsSyncedWithServer: boolean;
   videosSyncedWithServer: boolean;
+  serverAppsFetched: boolean;
+  serverNewsFetched: boolean;
+  serverBlogsFetched: boolean;
+  serverVideosFetched: boolean;
   syncVersion: number;
   lastSyncTime: string | null;
   refreshAll: () => Promise<void>;
@@ -127,6 +131,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [newsSyncedWithServer, setNewsSyncedWithServer] = useState(false);
   const [blogsSyncedWithServer, setBlogsSyncedWithServer] = useState(false);
   const [videosSyncedWithServer, setVideosSyncedWithServer] = useState(false);
+
+  const [serverAppsFetched, setServerAppsFetched] = useState(false);
+  const [serverNewsFetched, setServerNewsFetched] = useState(false);
+  const [serverBlogsFetched, setServerBlogsFetched] = useState(false);
+  const [serverVideosFetched, setServerVideosFetched] = useState(false);
   
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [isLive, setIsLive] = useState(false);
@@ -161,12 +170,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Safety fallback only if no cache - allow database up to 6 seconds to resolve initially
+    // Safety fallback only if no cache - allow database up to 2.5 seconds to resolve initially
     const timeout = !hasCache ? setTimeout(() => {
       setLoading(false);
-    }, 6000) : null;
+    }, 2500) : null;
 
-    // Fast sync fallback for deep links (especially new apps not in cache)
+    // Fast sync fallback for deep links (especially new apps not in cache) - raised to 2.5 seconds to prevent premature failure states
     const syncTimeout = setTimeout(() => {
       setLoadedFromServer(true);
       setAppsSyncedWithServer(true);
@@ -209,12 +218,20 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             setIsLive(true);
             setLastSyncTime(new Date().toLocaleTimeString());
             setAppsSyncedWithServer(true);
+            setServerAppsFetched(true);
             setLoadedFromServer(true);
           }
         } else {
           setAppsSyncedWithServer(true);
+          setServerAppsFetched(true);
           setLoadedFromServer(true);
         }
+        checkLoaded('apps');
+      }, (err) => {
+        console.warn("Firestore apps listener error, falling back:", err);
+        setAppsSyncedWithServer(true);
+        setServerAppsFetched(true);
+        setLoadedFromServer(true);
         checkLoaded('apps');
       }),
       onSnapshot(doc(db, 'store_data', 'settings'), { includeMetadataChanges: true }, (snap) => {
@@ -233,6 +250,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setLoadedFromServer(true);
         }
         checkLoaded('settings');
+      }, (err) => {
+        console.warn("Firestore settings listener error, falling back:", err);
+        setSettingsSyncedWithServer(true);
+        setLoadedFromServer(true);
+        checkLoaded('settings');
       }),
       onSnapshot(doc(db, 'store_data', 'news'), { includeMetadataChanges: true }, (snap) => {
         if (snap.exists()) {
@@ -241,10 +263,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('yonostore_news', JSON.stringify(data));
           if (!snap.metadata.fromCache) {
             setNewsSyncedWithServer(true);
+            setServerNewsFetched(true);
           }
         } else {
           setNewsSyncedWithServer(true);
+          setServerNewsFetched(true);
         }
+        checkLoaded('news');
+      }, (err) => {
+        console.warn("Firestore news listener error, falling back:", err);
+        setNewsSyncedWithServer(true);
+        setServerNewsFetched(true);
         checkLoaded('news');
       }),
       onSnapshot(doc(db, 'store_data', 'blogs'), { includeMetadataChanges: true }, (snap) => {
@@ -254,10 +283,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('yonostore_blogs', JSON.stringify(data));
           if (!snap.metadata.fromCache) {
             setBlogsSyncedWithServer(true);
+            setServerBlogsFetched(true);
           }
         } else {
           setBlogsSyncedWithServer(true);
+          setServerBlogsFetched(true);
         }
+        checkLoaded('blogs');
+      }, (err) => {
+        console.warn("Firestore blogs listener error, falling back:", err);
+        setBlogsSyncedWithServer(true);
+        setServerBlogsFetched(true);
         checkLoaded('blogs');
       }),
       onSnapshot(doc(db, 'store_data', 'videos'), { includeMetadataChanges: true }, (snap) => {
@@ -267,10 +303,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('yonostore_videos', JSON.stringify(data));
           if (!snap.metadata.fromCache) {
             setVideosSyncedWithServer(true);
+            setServerVideosFetched(true);
           }
         } else {
           setVideosSyncedWithServer(true);
+          setServerVideosFetched(true);
         }
+        checkLoaded('videos');
+      }, (err) => {
+        console.warn("Firestore videos listener error, falling back:", err);
+        setVideosSyncedWithServer(true);
+        setServerVideosFetched(true);
         checkLoaded('videos');
       })
     ];
@@ -414,6 +457,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setNewsSyncedWithServer(true);
       setBlogsSyncedWithServer(true);
       setVideosSyncedWithServer(true);
+      setServerAppsFetched(true);
+      setServerNewsFetched(true);
+      setServerBlogsFetched(true);
+      setServerVideosFetched(true);
       setLoadedFromServer(true);
       console.log("Manual Refresh: Parallel Fetch Success.");
     } catch (err) {
@@ -439,6 +486,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     newsSyncedWithServer,
     blogsSyncedWithServer,
     videosSyncedWithServer,
+    serverAppsFetched,
+    serverNewsFetched,
+    serverBlogsFetched,
+    serverVideosFetched,
     syncVersion,
     lastSyncTime,
     refreshAll,
@@ -453,6 +504,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }), [
     apps, settings, news, blogs, videos, loading, loadedFromServer,
     appsSyncedWithServer, settingsSyncedWithServer, newsSyncedWithServer, blogsSyncedWithServer, videosSyncedWithServer,
+    serverAppsFetched, serverNewsFetched, serverBlogsFetched, serverVideosFetched,
     syncVersion, lastSyncTime,
     refreshAll, testCloudConnection, saveApps, saveSettings, saveNews, saveBlogs, saveVideos,
     isConnected, isLive

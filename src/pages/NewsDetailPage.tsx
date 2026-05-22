@@ -14,7 +14,7 @@ interface Comment {
 }
 
 export default function NewsDetailPage() {
-  const { news: mockNews, settings: mockSettings, loading, newsSyncedWithServer } = useData();
+  const { news: mockNews, settings: mockSettings, loading, newsSyncedWithServer, serverNewsFetched } = useData();
   const { slug } = useParams();
   const newsItem = mockNews.find(n => n.slug?.toLowerCase() === slug?.toLowerCase());
   const [commentText, setCommentText] = useState('');
@@ -53,11 +53,25 @@ export default function NewsDetailPage() {
     setCommentText('');
   };
 
-  if (loading || (!newsItem && !newsSyncedWithServer)) {
+  // Initial loading phase (waiting for setup/cache checks)
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
         <div className="w-10 h-10 border-3 border-red-600/20 border-t-red-600 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(220,38,38,0.2)]"></div>
         <p className="text-[10px] font-black uppercase tracking-[0.6em] text-red-600 italic animate-pulse">Loading intel feed...</p>
+      </div>
+    );
+  }
+
+  // Graceful interstitial for slow database cold-starts or deep links on first visit
+  if (!newsItem && !serverNewsFetched) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 min-h-[40vh] text-center px-4 max-w-sm mx-auto">
+        <div className="w-10 h-10 border-3 border-red-500/20 border-t-red-500 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(239,68,68,0.2)]"></div>
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 mt-2">Syncing Intel Feed</h3>
+        <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+          Retrieving live updates from our transparent security intel network. Establishing secure cloud connection...
+        </p>
       </div>
     );
   }
