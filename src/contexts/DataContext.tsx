@@ -70,6 +70,7 @@ interface DataContextType {
   blogs: BlogPost[];
   videos: VideoItem[];
   loading: boolean;
+  loadedFromServer: boolean;
   syncVersion: number;
   lastSyncTime: string | null;
   refreshAll: () => Promise<void>;
@@ -115,6 +116,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return !(hasApps && hasSettings);
   });
   
+  const [loadedFromServer, setLoadedFromServer] = useState(false);
+  
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [isLive, setIsLive] = useState(false);
   const [syncVersion, setSyncVersion] = useState(0);
@@ -146,6 +149,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }, 300) : null;
 
+    // Fast sync fallback for deep links (especially new apps not in cache)
+    const syncTimeout = setTimeout(() => {
+      setLoadedFromServer(true);
+    }, 2000);
+
     const checkConnection = async () => {
       try {
         const testDoc = doc(db, 'store_data', 'connectivity_test');
@@ -155,6 +163,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         // Only set disconnected if we are sure
         if (err.message?.includes('offline') || err.code === 'unavailable') {
           setIsConnected(false);
+          setLoadedFromServer(true); // default to True if offline/stuck
         }
       }
     };
@@ -163,7 +172,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const connInterval = setInterval(checkConnection, 60000);
 
     const unsubs = [
-      onSnapshot(doc(db, 'store_data', 'apps'), { includeMetadataChanges: false }, (snap) => {
+      onSnapshot(doc(db, 'store_data', 'apps'), { includeMetadataChanges: true }, (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
           setApps(data);
@@ -172,11 +181,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             setIsConnected(true);
             setIsLive(true);
             setLastSyncTime(new Date().toLocaleTimeString());
+            setLoadedFromServer(true);
           }
+        } else {
+          setLoadedFromServer(true);
         }
         checkLoaded();
       }),
-      onSnapshot(doc(db, 'store_data', 'settings'), { includeMetadataChanges: false }, (snap) => {
+      onSnapshot(doc(db, 'store_data', 'settings'), { includeMetadataChanges: true }, (snap) => {
         if (snap.exists()) {
           const data = snap.data() as GlobalSettings;
           setSettings(data);
@@ -184,7 +196,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           if (!snap.metadata.fromCache) {
             setIsConnected(true);
             setIsLive(true);
+            setLoadedFromServer(true);
           }
+        } else {
+          setLoadedFromServer(true);
         }
         checkLoaded();
       }),
@@ -216,7 +231,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     
     return () => {
       unsubs.forEach(u => u());
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
+      clearTimeout(syncTimeout);
       clearInterval(connInterval);
     };
   }, []);
@@ -365,6 +381,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     blogs, 
     videos, 
     loading, 
+    loadedFromServer,
     syncVersion,
     lastSyncTime,
     refreshAll,
@@ -377,7 +394,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     isConnected,
     isLive
   }), [
-    apps, settings, news, blogs, videos, loading, syncVersion, lastSyncTime,
+    apps, settings, news, blogs, videos, loading, loadedFromServer, syncVersion, lastSyncTime,
     refreshAll, testCloudConnection, saveApps, saveSettings, saveNews, saveBlogs, saveVideos,
     isConnected, isLive
   ]);
