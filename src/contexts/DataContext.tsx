@@ -152,7 +152,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     // Fast sync fallback for deep links (especially new apps not in cache)
     const syncTimeout = setTimeout(() => {
       setLoadedFromServer(true);
-    }, 2000);
+    }, 5000);
 
     const checkConnection = async () => {
       try {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useData } from '../contexts/DataContext';
-import { ArrowLeft, MessageSquare, Send, Calendar } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Send, Calendar, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Comment {
@@ -55,7 +55,23 @@ export default function VideoDetailPage() {
   }
 
   if (!videoItem) {
-    return <Navigate to="/videos" />;
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-4 max-w-md mx-auto">
+        <div className="w-16 h-16 bg-red-600/10 text-red-600 rounded-2xl flex items-center justify-center mb-6 border border-red-600/20 shadow-[0_0_20px_rgba(220,38,38,0.15)]">
+          <ShieldAlert className="w-8 h-8 animate-pulse text-red-600" />
+        </div>
+        <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-800">Transmission Not Found</h1>
+        <p className="text-slate-500 text-sm mt-3 leading-relaxed mb-8">
+          The requested video transmission "<span className="font-mono font-bold text-red-600">{slug}</span>" could not be loaded. It may have been unlisted, or it is taking a few moments to sync database records.
+        </p>
+        <Link 
+          to="/videos" 
+          className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold uppercase text-xs tracking-widest shadow-lg shadow-red-600/20 transition-all duration-300 hover:shadow-red-600/30 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <ArrowLeft className="w-4 h-4" /> View other videos
+        </Link>
+      </div>
+    );
   }
 
   // Extract YouTube ID
