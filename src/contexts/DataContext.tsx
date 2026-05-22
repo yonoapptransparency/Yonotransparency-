@@ -170,12 +170,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Safety fallback only if no cache - allow database up to 2.5 seconds to resolve initially
+    // Safety fallback only if no cache - allow database up to 10 seconds to resolve initially
     const timeout = !hasCache ? setTimeout(() => {
       setLoading(false);
-    }, 2500) : null;
+    }, 10000) : null;
 
-    // Fast sync fallback for deep links (especially new apps not in cache) - raised to 2.5 seconds to prevent premature failure states
+    // Fast sync fallback for deep links (especially new apps not in cache) - raised to 10 seconds to prevent premature failure states
     const syncTimeout = setTimeout(() => {
       setLoadedFromServer(true);
       setAppsSyncedWithServer(true);
@@ -183,7 +183,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setNewsSyncedWithServer(true);
       setBlogsSyncedWithServer(true);
       setVideosSyncedWithServer(true);
-    }, 2500);
+      
+      // Prevent dynamic page loader from hanging when server cold start exceeds 10 seconds
+      setServerAppsFetched(true);
+      setServerNewsFetched(true);
+      setServerBlogsFetched(true);
+      setServerVideosFetched(true);
+    }, 10000);
 
     const checkConnection = async () => {
       try {
@@ -200,6 +206,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setNewsSyncedWithServer(true);
           setBlogsSyncedWithServer(true);
           setVideosSyncedWithServer(true);
+          
+          setServerAppsFetched(true);
+          setServerNewsFetched(true);
+          setServerBlogsFetched(true);
+          setServerVideosFetched(true);
         }
       }
     };

@@ -26,7 +26,7 @@ export default function AppDetails() {
   }
 
   // Graceful interstitial for slow database cold-starts or deep links on first visit
-  if (!app && !serverAppsFetched) {
+  if (!app && (!serverAppsFetched || !appsSyncedWithServer)) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[40vh] text-center px-4 max-w-sm mx-auto">
         <div className="w-10 h-10 border-3 border-red-500/20 border-t-red-500 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(239,68,68,0.2)]"></div>

@@ -23,6 +23,7 @@ const Blogs = lazy(() => import('./pages/Blogs'));
 const BlogDetailPage = lazy(() => import('./pages/BlogDetailPage'));
 const VideosPage = lazy(() => import('./pages/VideosPage'));
 const VideoDetailPage = lazy(() => import('./pages/VideoDetailPage'));
+const FallbackRouteMatcher = lazy(() => import('./components/FallbackRouteMatcher'));
 
 import Ticker from './components/Ticker';
 import SupportWidget from './components/SupportWidget';
@@ -583,7 +584,7 @@ function AppContent() {
                 <Route path="/blog/:slug" element={<BlogDetailPage />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
-                <Route path="*" element={<div className="text-center py-20 text-slate-500">Feature arriving soon. Check back later.</div>} />
+                <Route path="*" element={<FallbackRouteMatcher />} />
               </Routes>
             </motion.div>
           </AnimatePresence>
