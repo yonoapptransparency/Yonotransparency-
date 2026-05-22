@@ -26,7 +26,8 @@ export default function Home() {
       setActiveTab(tab);
     } else if (mockSettings.categories && mockSettings.categories.length > 0) {
       // Default to first category if no tab in search params
-      if (!tab && activeTab === 'All Apps' && !mockSettings.categories.includes('All Apps')) {
+      const hasAllApps = mockSettings.categories.some(c => c.toLowerCase() === 'all apps' || c.toLowerCase() === 'all');
+      if (!tab && (activeTab === 'All Apps' || activeTab === 'All') && !hasAllApps) {
         setActiveTab(mockSettings.categories[0]);
       }
     }
@@ -170,7 +171,12 @@ export default function Home() {
       {/* Grid of New Apps - Compact & Glossy (Hidden if searching) */}
       {(() => {
         if (searchTerm) return null;
-        const isHomeTab = activeTab.toLowerCase() === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || activeTab.toLowerCase() === 'all apps' || activeTab.toLowerCase() === 'home' || activeTab.toLowerCase() === 'apps';
+        const activeTabLower = activeTab.toLowerCase();
+        const isHomeTab = activeTabLower === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || 
+                          activeTabLower === 'all apps' || 
+                          activeTabLower === 'all' || 
+                          activeTabLower === 'home' || 
+                          activeTabLower === 'apps';
         return isHomeTab && (
           <div className="px-2">
             <h2 className="text-[10px] font-black mb-2 mt-2 uppercase tracking-[0.3em] text-red-600 opacity-80 flex items-center gap-2 justify-center text-center">
@@ -249,7 +255,12 @@ export default function Home() {
 
       {(() => {
         if (searchTerm) return null;
-        const isHomeTab = activeTab.toLowerCase() === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || activeTab.toLowerCase() === 'all apps' || activeTab.toLowerCase() === 'home' || activeTab.toLowerCase() === 'apps';
+        const activeTabLower = activeTab.toLowerCase();
+        const isHomeTab = activeTabLower === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || 
+                          activeTabLower === 'all apps' || 
+                          activeTabLower === 'all' || 
+                          activeTabLower === 'home' || 
+                          activeTabLower === 'apps';
         return isHomeTab && (
           <div className="px-1">
             <h2 className="text-[11px] font-black mt-6 mb-3 px-4 uppercase tracking-[0.3em] text-slate-400 flex items-center gap-4 text-center justify-center">
@@ -280,8 +291,13 @@ export default function Home() {
       )}
 
       {(() => {
-        const isHomeTab = activeTab.toLowerCase() === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || activeTab.toLowerCase() === 'all apps' || activeTab.toLowerCase() === 'home' || activeTab.toLowerCase() === 'apps';
-        const isExcluded = isHomeTab || activeTab.toLowerCase() === 'top charts' || activeTab.toLowerCase() === 'categories';
+        const activeTabLower = activeTab.toLowerCase();
+        const isHomeTab = activeTabLower === (mockSettings.categories?.[0]?.toLowerCase() || 'all apps') || 
+                          activeTabLower === 'all apps' || 
+                          activeTabLower === 'all' || 
+                          activeTabLower === 'home' || 
+                          activeTabLower === 'apps';
+        const isExcluded = isHomeTab || activeTabLower === 'top charts' || activeTabLower === 'categories';
         
         return !isExcluded && (
         <div className="animate-fade-in space-y-2 px-1">

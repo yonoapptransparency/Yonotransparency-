@@ -119,20 +119,30 @@ const AppsTab = React.memo(({ appsList, editingAppId, setEditingAppId, handleDel
               <input type="text" name="icon_url" defaultValue={editApp?.icon_url} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 min-h-[48px] dark:text-white" placeholder="Link to the app logo image" />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium opacity-60 mb-2 dark:text-white">Categories</label>
-              <div className="flex flex-wrap gap-2">
+              <label className="block text-xs font-black uppercase tracking-widest text-[10px] opacity-60 mb-2 dark:text-white">Categories</label>
+              <div className="flex flex-wrap gap-2 mb-3">
                 {categories?.map((cat: string) => (
                   <label key={cat} className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 px-3 py-2 rounded-lg cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
                     <input 
                       type="checkbox" 
                       name="category_list" 
                       value={cat} 
-                      defaultChecked={editApp?.category.toLowerCase().split(',').map((c: string) => c.trim()).includes(cat.toLowerCase())}
+                      defaultChecked={editApp?.category ? editApp.category.toLowerCase().split(',').map((c: string) => c.trim()).includes(cat.toLowerCase()) : false}
                       className="rounded border-black/20 bg-black/5 text-pink-500 focus:ring-pink-500 w-4 h-4"
                     />
                     <span className="text-sm opacity-80 dark:text-white">{cat}</span>
                   </label>
                 ))}
+              </div>
+              <div className="mt-2">
+                <label className="block text-xs font-bold text-pink-500/70 mb-1 uppercase tracking-wider">Or Add Extra Customized Categories (separated by commas)</label>
+                <input 
+                  type="text" 
+                  name="custom_category" 
+                  placeholder="e.g. Action, Featured, Live" 
+                  defaultValue={editApp?.category ? editApp.category.split(',').map((c: string) => c.trim()).filter((c: string) => !categories?.map((cg: string) => cg.toLowerCase()).includes(c.toLowerCase())).join(', ') : ''}
+                  className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 text-sm dark:text-white font-bold"
+                />
               </div>
             </div>
             
@@ -762,15 +772,44 @@ export default function AdminDashboard() {
     }
   };
 
-  const addCategory = () => {
-    if (newCatInput.trim() && !categoriesList.includes(newCatInput.trim())) {
-      setCategoriesList([...categoriesList, newCatInput.trim()]);
+  const addCategory = async () => {
+    const trimmed = newCatInput.trim();
+    if (trimmed && !categoriesList.includes(trimmed)) {
+      const updatedList = [...categoriesList, trimmed];
+      setCategoriesList(updatedList);
       setNewCatInput('');
+      setSaving(true);
+      try {
+        await saveMockSettings({
+          ...mockSettings,
+          categories: updatedList
+        });
+        triggerHaptic();
+      } catch (err: any) {
+        alert('Cloud Sync Failed: ' + (err.message || err));
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
-  const removeCategory = (catToRemove: string) => {
-    setCategoriesList(categoriesList.filter(c => c !== catToRemove));
+  const removeCategory = async (catToRemove: string) => {
+    if (window.confirm(`Are you sure you want to remove the category "${catToRemove}"? Apps using this category won't be deleted, but this tab will be removed.`)) {
+      const updatedList = categoriesList.filter(c => c !== catToRemove);
+      setCategoriesList(updatedList);
+      setSaving(true);
+      try {
+        await saveMockSettings({
+          ...mockSettings,
+          categories: updatedList
+        });
+        triggerHaptic();
+      } catch (err: any) {
+        alert('Cloud Sync Failed: ' + (err.message || err));
+      } finally {
+        setSaving(false);
+      }
+    }
   };
 
   const handleSaveSettings = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -836,7 +875,13 @@ export default function AdminDashboard() {
         canonical_url: formData.get('canonical_url') as string || '',
         target_region: formData.get('target_region') as string || '',
         icon_url: formData.get('icon_url') as string || '',
-        category: formData.getAll('category_list').length > 0 ? formData.getAll('category_list').join(', ') : mockSettings.categories?.[0] || 'General',
+        category: (() => {
+          const checkedCats = formData.getAll('category_list') as string[];
+          const customCatsStr = formData.get('custom_category') as string || '';
+          const customCats = customCatsStr.split(',').map(c => c.trim()).filter(Boolean);
+          const combinedCats = Array.from(new Set([...checkedCats, ...customCats]));
+          return combinedCats.length > 0 ? combinedCats.join(', ') : mockSettings.categories?.[0] || 'General';
+        })(),
         version: '1.0',
         file_size: 'Unknown',
         developer: 'Admin',

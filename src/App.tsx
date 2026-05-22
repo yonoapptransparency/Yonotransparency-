@@ -63,7 +63,11 @@ function Header() {
 
   const triggerHaptic = () => {
     if (window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(10);
+      setTimeout(() => {
+        try {
+          window.navigator.vibrate(10);
+        } catch (e) {}
+      }, 0);
     }
   };
 
@@ -479,7 +483,11 @@ function AppContent() {
   const location = useLocation();
   const triggerHaptic = () => {
     if (window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(10);
+      setTimeout(() => {
+        try {
+          window.navigator.vibrate(10);
+        } catch (e) {}
+      }, 0);
     }
   };
 
@@ -607,7 +615,11 @@ function BottomNav() {
   const { pathname } = useLocation();
   const triggerHaptic = () => {
     if (window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(10);
+      setTimeout(() => {
+        try {
+          window.navigator.vibrate(10);
+        } catch (e) {}
+      }, 0);
     }
   };
 
