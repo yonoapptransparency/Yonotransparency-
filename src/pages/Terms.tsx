@@ -27,9 +27,9 @@ export default function Terms() {
           <span className="text-slate-200">Legal</span><br/>Charter
         </h1>
         
-        <div className="bg-slate-50 rounded-[4rem] p-12 sm:p-24 border border-black/5">
+        <div className="bg-zinc-50 border-2 border-zinc-200 shadow-sm rounded-[2rem] p-8 sm:p-16">
           <div 
-            className="space-y-10 text-xl font-medium leading-relaxed text-slate-700"
+            className="space-y-10 text-base sm:text-lg font-bold leading-relaxed text-black dark:text-zinc-100"
             dangerouslySetInnerHTML={{ __html: (mockSettings.terms_content || '').replace(/\n/g, '<br/>') }}
           />
         </div>

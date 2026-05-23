@@ -221,12 +221,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     const checkConnection = async () => {
       try {
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          setIsConnected(false);
+          setLoadedFromServer(true); // default to True if offline/stuck
+          setAppsSyncedWithServer(true);
+          setSettingsSyncedWithServer(true);
+          setNewsSyncedWithServer(true);
+          setBlogsSyncedWithServer(true);
+          setVideosSyncedWithServer(true);
+          
+          setServerAppsFetched(true);
+          setServerNewsFetched(true);
+          setServerBlogsFetched(true);
+          setServerVideosFetched(true);
+          setLoading(false);
+          return;
+        }
+
         const testDoc = doc(db, 'store_data', 'connectivity_test');
-        await getDocFromServer(testDoc);
+        // Use soft cached getDoc instead of getDocFromServer to avoid active network error logs
+        await getDoc(testDoc);
         setIsConnected(true);
       } catch (err: any) {
         // Only set disconnected if we are sure
-        if (err.message?.includes('offline') || err.code === 'unavailable') {
+        const errMsg = err.message || '';
+        const errCode = err.code || '';
+        if (errMsg.includes('offline') || errCode === 'unavailable' || errCode === 'permission-denied') {
           setIsConnected(false);
           setLoadedFromServer(true); // default to True if offline/stuck
           setAppsSyncedWithServer(true);

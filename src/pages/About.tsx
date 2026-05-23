@@ -25,14 +25,14 @@ export default function About() {
           <div className="space-y-10">
             <h2 className="premium-subheading">Core Objective</h2>
             <div 
-              className="text-2xl sm:text-3xl leading-snug font-semibold text-slate-800 italic"
+              className="text-2xl sm:text-3xl leading-snug font-black text-black italic"
               dangerouslySetInnerHTML={{ __html: (mockSettings.about_content || '').split('\n\n')[0].replace(/\n/g, '<br/>') }}
             />
           </div>
-          <div className="p-12 bg-slate-50 rounded-[3rem] border border-black/5">
-            <h2 className="premium-subheading mb-8">System Intel</h2>
+          <div className="p-10 bg-zinc-50 rounded-[2rem] border border-zinc-200/80 shadow-sm">
+            <h2 className="premium-subheading mb-8 text-black">System Intel</h2>
             <div 
-              className="space-y-6 text-lg leading-relaxed text-slate-600 font-medium"
+              className="space-y-6 text-base sm:text-lg leading-relaxed text-zinc-950 font-bold"
               dangerouslySetInnerHTML={{ __html: (mockSettings.about_content || '').split('\n\n').slice(1).join('<br/><br/>').replace(/\n/g, '<br/>') }}
             />
           </div>
@@ -45,9 +45,9 @@ export default function About() {
             { val: 'Realtime', label: 'Threat Monitoring' },
             { val: 'Stable', label: 'Node Status' },
           ].map((stat, i) => (
-            <div key={i} className="p-8 border border-black/5 rounded-[2rem] flex flex-col items-center text-center">
+            <div key={i} className="p-8 border border-zinc-200 bg-zinc-50 rounded-[2rem] flex flex-col items-center text-center shadow-sm">
               <span className="text-4xl font-black tracking-tighter text-red-600 mb-2 italic">{stat.val}</span>
-              <span className="premium-subheading text-[8px]">{stat.label}</span>
+              <span className="premium-subheading text-[8px] text-zinc-950">{stat.label}</span>
             </div>
           ))}
         </div>

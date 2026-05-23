@@ -82,6 +82,8 @@ export interface GlobalSettings {
   categories: string[];
   banners: Banner[];
   last_updated?: string;
+  secure_index_title?: string;
+  secure_index_subtitle?: string;
 }
 
 export interface NewsItem {

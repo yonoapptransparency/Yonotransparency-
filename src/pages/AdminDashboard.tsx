@@ -397,6 +397,14 @@ const SettingsTab = React.memo(({ mockSettings, handleSaveSettings, saving }: an
             <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Favicon URL</label>
             <input type="text" name="favicon_url" defaultValue={mockSettings.favicon_url} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all dark:text-white font-bold" />
           </div>
+          <div>
+            <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Secure Index Heading</label>
+            <input type="text" name="secure_index_title" defaultValue={mockSettings.secure_index_title || 'Secure Index'} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all dark:text-white font-bold" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Secure Index Subtitle Caption</label>
+            <input type="text" name="secure_index_subtitle" defaultValue={mockSettings.secure_index_subtitle || 'Verified & Transparent App Marketplace'} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all dark:text-white font-bold" />
+          </div>
         </div>
       </div>
 
@@ -1115,6 +1123,8 @@ export default function AdminDashboard() {
         seo_keywords: formData.get('seo_keywords') as string || mockSettings.seo_keywords,
         logo_url: formData.get('logo_url') as string || mockSettings.logo_url,
         favicon_url: formData.get('favicon_url') as string || mockSettings.favicon_url,
+        secure_index_title: formData.get('secure_index_title') as string || mockSettings.secure_index_title || 'Secure Index',
+        secure_index_subtitle: formData.get('secure_index_subtitle') as string || mockSettings.secure_index_subtitle || 'Verified & Transparent App Marketplace',
         
         about_content: formData.get('about_content') as string || mockSettings.about_content,
         privacy_content: formData.get('privacy_content') as string || mockSettings.privacy_content,

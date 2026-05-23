@@ -29,10 +29,10 @@ export default function Privacy() {
         
         <div className="grid lg:grid-cols-[1fr,2fr] gap-12 sm:gap-20">
           <aside className="space-y-8 sticky top-32">
-            <div className="p-8 bg-slate-50 rounded-3xl border border-black/5">
+            <div className="p-8 bg-zinc-50 rounded-[2rem] border border-zinc-200 shadow-sm">
               <ShieldCheck className="w-8 h-8 text-red-600 mb-4" />
-              <h3 className="premium-subheading mb-2">Security Status</h3>
-              <p className="text-xl font-black italic">Active</p>
+              <h3 className="premium-subheading mb-2 text-zinc-950">Security Status</h3>
+              <p className="text-xl font-black italic text-zinc-950">Active</p>
             </div>
             <div className="px-4">
               <h3 className="premium-subheading mb-4">Support Email</h3>
@@ -40,9 +40,9 @@ export default function Privacy() {
             </div>
           </aside>
           
-          <article className="p-12 sm:p-20 bg-white border border-black/5 rounded-[4rem] shadow-sm">
+          <article className="p-12 sm:p-16 bg-white border border-zinc-200/80 rounded-[2.5rem] shadow-sm">
             <div 
-              className="space-y-10 text-lg sm:text-xl leading-relaxed text-slate-600 font-medium"
+              className="space-y-10 text-[15px] sm:text-[17px] leading-relaxed text-zinc-950 font-bold"
               dangerouslySetInnerHTML={{ __html: (mockSettings.privacy_content || '').replace(/\n/g, '<br/>') }}
             />
           </article>

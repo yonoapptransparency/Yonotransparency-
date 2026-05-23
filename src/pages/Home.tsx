@@ -124,17 +124,42 @@ export default function Home() {
           })}
         </script>
       </Helmet>
-      {/* Premium Hero Section - Compact & Sleek */}
-      <div className="text-center py-4 px-4 bg-linear-to-b from-slate-50/50 dark:from-slate-900/50 to-transparent backdrop-blur-md mb-4 border-b border-black/5 dark:border-white/5">
-        <motion.h1 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-base sm:text-lg font-black tracking-[0.2em] mb-4 uppercase flex justify-center items-center gap-2 italic dark:text-white"
-        >
-          <ShieldCheck className="w-5 h-5 text-red-600 drop-shadow-sm" />
-          <span className="opacity-90">Secure</span> <span className="text-red-600 drop-shadow-sm">Index</span>
-          <ShieldCheck className="w-5 h-5 text-red-600 drop-shadow-sm" />
-        </motion.h1>
+      {/* Premium Hero Section - Compact, Sleek, Futuristic */}
+      <div className="text-center py-6 px-4 bg-linear-to-b from-slate-50/70 dark:from-zinc-950/70 via-slate-50/30 dark:via-zinc-950/30 to-transparent backdrop-blur-lg mb-4 border-b border-zinc-200/50 dark:border-zinc-800/50">
+        <div className="inline-flex flex-col items-center justify-center">
+          {/* Modern security logo pill badge */}
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full mb-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest font-mono">Verified Portal Gate</span>
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-2xl sm:text-3xl font-black mb-1.5 uppercase flex justify-center items-center gap-3 tracking-tight italic text-black dark:text-white"
+          >
+            <ShieldCheck className="w-7 h-7 text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.2)]" />
+            <span className="tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-black via-zinc-900 to-zinc-700 dark:from-white dark:via-zinc-200 dark:to-zinc-400">
+              {mockSettings.secure_index_title || 'Secure Index'}
+            </span>
+            <ShieldCheck className="w-7 h-7 text-red-600 drop-shadow-[0_2px_8px_rgba(220,38,38,0.2)]" />
+          </motion.h1>
+
+          {mockSettings.secure_index_subtitle && (
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="text-[10px] sm:text-xs font-black uppercase text-red-600 tracking-[0.25em] mb-4 text-center max-w-sm sm:max-w-md bg-red-500/5 dark:bg-red-500/10 px-4 py-1 rounded-full border border-red-500/10"
+            >
+              {mockSettings.secure_index_subtitle}
+            </motion.p>
+          )}
+        </div>
 
         {/* Compact Search */}
         <div className="max-w-md mx-auto mb-1">

@@ -25,7 +25,7 @@ export default function Contact() {
       >
         <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
         <div 
-          className="opacity-80 mb-8 markdown-body font-medium"
+          className="mb-8 markdown-body font-bold text-zinc-950"
           dangerouslySetInnerHTML={{ __html: mockSettings.contact_content || '' }}
         />
 
@@ -36,8 +36,8 @@ export default function Contact() {
                 <Mail className="w-6 h-6 text-pink-500" />
               </div>
               <div>
-                <h3 className="font-bold">Email</h3>
-                <p className="text-slate-500">{mockSettings.support_email}</p>
+                <h3 className="font-black text-xs uppercase tracking-wider text-slate-500 mb-0.5">Email</h3>
+                <p className="text-zinc-950 font-bold text-sm">{mockSettings.support_email}</p>
               </div>
             </div>
 
@@ -46,8 +46,8 @@ export default function Contact() {
                 <MessageSquare className="w-6 h-6 text-blue-500" />
               </div>
               <div>
-                <h3 className="font-bold">Live Chat</h3>
-                <p className="text-slate-500">Available Mon-Fri, 9am - 6pm EST</p>
+                <h3 className="font-black text-xs uppercase tracking-wider text-slate-500 mb-0.5">Live Chat</h3>
+                <p className="text-zinc-950 font-bold text-sm">Available Mon-Fri, 9am - 6pm EST</p>
               </div>
             </div>
 
@@ -56,8 +56,8 @@ export default function Contact() {
                 <MapPin className="w-6 h-6 text-purple-500" />
               </div>
               <div>
-                <h3 className="font-bold">Office</h3>
-                <p className="text-slate-500">123 Tech Avenue, Silicon Valley, CA</p>
+                <h3 className="font-black text-xs uppercase tracking-wider text-slate-500 mb-0.5">Office</h3>
+                <p className="text-zinc-950 font-bold text-sm">123 Tech Avenue, Silicon Valley, CA</p>
               </div>
             </div>
           </div>

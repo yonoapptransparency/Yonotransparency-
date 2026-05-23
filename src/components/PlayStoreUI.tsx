@@ -17,24 +17,24 @@ export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
     
     const interval = setInterval(() => {
       if (scrollRef.current) {
-        const { scrollLeft, clientWidth, scrollWidth } = scrollRef.current;
-        const maxScroll = scrollWidth - clientWidth;
-        
+        const { clientWidth } = scrollRef.current;
         const firstItem = scrollRef.current.querySelector('a');
         const itemWidth = firstItem ? firstItem.offsetWidth + 12 : clientWidth * 0.8;
 
-        if (scrollLeft >= maxScroll - 50) {
+        let nextIndex = activeIndex + 1;
+        if (nextIndex >= items.length) {
+          nextIndex = 0;
           scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
           setActiveIndex(0);
         } else {
-          scrollRef.current.scrollBy({ left: itemWidth, behavior: 'smooth' });
-          setActiveIndex(prev => (prev + 1) % items.length);
+          scrollRef.current.scrollTo({ left: nextIndex * itemWidth, behavior: 'smooth' });
+          setActiveIndex(nextIndex);
         }
       }
-    }, 3500);
+    }, 1000); // Set automatically scrolling every 1 second after
 
     return () => clearInterval(interval);
-  }, [items]);
+  }, [items, activeIndex]);
 
   // Sync index on manual scroll
   const handleScroll = () => {
@@ -43,7 +43,7 @@ export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
       const firstItem = scrollRef.current.querySelector('a');
       const itemWidth = firstItem ? firstItem.offsetWidth + 12 : clientWidth * 0.8;
       const index = Math.round(scrollLeft / itemWidth);
-      if (index !== activeIndex) setActiveIndex(index);
+      if (index !== activeIndex && index < items.length) setActiveIndex(index);
     }
   };
 
@@ -71,10 +71,18 @@ export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
                 decoding="async"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent p-4 flex flex-col justify-end">
-                <span className="bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em] shadow-lg w-fit mb-2">Exclusive</span>
-                <h3 className="text-white text-lg sm:text-xl font-black mb-0 uppercase tracking-tighter drop-shadow-md italic leading-tight">{item.title}</h3>
-                <p className="text-white text-[10px] sm:text-xs mb-1 font-bold drop-shadow-sm opacity-90 uppercase tracking-tight">{item.subtitle}</p>
+              <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col justify-end">
+                <div className="flex flex-col gap-1 w-full text-left">
+                  <span className="bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-[0.2em] shadow-lg w-fit">Exclusive</span>
+                  <div className="mt-1">
+                    <h3 className="text-white text-base sm:text-lg font-black mb-0 uppercase tracking-tighter drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)] italic leading-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-white text-[10px] sm:text-xs font-bold drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.95)] uppercase tracking-tight mt-0.5">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </Link>

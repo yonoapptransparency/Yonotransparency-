@@ -39,7 +39,7 @@ export default function Responsibility() {
           <div className="space-y-10">
             <h2 className="premium-subheading">Operational Guardrails</h2>
             <div 
-              className="space-y-6 text-lg leading-relaxed text-slate-600 font-medium"
+              className="space-y-6 text-base sm:text-lg leading-relaxed text-zinc-950 font-bold"
               dangerouslySetInnerHTML={{ __html: (mockSettings.responsibility_content || '').split('\n\n').slice(1).join('<br/><br/>').replace(/\n/g, '<br/>') }}
             />
           </div>

@@ -1,7 +1,7 @@
 import { DataProvider, useData } from './contexts/DataContext';
 import { useLocation, BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { Menu, Shield, ShieldCheck, Info, ArrowRight, X, LayoutGrid, Newspaper, Sparkles, Send, MoreHorizontal, Search } from 'lucide-react';
+import { Menu, Shield, ShieldCheck, Info, ArrowRight, X, LayoutGrid, Newspaper, Sparkles, Send, MoreHorizontal, Search, Video } from 'lucide-react';
 import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -128,7 +128,7 @@ function Header() {
                     className="absolute top-full right-0 mt-2 w-48 bg-white border border-black/5 rounded-2xl shadow-xl overflow-hidden py-2"
                   >
                     {[
-                      { to: '/videos', label: 'All App', icon: LayoutGrid },
+                      { to: '/videos', label: 'Videos', icon: Video },
                       { to: '/blogs', label: 'Blogs', icon: LayoutGrid },
                       { to: '/about', label: 'About Us', icon: Info },
                       { to: '/contact', label: 'Contact', icon: Send },
@@ -238,7 +238,7 @@ function Header() {
                 { to: '/', label: 'Home', icon: LayoutGrid },
                 { to: '/new-apps', label: 'New App', icon: Sparkles, hot: true },
                 { to: '/news', label: 'News', icon: Newspaper },
-                { to: '/videos', label: 'All App', icon: LayoutGrid },
+                { to: '/videos', label: 'Videos', icon: Video },
                 { to: '/blogs', label: 'Blogs', icon: Menu },
                 { to: '/responsibility', label: 'Safety', icon: ShieldCheck },
                 { to: '/about', label: 'About Us', icon: Info },
@@ -277,7 +277,7 @@ function Header() {
 function Footer() {
   const { settings } = useData();
   return (
-    <footer className="white-theme-portal">
+    <footer className="white-theme-portal pt-12 pb-8">
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center">
         <h3 className="text-xl font-black tracking-tight mb-4 flex items-center gap-2 uppercase">
           <div className="p-1 transition-transform hover:scale-110">
@@ -297,10 +297,10 @@ function Footer() {
             {settings.site_title}
           </span>
         </h3>
-        <p className="text-sm mb-6 max-w-md font-black uppercase tracking-widest leading-relaxed opacity-60">
+        <p className="text-sm mb-6 max-w-xl font-black uppercase tracking-widest leading-relaxed text-black dark:text-zinc-100">
           {settings.meta_description}
         </p>
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[10px] font-black mb-12 uppercase tracking-[0.25em] opacity-60">
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[10px] font-black mb-12 uppercase tracking-[0.25em] text-zinc-950 dark:text-zinc-200">
           <Link to="/" className="hover:text-red-600 transition-colors">Home</Link>
           <Link to="/about" className="hover:text-red-600 transition-colors">About Us</Link>
           <Link to="/contact" className="hover:text-red-600 transition-colors">Contact</Link>
@@ -314,19 +314,19 @@ function Footer() {
         {(settings.disclaimer_text || settings.ethics_discrimination_text) && (
           <div className="max-w-4xl w-full flex flex-col gap-6 mb-12">
             {settings.disclaimer_text && (
-              <div className="bg-slate-50 border border-black/5 rounded-[2.5rem] p-10 sm:p-14">
-                <h4 className="text-[11px] font-black mb-4 uppercase tracking-[0.3em] text-slate-900">{settings.disclaimer_heading || 'Platform Disclaimer'}</h4>
+              <div className="bg-zinc-50 border-2 border-zinc-200 shadow-sm rounded-[2rem] p-8 sm:p-12 text-left">
+                <h4 className="text-xs font-black mb-5 uppercase tracking-[0.3em] text-black border-b border-zinc-200 pb-3">{settings.disclaimer_heading || 'Platform Disclaimer'}</h4>
                 <div 
-                  className="text-sm font-black opacity-40 leading-relaxed max-w-2xl mx-auto"
+                  className="text-xs sm:text-sm font-extrabold text-black dark:text-zinc-100 leading-relaxed max-w-3xl"
                   dangerouslySetInnerHTML={{ __html: settings.disclaimer_text }}
                 />
               </div>
             )}
             {settings.ethics_discrimination_text && (
-              <div className="bg-slate-50 border border-black/5 rounded-[2.5rem] p-10 sm:p-14">
-                <h4 className="text-[11px] font-black mb-4 uppercase tracking-[0.3em] text-slate-900">{settings.ethics_heading || 'Ethics & Discrimination'}</h4>
+              <div className="bg-zinc-50 border-2 border-zinc-200 shadow-sm rounded-[2rem] p-8 sm:p-12 text-left">
+                <h4 className="text-xs font-black mb-5 uppercase tracking-[0.3em] text-black border-b border-zinc-200 pb-3">{settings.ethics_heading || 'Ethics & Discrimination'}</h4>
                 <div 
-                  className="text-sm font-black opacity-40 leading-relaxed max-w-2xl mx-auto"
+                  className="text-xs sm:text-sm font-extrabold text-black dark:text-zinc-100 leading-relaxed max-w-3xl"
                   dangerouslySetInnerHTML={{ __html: settings.ethics_discrimination_text }}
                 />
               </div>
@@ -336,18 +336,18 @@ function Footer() {
 
         {settings.important_notice && (
           <div className="max-w-4xl w-full mb-12">
-            <div className="bg-red-50/50 border border-red-600/10 rounded-[2.5rem] p-10 sm:p-14">
-              <h4 className="text-[11px] font-black text-red-600 mb-4 uppercase tracking-[0.4em]">{settings.important_notice_heading || 'Important Notice'}</h4>
+            <div className="bg-red-50 border-2 border-red-200 rounded-[2rem] p-8 sm:p-12 text-left shadow-sm">
+              <h4 className="text-xs font-black text-red-600 mb-5 uppercase tracking-[0.4em] border-b border-red-200 pb-3">{settings.important_notice_heading || 'Important Notice'}</h4>
               <div 
-                className="text-lg font-black text-slate-900 opacity-70 italic leading-snug max-w-2xl mx-auto"
+                className="text-base sm:text-lg font-black text-red-950 italic leading-snug max-w-3xl"
                 dangerouslySetInnerHTML={{ __html: settings.important_notice }}
               />
             </div>
           </div>
         )}
 
-        <div className="text-[9px] font-black uppercase tracking-[0.25em] flex items-center gap-2 opacity-40">
-          &copy; 2026 {settings.site_title}. Verified Platform.
+        <div className="text-[10px] font-black uppercase tracking-[0.25em] flex flex-col items-center gap-3 text-black dark:text-zinc-200">
+          <span>&copy; 2026 {settings.site_title}. Verified Platform.</span>
           <SyncStatus />
         </div>
       </div>
@@ -630,8 +630,8 @@ function BottomNav() {
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-transparent md:hidden pb-safe">
       <div className="flex justify-around items-center h-12 max-w-sm mx-auto px-1">
         <Link to="/videos" onClick={triggerHaptic} className={`flex flex-col items-center gap-0 group relative transition-all duration-200 ${isActive('/videos') ? 'scale-105' : ''}`}>
-          <LayoutGrid className={`w-3.5 h-3.5 transition-colors ${isActive('/videos') ? 'text-red-600' : 'opacity-40'}`} />
-          <span className={`text-[6px] font-black uppercase tracking-tighter transition-colors ${isActive('/videos') ? 'text-red-600' : 'opacity-40'}`}>Apps</span>
+          <Video className={`w-3.5 h-3.5 transition-colors ${isActive('/videos') ? 'text-red-600' : 'opacity-40'}`} />
+          <span className={`text-[6px] font-black uppercase tracking-tighter transition-colors ${isActive('/videos') ? 'text-red-600' : 'opacity-40'}`}>Videos</span>
         </Link>
         <Link to="/new-apps" onClick={triggerHaptic} className={`flex flex-col items-center gap-0 group relative transition-all duration-200 ${isActive('/new-apps') ? 'scale-105' : ''}`}>
           <Sparkles className={`w-3.5 h-3.5 transition-colors ${isActive('/new-apps') ? 'text-red-600' : 'opacity-40'}`} />

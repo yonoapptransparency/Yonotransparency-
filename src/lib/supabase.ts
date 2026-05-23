@@ -41,6 +41,8 @@ export interface GlobalSettings {
   categories: string[];
   banners: Banner[];
   last_updated?: string;
+  secure_index_title?: string;
+  secure_index_subtitle?: string;
 }
 
 export interface NewsItem {
@@ -276,6 +278,8 @@ export const mockSettings: GlobalSettings = savedSettings ? JSON.parse(savedSett
   responsibility_content: '<p>Our website is dedicated to maintaining the highest standards of transparency and user safety. We take our responsibility seriously to ensure that every application listed on our platform is thoroughly vetted.</p><p>Users are also encouraged to take responsibility for their own device security and data privacy.</p>',
   important_notice: 'Please note: Download apps at your own risk. We verify safety, but you are responsible for your device security.',
   categories: ['All Apps', 'Categories', 'Top Charts', 'Games', 'Tools'],
+  secure_index_title: 'Secure Index',
+  secure_index_subtitle: 'Verified & Transparent App Marketplace',
   banners: [
     { id: "1", title: "Hot Deals: 50% Off", subtitle: "Limited time offer on subscriptions", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80", link: "/" },
     { id: "2", title: "Top Games Collection", subtitle: "Experience gaming like never before", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80", link: "/" },
