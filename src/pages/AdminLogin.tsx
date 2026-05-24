@@ -19,7 +19,7 @@ export default function AdminLogin() {
   useEffect(() => {
     // Check if we are on a Netlify preview domain or wrong domain which might cause auth issues
     const host = window.location.hostname;
-    const isMainDomain = host === 'yonostored.netlify.app' || host === 'yonostored.in' || host === 'localhost' || host === '127.0.0.1' || host.includes('vercel.app');
+    const isMainDomain = host === 'yonostored.netlify.app' || host === 'yonostored.in' || host === 'www.yonostored.in' || host.endsWith('.yonostored.in') || host === 'localhost' || host === '127.0.0.1' || host.includes('vercel.app');
     
     // Check if we are on an AI Studio preview domain
     const isAiStudio = host.includes('run.app');
@@ -134,16 +134,16 @@ export default function AdminLogin() {
             </p>
             <div className="space-y-2">
               <a 
-                href="https://yonostored.netlify.app/admin/login" 
-                className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded transition-colors"
+                href="https://yonostored.in/admin/login" 
+                className="block w-full text-center bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold py-2 rounded transition-colors"
               >
-                Go to Netlify Domain
+                Go to Custom Domain (yonostored.in)
               </a>
               <a 
-                href="http://yonostored.in/admin/login" 
-                className="block w-full text-center bg-black/5 hover:bg-black/10 text-black text-xs font-bold py-2 rounded transition-colors"
+                href="https://yonostored.vercel.app/admin/login" 
+                className="block w-full text-center bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white text-xs font-bold py-2 rounded transition-colors"
               >
-                Go to Main Domain (yonostored.in)
+                Go to Vercel Domain (yonostored.vercel.app)
               </a>
             </div>
           </div>
