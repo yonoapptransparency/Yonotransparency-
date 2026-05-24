@@ -30,7 +30,21 @@
         "site_title": { "type": "string" },
         "meta_description": { "type": "string" },
         "logo_url": { "type": "string" },
-        "categories": { "type": "array", "items": { "type": "string" } }
+        "categories": { "type": "array", "items": { "type": "string" } },
+        "banners": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "subtitle": { "type": "string" },
+              "image": { "type": "string" },
+              "link": { "type": "string" }
+            },
+            "required": ["id", "image", "link"]
+          }
+        }
       }
     }
   },

@@ -193,7 +193,7 @@ export default function DownloadPage() {
         <meta property="og:title" content={`Secure Link: ${app.name}`} />
         <meta property="og:description" content={`Authorized download access for ${app.name}. Verified by Transparency Portal.`} />
         <meta property="og:image" content={app.og_image_url || app.icon_url} />
-        <meta name="robots" content="noindex, follow" />
+        <meta name="robots" content="index, follow" />
         {app.canonical_url && <link rel="canonical" href={app.canonical_url} />}
         <script type="application/ld+json">
           {JSON.stringify(softwareSchema)}

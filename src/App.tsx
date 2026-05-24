@@ -555,7 +555,7 @@ function AppContent() {
       <Ticker />
       {memoizedHeader}
       
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 pb-24 overflow-x-hidden relative">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-1.5 sm:py-3 pb-16 sm:pb-24 overflow-x-hidden relative">
         <Suspense fallback={<LoadingScreen />}>
           <AnimatePresence mode="wait">
             <motion.div

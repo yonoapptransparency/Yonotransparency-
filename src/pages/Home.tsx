@@ -125,13 +125,13 @@ export default function Home() {
         </script>
       </Helmet>
       {/* Premium Hero Section - Compact, Sleek, Futuristic */}
-      <div className="text-center py-6 px-4 bg-linear-to-b from-slate-50/70 dark:from-zinc-950/70 via-slate-50/30 dark:via-zinc-950/30 to-transparent backdrop-blur-lg mb-4 border-b border-zinc-200/50 dark:border-zinc-800/50">
+      <div className="text-center py-2.5 sm:py-5 px-4 bg-linear-to-b from-slate-50/70 dark:from-zinc-950/70 via-slate-50/30 dark:via-zinc-950/30 to-transparent backdrop-blur-lg mb-4 border-b border-zinc-200/50 dark:border-zinc-800/50">
         <div className="inline-flex flex-col items-center justify-center">
           {/* Modern security logo pill badge */}
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full mb-3 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+            className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full mb-1.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
             <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest font-mono">Verified Portal Gate</span>
@@ -154,7 +154,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-[10px] sm:text-xs font-black uppercase text-red-600 tracking-[0.25em] mb-4 text-center max-w-sm sm:max-w-md bg-red-500/5 dark:bg-red-500/10 px-4 py-1 rounded-full border border-red-500/10"
+              className="text-[10px] sm:text-xs font-black uppercase text-red-600 tracking-[0.25em] mb-2 text-center max-w-sm sm:max-w-md bg-red-500/5 dark:bg-red-500/10 px-4 py-1 rounded-full border border-red-500/10"
             >
               {mockSettings.secure_index_subtitle}
             </motion.p>

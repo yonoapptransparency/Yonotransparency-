@@ -24,10 +24,10 @@ export default function SupportWidget() {
     <div className="relative inline-block z-50">
       <button
         onClick={toggleWidget}
-        className="flex items-center gap-2 px-4 justify-center min-h-[48px] glass-panel rounded-full text-red-600 dark:text-red-500 hover:brightness-110 shadow-lg transition-all hover:scale-105 active:scale-95"
+        className="flex items-center gap-2 w-10 h-10 lg:w-auto lg:h-11 lg:px-4 justify-center bg-white border border-black/5 rounded-full text-red-600 hover:brightness-110 shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
         aria-label="Support Widget"
       >
-        <MessageCircle className="w-5 h-5 drop-shadow-[0_0_8px_rgba(236,72,153,0.3)]" />
+        <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 drop-shadow-[0_0_8px_rgba(236,72,153,0.3)]" />
         <span className="text-[10px] font-black uppercase tracking-widest hidden lg:inline italic">Sync Helper</span>
       </button>
 

@@ -1531,17 +1531,100 @@ export default function AdminDashboard() {
                    </div>
                    <div className="grid gap-6">
                      {banners.map((banner) => (
-                       <div key={banner.id} className="bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-[2rem] p-6 flex gap-6 hover:border-pink-500/30 transition-all">
-                        <img src={banner.image} className="w-48 h-28 object-cover rounded-2xl shadow-2xl border-2 border-white/10" alt="" />
+                       <div key={banner.id} className="bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-[2.5rem] p-6 flex flex-col md:flex-row gap-6 hover:border-pink-500/30 transition-all shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)]">
+                        <div className="flex flex-col items-center gap-1.5 self-center md:self-stretch justify-center">
+                          <img 
+                            src={banner.image || "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80"} 
+                            className="w-48 h-28 object-cover rounded-2xl shadow-xl border-2 border-black/10 dark:border-white/10 bg-zinc-100" 
+                            alt="Banner Preview" 
+                            onError={(e) => {
+                              // Fallback for broken image URLs
+                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80";
+                            }}
+                          />
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Image Preview</span>
+                        </div>
                         <div className="flex-1 space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <input type="text" value={banner.title} onChange={(e) => handleBannerChange(banner.id, 'title', e.target.value)} className="bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-sm font-bold dark:text-white" placeholder="Main Title" />
-                            <input type="text" value={banner.subtitle} onChange={(e) => handleBannerChange(banner.id, 'subtitle', e.target.value)} className="bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-sm font-bold dark:text-white" placeholder="Subtitle" />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Banner Heading</label>
+                              <input type="text" value={banner.title} onChange={(e) => handleBannerChange(banner.id, 'title', e.target.value)} className="w-full bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-sm font-bold dark:text-white" placeholder="Heading Text" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Banner Subtitle</label>
+                              <input type="text" value={banner.subtitle} onChange={(e) => handleBannerChange(banner.id, 'subtitle', e.target.value)} className="w-full bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-sm font-bold dark:text-white" placeholder="Subtitle Caption" />
+                            </div>
                           </div>
-                          <div className="flex gap-4">
-                            <input type="text" value={banner.link} onChange={(e) => handleBannerChange(banner.id, 'link', e.target.value)} className="bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-xs font-mono dark:text-white flex-1" placeholder="Link (Target)" />
-                            <input type="text" value={banner.image} onChange={(e) => handleBannerChange(banner.id, 'image', e.target.value)} className="bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-xs font-mono dark:text-white flex-1" placeholder="Image Source" />
-                            <button onClick={() => handleDeleteBanner(banner.id)} className="p-3 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all border-2 border-rose-500/20"><Trash2 className="w-5 h-5" /></button>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Image Asset Path Or URL</label>
+                              <input type="text" value={banner.image} onChange={(e) => handleBannerChange(banner.id, 'image', e.target.value)} className="w-full bg-white dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-xl p-3 text-xs font-mono dark:text-white" placeholder="Image URL Source" />
+                            </div>
+                            
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400">Target Redirect Link</label>
+                                <span className="text-[9px] font-black text-pink-500 uppercase tracking-wider">Quick Link Tool</span>
+                              </div>
+                              <input type="text" value={banner.link} onChange={(e) => handleBannerChange(banner.id, 'link', e.target.value)} className="w-full bg-white dark:bg-slate-900 border-2 border-pink-500/20 dark:border-pink-500/20 rounded-xl p-3 text-xs font-mono dark:text-white" placeholder="Link URL (/app/slug or http://...)" />
+                              
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <select 
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleBannerChange(banner.id, 'link', e.target.value);
+                                      e.target.value = "";
+                                    }
+                                  }}
+                                  className="bg-black/5 dark:bg-slate-800 border border-black/10 dark:border-white/10 rounded-lg py-1 px-2 text-[9px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-300 outline-none max-w-[140px]"
+                                >
+                                  <option value="">Link to App...</option>
+                                  {appsList.map((a: any) => (
+                                    <option key={a.id} value={`/app/${a.slug}`}>{a.name}</option>
+                                  ))}
+                                </select>
+
+                                <select 
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleBannerChange(banner.id, 'link', e.target.value);
+                                      e.target.value = "";
+                                    }
+                                  }}
+                                  className="bg-black/5 dark:bg-slate-800 border border-black/10 dark:border-white/10 rounded-lg py-1 px-2 text-[9px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-300 outline-none max-w-[140px]"
+                                >
+                                  <option value="">Link to Blog...</option>
+                                  {blogs.map((b: any) => (
+                                    <option key={b.id} value={`/blog/${b.slug}`}>{b.title}</option>
+                                  ))}
+                                </select>
+
+                                <select 
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleBannerChange(banner.id, 'link', e.target.value);
+                                      e.target.value = "";
+                                    }
+                                  }}
+                                  className="bg-black/5 dark:bg-slate-800 border border-black/10 dark:border-white/10 rounded-lg py-1 px-2 text-[9px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-300 outline-none max-w-[140px]"
+                                >
+                                  <option value="">Link to News...</option>
+                                  {newsList.map((n: any) => (
+                                    <option key={n.id} value={`/news/${n.slug}`}>{n.title}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end pt-2 border-t border-black/5 dark:border-white/5">
+                            <button 
+                              onClick={() => handleDeleteBanner(banner.id)} 
+                              className="flex items-center gap-1.5 px-4 py-2 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/20 text-[10px] font-bold uppercase tracking-widest"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Remove Banner
+                            </button>
                           </div>
                         </div>
                        </div>
@@ -1554,7 +1637,7 @@ export default function AdminDashboard() {
                        triggerHaptic();
                        setSaving(false);
                        alert('Banners Synced to Frontend System.');
-                     }} className="bg-pink-500 text-white px-20 py-5 rounded-[2.5rem] font-black uppercase tracking-widest italic shadow-2xl shadow-pink-500/40">Sync Banners</button>
+                     }} className="bg-pink-500 text-white px-20 py-5 rounded-[2.5rem] font-black uppercase tracking-widest italic shadow-2xl shadow-pink-500/40 animate-pulse">Sync Banners</button>
                    </div>
                 </div>
               )}

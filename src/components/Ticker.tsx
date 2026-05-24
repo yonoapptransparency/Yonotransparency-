@@ -16,7 +16,7 @@ export default function Ticker() {
           transition={{
             repeat: Infinity,
             ease: "linear",
-            duration: 35
+            duration: 15
           }}
         >
           <span className="mx-10">{settings.ticker_text}</span>

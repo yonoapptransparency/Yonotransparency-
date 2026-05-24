@@ -54,12 +54,10 @@ export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
         onScroll={handleScroll}
         className="flex overflow-x-auto gap-3 px-4 pb-6 snap-x no-scrollbar scroll-smooth"
       >
-        {items.map((item, i) => (
-          <Link
-            to={item.link || "/"}
-            key={item.id || i}
-            className="flex-shrink-0 w-[85vw] sm:w-[500px] h-[160px] sm:h-[180px] rounded-2xl relative overflow-hidden snap-center group block border border-white/30 shadow-lg"
-          >
+        {items.map((item, i) => {
+          const isExternal = item.link && (item.link.startsWith('http://') || item.link.startsWith('https://') || item.link.startsWith('//'));
+          const classes = "flex-shrink-0 w-[85vw] sm:w-[500px] h-[160px] sm:h-[180px] rounded-2xl relative overflow-hidden snap-center group block border border-white/30 shadow-lg";
+          const content = (
             <motion.div 
               whileHover={{ scale: 0.99 }}
               className="w-full h-full relative will-change-transform"
@@ -85,8 +83,32 @@ export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
                 </div>
               </div>
             </motion.div>
-          </Link>
-        ))}
+          );
+
+          if (isExternal) {
+            return (
+              <a 
+                href={item.link} 
+                key={item.id || i}
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={classes}
+              >
+                {content}
+              </a>
+            );
+          }
+
+          return (
+            <Link
+              to={item.link || "/"}
+              key={item.id || i}
+              className={classes}
+            >
+              {content}
+            </Link>
+          );
+        })}
       </div>
       
       {/* Indicators */}
