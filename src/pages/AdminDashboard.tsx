@@ -996,11 +996,49 @@ export default function AdminDashboard() {
   const [newCatInput, setNewCatInput] = useState('');
   const [user, setUser] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAdminUser, setIsAdminUser] = useState<boolean | null>(null);
 
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setCheckingAuth(false);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const emailLower = currentUser.email?.toLowerCase() || 'none';
+        if (emailLower === 'defentechscholar@gmail.com') {
+          setIsAdminUser(true);
+          setCheckingAuth(false);
+          return;
+        }
+
+        try {
+          // Check by UID first
+          const adminUidDoc = doc(db, 'admins', currentUser.uid);
+          const snapUid = await getDoc(adminUidDoc);
+          if (snapUid.exists() && snapUid.data()?.role === 'admin') {
+            setIsAdminUser(true);
+            setCheckingAuth(false);
+            return;
+          }
+
+          // Check by email second
+          const adminEmailDoc = doc(db, 'admins', emailLower);
+          const snapEmail = await getDoc(adminEmailDoc);
+          if (snapEmail.exists() && snapEmail.data()?.role === 'admin') {
+            setIsAdminUser(true);
+            setCheckingAuth(false);
+            return;
+          }
+
+          setIsAdminUser(false);
+        } catch (e) {
+          console.warn("Database-driven administrator check failed or not permitted:", e);
+          setIsAdminUser(false);
+        } finally {
+          setCheckingAuth(false);
+        }
+      } else {
+        setIsAdminUser(null);
+        setCheckingAuth(false);
+      }
     });
     return unsubscribe;
   }, []);
@@ -1388,12 +1426,12 @@ export default function AdminDashboard() {
     return <Navigate to="/admin/login" />;
   }
 
-  if (user.email?.toLowerCase() !== 'defentechscholar@gmail.com') {
+  if (isAdminUser === false) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center bg-black/5">
         <h1 className="text-3xl font-black text-rose-600 mb-4 uppercase tracking-tighter italic">Access Restricted</h1>
-        <p className="opacity-60 max-w-md mb-8 font-bold">
-          This account is not authorized to access the Admin Central.
+        <p className="opacity-60 max-w-md mb-8 font-bold text-slate-600 dark:text-zinc-400">
+          This account is not authorized to manage the system. Only authorized administrators registered in the Firebase console database under the 'admins' collection can control the Admin Central.
         </p>
         <button onClick={handleLogout} className="bg-rose-600 hover:bg-rose-700 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-rose-600/20 transition-all active:scale-95">
           Sign Out Authority

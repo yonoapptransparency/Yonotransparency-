@@ -149,19 +149,46 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   // Load GitHub config on admin session auth
   useEffect(() => {
-    const unsubAuth = auth.onAuthStateChanged(async (user) => {
-      if (user && user.email?.toLowerCase() === 'defentechscholar@gmail.com') {
-        setGitConfigLoading(true);
-        try {
-          const configDoc = doc(db, 'secure_git_config', 'config');
-          const snap = await getDoc(configDoc);
-          if (snap.exists()) {
-            setGitConfig(snap.data() as GitConfig);
+    const unsubAuth = auth.onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        const emailLower = currentUser.email?.toLowerCase() || 'none';
+        let isAuthorized = emailLower === 'defentechscholar@gmail.com';
+
+        if (!isAuthorized) {
+          try {
+            // Check UID record
+            const adminUidDoc = doc(db, 'admins', currentUser.uid);
+            const snapUid = await getDoc(adminUidDoc);
+            if (snapUid.exists() && snapUid.data()?.role === 'admin') {
+              isAuthorized = true;
+            } else {
+              // Check Email record
+              const adminEmailDoc = doc(db, 'admins', emailLower);
+              const snapEmail = await getDoc(adminEmailDoc);
+              if (snapEmail.exists() && snapEmail.data()?.role === 'admin') {
+                isAuthorized = true;
+              }
+            }
+          } catch (e) {
+            console.warn("Database admin verification for GitHub context failed:", e);
           }
-        } catch (err) {
-          console.warn("Secure GitHub configuration read bypassed or not initialized:", err);
-        } finally {
-          setGitConfigLoading(false);
+        }
+
+        if (isAuthorized) {
+          setGitConfigLoading(true);
+          try {
+            const configDoc = doc(db, 'secure_git_config', 'config');
+            const snap = await getDoc(configDoc);
+            if (snap.exists()) {
+              setGitConfig(snap.data() as GitConfig);
+            }
+          } catch (err) {
+            console.warn("Secure GitHub configuration read bypassed or not initialized:", err);
+          } finally {
+            setGitConfigLoading(false);
+          }
+        } else {
+          setGitConfig(null);
         }
       } else {
         setGitConfig(null);
