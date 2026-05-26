@@ -266,10 +266,10 @@ export default function AppDetails() {
               className="w-full sm:w-auto min-w-[280px] sm:min-w-[400px] flex justify-center cursor-pointer select-none"
             >
               <Link 
-                to={`/verify/${app.slug}`} 
+                to={`/info/${app.slug}`} 
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-5 px-12 rounded-2xl sm:rounded-3xl flex items-center justify-center gap-3 transition-all text-[12px] sm:text-[14px] uppercase tracking-[0.2em] italic shadow-2xl shadow-red-600/30 relative overflow-hidden group"
               >
-                READ MORE <ArrowRight className="w-5 h-5" />
+                READ SECURITY & SPECS <ArrowRight className="w-5 h-5" />
               </Link>
             </motion.div>
           </div>

@@ -570,7 +570,7 @@ function AppContent() {
                 <Route path="/" element={<Home />} />
                 <Route path="/new-apps" element={<NewApps />} />
                 <Route path="/app/:slug" element={<AppDetails />} />
-                <Route path="/verify/:slug" element={<GatewayPage />} />
+                <Route path="/info/:slug" element={<GatewayPage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<Privacy />} />

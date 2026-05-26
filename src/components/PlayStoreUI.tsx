@@ -31,7 +31,7 @@ export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
           setActiveIndex(nextIndex);
         }
       }
-    }, 1000); // Set automatically scrolling every 1 second after
+    }, 2000); // Set automatically scrolling every 2 seconds after
 
     return () => clearInterval(interval);
   }, [items, activeIndex]);

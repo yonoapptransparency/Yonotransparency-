@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ShieldCheck, AlertTriangle, ShieldAlert, Loader2, Lock, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ShieldCheck, AlertTriangle, ShieldAlert, Loader2, Lock, CheckCircle2, Info } from 'lucide-react';
 
 function sha256_sync(ascii: string): string {
   function rightRotate(value: number, amount: number) {
@@ -106,21 +106,21 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Kinetic behavioral tracking variables
-  const [mouseMoved, setMouseMoved] = useState(false);
-  const [touchUsed, setTouchUsed] = useState(false);
-  const [moveCount, setMoveCount] = useState(0);
+  const mouseMovedRef = useRef(false);
+  const touchUsedRef = useRef(false);
+  const moveCountRef = useRef(0);
   const [pageLoadTime] = useState(() => Date.now());
 
   // Record human kinetic gestures from portal load to build physical behavior context
   useEffect(() => {
     const handleMouseActivity = () => {
-      setMouseMoved(true);
-      setMoveCount(prev => prev + 1);
+      mouseMovedRef.current = true;
+      moveCountRef.current += 1;
     };
     const handleTouchActivity = () => {
-      setTouchUsed(true);
-      setMouseMoved(true);
-      setMoveCount(prev => prev + 1);
+      touchUsedRef.current = true;
+      mouseMovedRef.current = true;
+      moveCountRef.current += 1;
     };
 
     window.addEventListener("mousemove", handleMouseActivity);
@@ -334,7 +334,7 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
 
   const scoreSignals = (headlessCount: number, moveCountVal: number, touchUsedVal: boolean, timeSinceLoad: number) => {
     let score = 0;
-    const isInteractive = mouseMoved || touchUsedVal || moveCountVal >= 1;
+    const isInteractive = mouseMovedRef.current || touchUsedVal || moveCountVal >= 1;
     if (isInteractive) score += 60;
     if (moveCountVal >= 1) score += 20;
     if (timeSinceLoad > 500) score += 20;
@@ -355,7 +355,7 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
       const headlessCount = detectHeadless();
 
       // Soft human kinetic score calculation: always logs details but never blocks legitimate humans
-      const score = Math.max(40, scoreSignals(headlessCount, moveCount, touchUsed, timeSinceLoad));
+      const score = Math.max(40, scoreSignals(headlessCount, moveCountRef.current, touchUsedRef.current, timeSinceLoad));
 
       // Step 1: Request unique dynamic sequence challenge nonce
       const challengeResponse = await fetch('/api/v1/get-challenge', {
@@ -396,8 +396,8 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
           solution,
           fingerprint,
           score,
-          moved: moveCount,
-          touch: touchUsed,
+          moved: moveCountRef.current,
+          touch: touchUsedRef.current,
           sid // pass sid back in request payload as fallback
         })
       });
@@ -476,8 +476,8 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
     if (isVerifying || ready || isGenerating) return;
     
     // Fallback: click acts as registered interaction
-    setMouseMoved(true);
-    setMoveCount(prev => Math.max(prev, 1));
+    mouseMovedRef.current = true;
+    moveCountRef.current = Math.max(moveCountRef.current, 1);
 
     playSoftClick();
 
@@ -486,8 +486,7 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
     }
     
     setErrorMsg('');
-    setIsVerifying(true);
-    setCountdown(1); // Set to 1 second instead of 3 for ultra-fast, snappy verification!
+    triggerTokenHandshake();
   };
 
   if (errorMsg) {
@@ -500,7 +499,7 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
           onClick={() => { setErrorMsg(''); handleClearance(); }} 
           className="w-full sm:w-96 min-h-[64px] bg-rose-600 hover:bg-rose-500 text-white font-black py-4 px-10 rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer border-b-4 border-rose-800 uppercase"
         >
-          Retry Security Handshake
+          RETRY
         </button>
       </div>
     );
@@ -513,25 +512,24 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
           onClick={() => triggerExecution()}
           className="w-full min-h-[64px] bg-green-600 hover:bg-green-500 text-white font-black py-4 px-10 rounded-full flex items-center justify-center gap-3 transition-all shadow-xl shadow-green-600/30 active:scale-95 group uppercase tracking-tight text-xl cursor-pointer border-b-4 border-green-800 shrink-0"
         >
-          <Lock className="w-6 h-6 text-white drop-shadow-sm animate-bounce" /> 
-          <span className="text-white drop-shadow-sm">Extract Safe File</span>
+          <span className="text-white drop-shadow-sm">OKAY</span>
         </button>
 
         <div className="text-center p-3 bg-slate-100/80 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800/40 rounded-2xl w-full">
           <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold leading-relaxed">
-            If extraction did not trigger automatically, please click below:
+            If it did not load automatically, click here:
           </p>
           <a
             href={dynamicLink}
             onClick={playSoftClick}
             className="text-xs font-black text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 underline underline-offset-4 uppercase tracking-wider block mt-1 cursor-pointer"
           >
-            Direct Extraction Link
+            Direct Link
           </a>
         </div>
 
         <span className="text-[10px] font-black uppercase text-green-500 tracking-[0.2em] italic flex items-center gap-1.5 mt-1">
-          <CheckCircle2 className="w-3.5 h-3.5" /> Secure Tunnel Active: Link Expires in {tokenCountdown}s
+          <CheckCircle2 className="w-3.5 h-3.5" /> Valid for {tokenCountdown}s
         </span>
       </div>
     );
@@ -548,31 +546,13 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
             'bg-red-600 hover:bg-red-500 text-white animate-pulse shadow-red-600/40 border-b-4 border-red-800'}
           ${isVerifying || isGenerating ? 'opacity-70 cursor-not-allowed' : ''}`}
       >
-        {isVerifying && countdown > 0 ? (
+        {isGenerating ? (
           <>
-            <Loader2 className="w-6 h-6 animate-spin text-white drop-shadow-sm" /> 
-            <span className="text-white drop-shadow-sm font-bold">Solving puzzle challenge: {countdown}s</span>
-          </>
-        ) : isGenerating ? (
-          <>
-            <Loader2 className="w-6 h-6 animate-spin text-white drop-shadow-sm" /> 
-            <span className="text-white drop-shadow-sm">Verifying browser fingerprint...</span>
-          </>
-        ) : status === 'Verified' ? (
-          <>
-            <ShieldCheck className="w-6 h-6 text-white drop-shadow-sm" /> 
-            <span className="text-white drop-shadow-sm">Clearance Access</span>
-          </>
-        ) : status === 'Caution' ? (
-          <>
-            <AlertTriangle className="w-6 h-6 text-black drop-shadow-sm" /> 
-            <span className="text-black drop-shadow-sm">Solve Security Handshake</span>
+            <Loader2 className="w-6 h-6 animate-spin text-current drop-shadow-sm" /> 
+            <span className="text-current drop-shadow-sm">Processing...</span>
           </>
         ) : (
-          <>
-            <ShieldAlert className="w-6 h-6 text-white drop-shadow-sm" /> 
-            <span className="text-white drop-shadow-sm">Proceed to Access</span>
-          </>
+          <span className="text-current drop-shadow-sm">OKAY</span>
         )}
       </button>
 

@@ -224,11 +224,11 @@ export default function GatewayPage() {
         </Link>
       </div>
       <Helmet>
-        <title>{`Verify ${app.name} - Verified ${app.version} Security Handshake`}</title>
-        <meta name="description" content={`Safe verification gateway for ${app.name}. Technical size: ${app.file_size}. Verified safety status: ${app.safety_status}. Access secure link after identity verification.`} />
-        {app.seo_keywords && <meta name="keywords" content={`${app.seo_keywords}, verify ${app.name}, ${app.name} safe install, secure ${app.name}`} />}
-        <meta property="og:title" content={`Secure Link: ${app.name}`} />
-        <meta property="og:description" content={`Authorized verification access for ${app.name}. Verified by Transparency Portal.`} />
+        <title>{`${app.name} - Technical Info & Secure Clearance`}</title>
+        <meta name="description" content={`Verified technical specs and secure access profile for ${app.name}. Checked by Transparency Portal.`} />
+        {app.seo_keywords && <meta name="keywords" content={`${app.seo_keywords}, info ${app.name}, ${app.name} technical info, secure ${app.name}`} />}
+        <meta property="og:title" content={`Secure Access Profile: ${app.name}`} />
+        <meta property="og:description" content={`Authorized security information and specifications access for ${app.name}. Verified by Transparency Portal.`} />
         <meta property="og:image" content={app.og_image_url || app.icon_url} />
         <meta name="robots" content="index, follow" />
         {app.canonical_url && <link rel="canonical" href={app.canonical_url} />}
@@ -250,91 +250,49 @@ export default function GatewayPage() {
           app.safety_status === 'Caution' ? "bg-amber-500/10 text-amber-500 border border-amber-500/10" :
           "bg-rose-500/10 text-rose-500 border border-rose-500/10"
         )}>
-          {app.safety_status === 'Verified' ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
-          Security Status: {app.safety_status}
+          <Info className="w-3.5 h-3.5" />
+          Status: {app.safety_status}
         </div>
         <h1 className="text-2xl sm:text-3xl font-black mb-3 uppercase tracking-tighter dark:text-white italic flex flex-wrap items-center justify-center gap-3">
-          <ShieldCheck className="w-6 h-6 text-red-600" />
-          <span>Security</span>
+          <Info className="w-6 h-6 text-red-600" />
+          <span>Information</span>
           <span className="text-red-600">Portal</span>
-          <Sparkles className="w-6 h-6 text-red-600 animate-pulse" />
         </h1>
         <p className="font-bold uppercase tracking-tight text-[10px] sm:text-[11px] text-slate-400 dark:text-zinc-500 max-w-md mx-auto leading-relaxed">
-          Technical handshake in progress. Verify <span className="text-red-600 underline decoration-red-600/30 underline-offset-4">{app.name}</span> identity below to authorize final data extraction.
+          Specifications and details for <span className="text-red-600 underline decoration-red-600/30 underline-offset-4">{app.name}</span>.
         </p>
       </div>
 
-      {/* Main Clearance Action with Stealth Gate */}
-      <div className="p-6 sm:p-10 text-center mb-10 border-b border-black/5 max-w-4xl mx-auto overflow-hidden relative">
-        {!isVerified ? (
-          <div className="flex flex-col items-center gap-10">
-            <div className="flex flex-col md:flex-row items-center justify-between w-full gap-8">
-              <div className="flex items-center gap-6">
-                <div className="relative group">
-                  <div className="relative w-24 h-24 bg-white rounded-3xl overflow-hidden shadow-2xl border border-black/5 shrink-0">
-                    {app.icon_url ? <img src={app.icon_url} alt="" className="w-full h-full object-cover"/> : null}
-                  </div>
-                </div>
-                <div className="text-left">
-                  <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter mb-2 italic leading-none">{app.name}</h2>
-                  <div className="flex flex-wrap gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500 dark:text-zinc-400">
-                    <span>ID: {app.serial_number}</span>
-                    <span>•</span>
-                    <span>{app.file_size}</span>
-                    <span>•</span>
-                    <span>VER: {app.version}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full max-w-lg relative">
-              <button
-                onClick={startVerification}
-                disabled={isVerifying}
-                className="w-full relative h-20 bg-red-600 hover:bg-red-500 rounded-3xl overflow-hidden active:scale-[0.98] transition-all cursor-pointer shadow-xl shadow-red-600/20 flex items-center justify-center border-b-4 border-red-800"
-              >
-                <div 
-                   className="absolute inset-y-0 left-0 bg-black/15 transition-all duration-75"
-                   style={{ width: `${progress}%` }}
-                ></div>
-
-                <div className="absolute inset-0 flex items-center justify-center gap-5 px-6">
-                  <Fingerprint className={cn("w-6 h-6 text-white transition-all", isVerifying ? "animate-pulse scale-110 text-red-200" : "animate-bounce")} />
-                  <span className="text-base font-black text-white uppercase tracking-[0.2em] italic truncate text-shadow-sm">
-                    {isVerifying ? `SCANNING BIOMETRICS ${progress}%` : "TAP TO AUTHORIZE EXTRACTION"}
-                  </span>
-                </div>
-              </button>
-              
-              <p className="mt-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">SECURE GATEWAY: TAP CONTAINER TO INITIALIZE VERIFICATION</p>
-            </div>
-          </div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col lg:flex-row items-center justify-between w-full gap-10 py-12"
-          >
-            <div className="flex items-center gap-8 text-left">
-              <div className="w-24 h-24 bg-white rounded-3xl overflow-hidden shadow-2xl border border-black/5 shrink-0">
+      {/* Main Specs and Info Hub */}
+      <div className="max-w-4xl mx-auto px-4 mb-10">
+        <div className="bg-white/40 dark:bg-zinc-900/30 border border-slate-200/50 dark:border-zinc-800/50 rounded-[2.5rem] p-6 sm:p-10 shadow-2xl backdrop-blur-3xl">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+            {/* Left side: App Presentation */}
+            <div className="flex items-center gap-6 text-left w-full lg:w-auto">
+              <div className="relative w-23 h-23 bg-white rounded-3xl overflow-hidden shadow-2xl border border-black/5 shrink-0">
                 {app.icon_url ? <img src={app.icon_url} alt="" className="w-full h-full object-cover"/> : null}
               </div>
               <div>
-                <h2 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter mb-2 italic leading-none">{app.name}</h2>
-                <div className="flex items-center gap-2 text-green-600 font-black uppercase tracking-widest text-xs italic">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Protocol Secured
+                <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter mb-2 italic leading-none">{app.name}</h2>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-slate-450 dark:text-zinc-500">
+                  <span>ID: {app.serial_number}</span>
+                  <span>•</span>
+                  <span>{app.file_size}</span>
+                  <span>•</span>
+                  <span>VER: {app.version}</span>
                 </div>
               </div>
             </div>
-            
-            <div className="flex flex-col items-center gap-4">
+
+            {/* Right side: Dynamic Button */}
+            <div className="flex flex-col items-center gap-3 w-full lg:w-auto shrink-0">
               <ClearanceButton appId={app.id} status={app.safety_status as 'Verified' | 'Caution' | 'Unsafe'} clearanceUrl={app.encrypted_download_url} />
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 italic animate-pulse">Session Active: 15:00 Remaining</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-zinc-500 italic">
+                info
+              </p>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </div>
       </div>
 
       {/* FAQ Intel */}
@@ -404,41 +362,41 @@ export default function GatewayPage() {
       {/* Strict Section Order 3: Peer Reviews */}
       <div className="max-w-4xl mx-auto mb-12 px-2">
         <h2 className="text-2xl font-black mb-8 flex items-center gap-3 uppercase tracking-tighter dark:text-white italic">
-          <MessageSquare className="w-6 h-6 text-pink-500" /> Transmission Reviews
+          <MessageSquare className="w-6 h-6 text-pink-500" /> User Reviews
         </h2>
         
         <form onSubmit={handleReviewSubmit} className="bg-white/40 dark:bg-black/60 border-2 border-white/20 dark:border-white/5 p-8 rounded-[2.5rem] mb-12 backdrop-blur-3xl shadow-2xl">
-          <h3 className="font-black mb-6 uppercase tracking-widest text-[10px] text-slate-400 dark:text-zinc-500 italic">Open Channel Feedback</h3>
+          <h3 className="font-black mb-6 uppercase tracking-widest text-[10px] text-slate-400 dark:text-zinc-500 italic">Feedback</h3>
           
           <input type="text" name="honeypot" className="hidden" tabIndex={-1} autoComplete="off" />
           
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <label className="block text-[10px] font-black opacity-60 mb-2 uppercase tracking-widest italic dark:text-white">Identity Alias</label>
-              <input required type="text" className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:border-pink-500 transition-all outline-none font-bold dark:text-white" placeholder="Operator Name..." />
+              <label className="block text-[10px] font-black opacity-60 mb-2 uppercase tracking-widest italic dark:text-white">Your Name</label>
+              <input required type="text" className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:border-pink-500 transition-all outline-none font-bold dark:text-white" placeholder="Enter name..." />
             </div>
             <div>
-              <label className="block text-[10px] font-black opacity-60 mb-2 uppercase tracking-widest italic dark:text-white">Security Rating</label>
+              <label className="block text-[10px] font-black opacity-60 mb-2 uppercase tracking-widest italic dark:text-white">Rating</label>
               <select required className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:border-pink-500 transition-all outline-none font-bold dark:text-white appearance-none">
-                <option value="5">S-Rank: Maximum Security</option>
+                <option value="5">S-Rank: Excellent</option>
                 <option value="4">A-Rank: Stable</option>
                 <option value="3">B-Rank: Average</option>
-                <option value="2">C-Rank: Vulnerable</option>
-                <option value="1">F-Rank: Hazardous</option>
+                <option value="2">C-Rank: Needs Attention</option>
+                <option value="1">F-Rank: Critical</option>
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-[10px] font-black opacity-60 mb-2 uppercase tracking-widest italic dark:text-white">Transmission Message</label>
+              <label className="block text-[10px] font-black opacity-60 mb-2 uppercase tracking-widest italic dark:text-white">Your Message</label>
               <textarea required rows={4} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:border-pink-500 transition-all outline-none font-bold dark:text-white" placeholder="Type review..."></textarea>
             </div>
           </div>
           <button type="submit" className="mt-8 bg-pink-500 hover:bg-pink-600 text-white px-10 py-4 rounded-[1.5rem] font-black uppercase text-[10px] tracking-[0.3em] transition-all shadow-xl shadow-pink-500/20 active:scale-95 italic">
-            Broadcast Review
+            Submit Review
           </button>
         </form>
 
         <div className="text-center text-slate-400 font-black uppercase tracking-[0.4em] italic text-[10px] opacity-40">
-          - End of Encrypted Feed -
+          - End of Feed -
         </div>
       </div>
 
@@ -446,12 +404,12 @@ export default function GatewayPage() {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-12 max-w-4xl mx-auto mt-24 mb-40 px-4">
         {mockSettings.helpline_whatsapp && (
           <a href={`https://wa.me/${mockSettings.helpline_whatsapp.replace('+','')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-3 text-slate-400 hover:text-green-600 transition-colors font-black uppercase tracking-[0.3em] italic text-[10px]">
-            WhatsApp Command
+            WhatsApp Helpline
           </a>
         )}
         {mockSettings.helpline_telegram && (
           <a href={`https://t.me/${mockSettings.helpline_telegram.replace('@','')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-3 text-slate-400 hover:text-blue-500 transition-colors font-black uppercase tracking-[0.3em] italic text-[10px]">
-            Telegram Directive
+            Telegram Helpline
           </a>
         )}
       </div>
