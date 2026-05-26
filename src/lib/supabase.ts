@@ -211,7 +211,7 @@ export const mockApps: AppConfig[] = savedApps ? (() => {
     ],
     "is_featured": false,
     "name": "YONO RUMMY",
-    "category": "YONO, All APP",
+    "category": "All App, Yono, yes, I, jsjs, sjj",
     "yellow_box_msg": " \"Disclaimer: Any financial transactions or data usage occur directly within the third-party app. Our website is not responsible for any issues related to external app performance.\"",
     "og_image_url": "https://res.cloudinary.com/dq34n0ncz/image/upload/f_auto,q_auto/1000086624_zufwo6"
   },
@@ -1383,7 +1383,7 @@ export const mockApps: AppConfig[] = savedApps ? (() => {
     ],
     "is_featured": false,
     "name": "YONO RUMMY",
-    "category": "YONO, All APP",
+    "category": "All App, Yono, yes, I, jsjs, sjj",
     "yellow_box_msg": " \"Disclaimer: Any financial transactions or data usage occur directly within the third-party app. Our website is not responsible for any issues related to external app performance.\"",
     "og_image_url": "https://res.cloudinary.com/dq34n0ncz/image/upload/f_auto,q_auto/1000086624_zufwo6"
   },
@@ -2545,7 +2545,7 @@ export const mockApps: AppConfig[] = savedApps ? (() => {
     ],
     "is_featured": false,
     "name": "YONO RUMMY",
-    "category": "YONO, All APP",
+    "category": "All App, Yono, yes, I, jsjs, sjj",
     "yellow_box_msg": " \"Disclaimer: Any financial transactions or data usage occur directly within the third-party app. Our website is not responsible for any issues related to external app performance.\"",
     "og_image_url": "https://res.cloudinary.com/dq34n0ncz/image/upload/f_auto,q_auto/1000086624_zufwo6"
   },
