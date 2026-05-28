@@ -62,7 +62,8 @@ function escapeHtml(unsafe: string) {
 
 function stripHtml(html: string) {
     if (!html) return '';
-    return html.replace(/<[^>]*>?/gm, '');
+    const stripped = html.replace(/<[^>]*>?/gm, ' ');
+    return stripped.replace(/\s+/g, ' ').trim();
 }
 
 export async function injectSeoTags(template: string, urlPath: string): Promise<string> {
@@ -118,6 +119,8 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
     ${keywords ? `<meta name="keywords" content="${escapeHtml(keywords)}" />` : ''}
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rummystore.in${escapeHtml(urlPath)}" />
     ${ogImage ? `<meta property="og:image" content="${escapeHtml(ogImage)}" />` : ''}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />
