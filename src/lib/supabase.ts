@@ -284,16 +284,8 @@ export const mockApps: AppConfig[] = [
         "question": "1. What is Jaiho 91 and how does it work?"
       },
       {
-        "answer": "Answer: To protect your mobile device from malware or tampered software, you should always access the official, unmodified Jaiho 91 APK package. Avoid installing files from random social media channels or unverified blogs. Yonoinfo provides direct links to the official, tested source files for maximum technical safety.",
-        "question": "2. How can I download the verified Jaiho 91 APK safely?"
-      },
-      {
         "question": "3. Is Jaiho 91 a real or fake application?",
         "answer": "Answer: Jaiho 91 is a functional real-money gaming application with active gameplay rooms and live transaction processing systems. However, because it is a relatively new software platform in the market, the Yonoinfo team continuously tracks its withdrawal fulfillment rates and security certificates to keep our readers updated on its overall reliability."
-      },
-      {
-        "answer": "Answer: New players can secure the welcome bonus chips by downloading the official application and completing their profile registration. Once you link your active mobile number and complete the standard OTP verification process, the promotional bonus cash will be credited directly to your in-game wallet balance.",
-        "question": "4. How do I claim the official Jaiho 91 Signup Bonus?"
       },
       {
         "question": "5. What games are packed inside the Jaiho 91 app?",
