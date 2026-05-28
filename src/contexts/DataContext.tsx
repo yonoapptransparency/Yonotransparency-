@@ -300,9 +300,38 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const connInterval = setInterval(checkConnection, 60000);
 
     const unsubs = [
-      onSnapshot(doc(db, 'store_data', 'apps'), (snap) => {
+      onSnapshot(doc(db, 'store_data', 'apps_meta'), async (snap) => {
+        let loadedApps: any[] = [];
+        let fetchedData = false;
+        
         if (snap.exists()) {
-          const data = snap.data().items || [];
+          const numChunks = snap.data().numChunks || 1;
+          for (let i = 0; i < numChunks; i++) {
+            try {
+              const chunkSnap = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
+              if (chunkSnap.exists() && chunkSnap.data().items) {
+                loadedApps.push(...chunkSnap.data().items);
+              }
+            } catch (err) {
+              console.warn(`Failed to fetch chunk ${i}`, err);
+            }
+          }
+          fetchedData = true;
+        } else {
+          // Fallback to old apps document
+          try {
+            const oldSnap = await getDoc(doc(db, 'store_data', 'apps'));
+            if (oldSnap.exists() && oldSnap.data().items) {
+              loadedApps = oldSnap.data().items;
+              fetchedData = true;
+            }
+          } catch (err) {
+            console.warn("Failed to fetch legacy apps document", err);
+          }
+        }
+        
+        if (fetchedData) {
+          const data = loadedApps;
           setApps(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
           localStorage.setItem('yonostore_apps', JSON.stringify(data));
           
@@ -433,11 +462,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('yonostore_apps', JSON.stringify(newApps));
 
     try {
-      const docRef = doc(db, 'store_data', 'apps');
+      console.log("Cloud: Pushing Apps update in chunks...");
+      const CHUNK_SIZE = 25; // number of apps per document
+      const numChunks = Math.ceil(newApps.length / CHUNK_SIZE) || 1;
       const now = new Date().toISOString();
       
-      console.log("Cloud: Pushing Apps update...");
-      await setDoc(docRef, { items: newApps, last_updated: now });
+      for (let i = 0; i < numChunks; i++) {
+        const chunk = newApps.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        await setDoc(doc(db, 'store_data', `apps_chunk_${i}`), { items: chunk });
+      }
+      
+      const metaRef = doc(db, 'store_data', 'apps_meta');
+      await setDoc(metaRef, { numChunks, last_updated: now });
+      
       console.log("Cloud: Apps update acknowledged by server.");
 
       if (gitConfig?.autoSync) {
@@ -650,12 +687,40 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       await Promise.all(docsToFetch.map(async (d) => {
         try {
-          // Use standard getDoc instead of getDocFromServer for instant cached fallbacks or clean short 3s check
-          const snap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', d.path)), 3000);
-          if (snap.exists()) {
-            const data = (d as any).key ? (snap.data() as any)[(d as any).key] : snap.data();
-            d.setter(data);
-            localStorage.setItem(`yonostore_${d.path}`, JSON.stringify(data));
+          if (d.path === 'apps') {
+            const snapMeta = await withServerConfirmation(() => getDoc(doc(db, 'store_data', 'apps_meta')), 3000);
+            if (snapMeta.exists()) {
+              const numChunks = snapMeta.data().numChunks || 1;
+              const allApps = [];
+              for(let i=0; i<numChunks; i++) {
+                try {
+                  const snapChunk = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
+                  if(snapChunk.exists() && snapChunk.data().items) {
+                    allApps.push(...snapChunk.data().items);
+                  }
+                } catch (e) {
+                  console.warn(`Failed to chunk ${i} on manual refresh`, e);
+                }
+              }
+              setApps(allApps);
+              localStorage.setItem('yonostore_apps', JSON.stringify(allApps));
+            } else {
+              // Fallback to old document
+              const oldSnap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', 'apps')), 3000);
+              if (oldSnap.exists() && oldSnap.data().items) {
+                const data = oldSnap.data().items;
+                setApps(data);
+                localStorage.setItem('yonostore_apps', JSON.stringify(data));
+              }
+            }
+          } else {
+            // Use standard getDoc instead of getDocFromServer for instant cached fallbacks or clean short 3s check
+            const snap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', d.path)), 3000);
+            if (snap.exists()) {
+              const data = (d as any).key ? (snap.data() as any)[(d as any).key] : snap.data();
+              d.setter(data);
+              localStorage.setItem(`yonostore_${d.path}`, JSON.stringify(data));
+            }
           }
         } catch (fetchErr) {
           console.warn(`Parallel Sync failed for ${d.path}, skipping...`, fetchErr);

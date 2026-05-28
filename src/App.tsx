@@ -6,8 +6,8 @@ import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Lazy Load Pages for Performance
-import Home from './pages/Home';
-import AppDetails from './pages/AppDetails';
+const Home = lazy(() => import('./pages/Home'));
+const AppDetails = lazy(() => import('./pages/AppDetails'));
 const GatewayPage = lazy(() => import('./pages/GatewayPage'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
