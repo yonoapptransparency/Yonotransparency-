@@ -134,8 +134,8 @@ export default function NewsDetailPage() {
   return (
     <div className="animate-fade-in max-w-4xl mx-auto px-4 plain-content mb-20">
       <Helmet>
-        <title>{newsItem.seo_title || newsItem.title} - {mockSettings.site_title}</title>
-        <meta name="description" content={newsItem.seo_description || newsItem.description} />
+        <title>{newsItem.title} - {mockSettings.site_title}</title>
+        <meta name="description" content={newsItem.description} />
         {newsItem.seo_keywords && <meta name="keywords" content={newsItem.seo_keywords} />}
         <meta name="author" content={newsItem.ceo_name || "RUMMY STORE"} />
         <meta name="robots" content="index, follow" />
@@ -143,8 +143,8 @@ export default function NewsDetailPage() {
         {newsItem.target_region && <meta name="coverage" content={newsItem.target_region} />}
         <link rel="canonical" href={window.location.origin + "/news/" + newsItem.slug} />
 
-        <meta property="og:title" content={newsItem.seo_title || newsItem.title} />
-        <meta property="og:description" content={newsItem.seo_description || newsItem.description} />
+        <meta property="og:title" content={newsItem.title} />
+        <meta property="og:description" content={newsItem.description} />
         <meta property="og:image" content={newsItem.og_image_url || newsItem.logo_url} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={window.location.href} />
@@ -152,8 +152,8 @@ export default function NewsDetailPage() {
         <meta property="article:author" content={newsItem.ceo_name} />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={newsItem.seo_title || newsItem.title} />
-        <meta name="twitter:description" content={newsItem.seo_description || newsItem.description} />
+        <meta name="twitter:title" content={newsItem.title} />
+        <meta name="twitter:description" content={newsItem.description} />
         <meta name="twitter:image" content={newsItem.og_image_url || newsItem.logo_url} />
       </Helmet>
       

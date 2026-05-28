@@ -41,17 +41,13 @@ export default function Home() {
         let score = 0;
         const name = app.name.toLowerCase();
         const cat = app.category.toLowerCase();
-        const seoTitle = app.seo_title?.toLowerCase() || "";
-        const seoDesc = app.seo_description?.toLowerCase() || "";
         const keywords = app.seo_keywords?.toLowerCase() || "";
 
         // Exact matches
         if (name === term) score += 1000;
-        if (seoTitle === term) score += 800;
 
         // "Starts with" matches
         if (name.startsWith(term)) score += 500;
-        if (seoTitle.startsWith(term)) score += 400;
 
         // Word-level matches (e.g. "India" in "Best India Apps")
         const nameWords = name.split(/\s+/);
@@ -67,9 +63,7 @@ export default function Home() {
 
         // Substring matches
         if (name.includes(term)) score += 50;
-        if (seoTitle.includes(term)) score += 40;
         if (cat.includes(term)) score += 30;
-        if (seoDesc.includes(term)) score += 20;
 
         return { app, score };
       })

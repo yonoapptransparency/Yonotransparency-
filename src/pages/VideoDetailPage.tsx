@@ -139,11 +139,11 @@ export default function VideoDetailPage() {
   return (
     <div className="animate-fade-in max-w-4xl mx-auto pb-12">
       <Helmet>
-        <title>{videoItem.seo_title || videoItem.title}</title>
-        <meta name="description" content={videoItem.seo_description || videoItem.description} />
+        <title>{videoItem.title} - {mockSettings.site_title}</title>
+        <meta name="description" content={videoItem.description} />
         {videoItem.seo_keywords && <meta name="keywords" content={videoItem.seo_keywords} />}
-        <meta property="og:title" content={videoItem.seo_title || videoItem.title} />
-        <meta property="og:description" content={videoItem.seo_description || videoItem.description} />
+        <meta property="og:title" content={videoItem.title} />
+        <meta property="og:description" content={videoItem.description} />
         <meta property="og:type" content="video.other" />
       </Helmet>
       

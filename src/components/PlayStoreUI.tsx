@@ -192,7 +192,7 @@ export const PlayStoreTabs = React.memo(({ activeTab, onTabChange, hideOnSearch 
 
   const tabs = settings.categories && settings.categories.length > 0 
     ? settings.categories 
-    : ["All", "Yono app", "Sunali", "Jeet"];
+    : ["All", "Rummy Games", "Card Games", "Esports"];
   
   return (
     <div className="mb-6 sticky top-16 z-40">

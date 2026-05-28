@@ -90,9 +90,8 @@ export default function AppDetails() {
     );
   }
 
-  const defaultDesc = `${app.name} technical specifications, version ${app.version}. Verified security status: ${app.safety_status}. Access security clearance profile for<sup>TM</sup> ${app.name} safe environment.`;
-  const desc = app.seo_description || defaultDesc;
-  const title = app.seo_title || `${app.name} - Technical Specifications & Security Clearance`;
+  const title = `${app.name} - Technical Specifications | ${mockSettings.site_title || 'RUMMY STORE'}`;
+  const desc = app.description_html ? app.description_html.replace(/<[^>]*>?/gm, '').substring(0, 160) : `${app.name} secure installation and specifications`;
   const ogImage = app.og_image_url || app.icon_url;
 
   const faqSchema = app.faqs && app.faqs.length > 0 ? {
@@ -112,7 +111,7 @@ export default function AppDetails() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": app.name,
-    "description": app.seo_description || `${app.name} secure installation and specifications`,
+    "description": desc,
     "applicationCategory": app.category,
     "operatingSystem": "Android, iOS, Windows",
     "softwareVersion": app.version,
@@ -349,7 +348,7 @@ export default function AppDetails() {
           </h2>
           <div 
             className="prose prose-slate max-w-none text-lg font-medium leading-relaxed text-slate-600 custom-description"
-            dangerouslySetInnerHTML={{ __html: app.description_html || `<p>${app.seo_description || 'No detailed description available yet.'}</p>` }}
+            dangerouslySetInnerHTML={{ __html: app.description_html || '<p>No detailed description available yet.</p>' }}
           />
           
           {app.release_notes && (

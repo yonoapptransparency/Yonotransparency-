@@ -152,13 +152,10 @@ const AppsTab = React.memo(({ appsList, editingAppId, setEditingAppId, handleDel
             </div>
             
             {/* RESTORED SEO FIELDS */}
-            <div>
-              <label className="block text-sm font-medium opacity-60 mb-1 dark:text-white">SEO Title Optimization</label>
-              <input type="text" name="seo_title" defaultValue={editApp?.seo_title} placeholder="Leave blank to use App Name" className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 min-h-[48px] dark:text-white" />
-            </div>
+            
             <div>
               <label className="block text-sm font-medium opacity-60 mb-1 dark:text-white">SEO Description</label>
-              <input type="text" name="seo_description" defaultValue={editApp?.seo_description} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 min-h-[48px] dark:text-white" />
+              
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium opacity-60 mb-1 dark:text-white">SEO Keywords (Comma Separated)</label>
@@ -595,7 +592,7 @@ const GithubSyncTab = React.memo(({ gitConfig, saveGitConfig, pushAllToGitHub, g
                   value={repo} 
                   onChange={(e) => setRepo(e.target.value)} 
                   className="w-full bg-black/5 dark:bg-slate-900 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all dark:text-white font-bold" 
-                  placeholder="e.g. yonotransparency" 
+                  placeholder="e.g. rummystore" 
                   required 
                 />
               </div>
@@ -696,7 +693,7 @@ const GithubSyncTab = React.memo(({ gitConfig, saveGitConfig, pushAllToGitHub, g
               <p className="font-black uppercase tracking-wider text-[10px] text-pink-400 mb-1">Option A: Fine-Grained Token (Recommended)</p>
               <ol className="list-decimal list-inside space-y-1 pl-1">
                 <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" className="text-pink-500 underline font-bold">New Fine-Grained Token</a></li>
-                <li>Under <strong>Repository access</strong>, select your repository (<code>Yonotransparency-</code>)</li>
+                <li>Under <strong>Repository access</strong>, select your repository (<code>rummystore</code>)</li>
                 <li>Under <strong>Permissions</strong>, click <strong>Repository permissions</strong></li>
                 <li>Scroll to <strong>Contents</strong>, and set it to <strong>Read and write</strong></li>
                 <li>Generate and copy the token!</li>

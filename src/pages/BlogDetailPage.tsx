@@ -92,8 +92,8 @@ export default function BlogDetailPage() {
   return (
     <div className="animate-fade-in max-w-4xl mx-auto px-4 plain-content mb-20">
       <Helmet>
-        <title>{blog.seo_title || blog.title} - {mockSettings.site_title}</title>
-        <meta name="description" content={blog.seo_description || blog.content.substring(0, 160)} />
+        <title>{blog.title} - {mockSettings.site_title}</title>
+        <meta name="description" content={blog.content.substring(0, 160).replace(/<[^>]*>?/gm, '')} />
         {blog.seo_keywords && <meta name="keywords" content={blog.seo_keywords} />}
         <meta name="author" content={blog.author || "Administrator"} />
         <meta name="robots" content="index, follow" />
@@ -101,8 +101,8 @@ export default function BlogDetailPage() {
         {blog.target_region && <meta name="coverage" content={blog.target_region} />}
         <link rel="canonical" href={window.location.origin + "/blog/" + blog.slug} />
 
-        <meta property="og:title" content={blog.seo_title || blog.title} />
-        <meta property="og:description" content={blog.seo_description || blog.content.substring(0, 160)} />
+        <meta property="og:title" content={blog.title} />
+        <meta property="og:description" content={blog.content.substring(0, 160).replace(/<[^>]*>?/gm, '')} />
         <meta property="og:image" content={blog.cover_url} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={window.location.href} />
@@ -110,8 +110,8 @@ export default function BlogDetailPage() {
         <meta property="article:author" content={blog.author} />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={blog.seo_title || blog.title} />
-        <meta name="twitter:description" content={blog.seo_description || blog.content.substring(0, 160)} />
+        <meta name="twitter:title" content={blog.title} />
+        <meta name="twitter:description" content={blog.content.substring(0, 160).replace(/<[^>]*>?/gm, '')} />
         <meta name="twitter:image" content={blog.cover_url} />
       </Helmet>
       

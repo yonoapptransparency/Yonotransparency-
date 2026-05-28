@@ -245,7 +245,7 @@ export async function commitFileToGitHub({
   const cleanToken = token.trim();
   let cleanRepo = repo.trim();
 
-  // 1. High-reliability pre-emptive repository casing alignment (cater for case mismatches e.g. Yonotransparency- vs yonotransparency-)
+  // 1. High-reliability pre-emptive repository casing alignment (cater for case mismatches e.g. rummystore vs rummystore-)
   try {
     const headerAuth = cleanToken.toLowerCase().startsWith('ghp_') 
       ? `token ${cleanToken}` 

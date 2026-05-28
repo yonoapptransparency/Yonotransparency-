@@ -32,8 +32,7 @@ export default function VideosPage() {
       const term = searchTerm.toLowerCase();
       return (
         video.title?.toLowerCase().includes(term) ||
-        video.description?.toLowerCase().includes(term) ||
-        video.seo_title?.toLowerCase().includes(term)
+        video.description?.toLowerCase().includes(term)
       );
     });
   }, [mockVideos, searchTerm]);

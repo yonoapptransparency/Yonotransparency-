@@ -179,7 +179,7 @@ export default function GatewayPage() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": app.name,
-    "description": app.seo_description || `${app.name} - Custom Handshake`,
+    "description": desc,
     "applicationCategory": app.category,
     "operatingSystem": "All",
     "softwareVersion": app.version,
@@ -224,7 +224,7 @@ export default function GatewayPage() {
         </Link>
       </div>
       <Helmet>
-        <title>{`${app.name} - Technical Info & Secure Clearance`}</title>
+        <title>{`${app.name} - Technical Info | ${mockSettings.site_title || 'RUMMY STORE'}`}</title>
         <meta name="description" content={`Verified technical specs and secure access profile for ${app.name}. Checked by RUMMY STORE.`} />
         {app.seo_keywords && <meta name="keywords" content={`${app.seo_keywords}, info ${app.name}, ${app.name} technical info, secure ${app.name}`} />}
         <meta property="og:title" content={`Secure Access Profile: ${app.name}`} />
@@ -355,7 +355,7 @@ export default function GatewayPage() {
         <h2 className="text-4xl sm:text-7xl font-black mb-12 uppercase tracking-tighter italic leading-none text-slate-900">Technical<br/>Analysis</h2>
         <div 
           className="prose prose-slate max-w-none leading-relaxed font-medium text-lg text-slate-600"
-          dangerouslySetInnerHTML={{ __html: app.description_html || `<p>${app.seo_description}</p>` }}
+          dangerouslySetInnerHTML={{ __html: app.description_html || '<p>Secure gateway mirror verified</p>' }}
         />
       </div>
 
@@ -440,7 +440,7 @@ export default function GatewayPage() {
       <div className="max-w-4xl mx-auto px-4 mb-40 text-center">
           <h2 
             className="text-4xl sm:text-7xl font-black mb-16 uppercase tracking-tighter text-slate-900 italic leading-none"
-            dangerouslySetInnerHTML={{ __html: mockSettings.portal_heading || 'Transparency Review Portal' }}
+            dangerouslySetInnerHTML={{ __html: mockSettings.portal_heading || mockSettings.site_title || 'Platform Review Portal' }}
           />
           
           <div className="space-y-8 max-w-2xl mx-auto">
