@@ -4,7 +4,6 @@ import { Shield, Mail, KeyRound, Loader2 } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { useData } from '../contexts/DataContext';
 import { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
 
 export default function AdminLogin() {
   const { settings } = useData();
@@ -21,10 +20,10 @@ export default function AdminLogin() {
     const host = window.location.hostname;
     const isMainDomain = host === 'localhost' || host === '127.0.0.1' || !host.includes('run.app');
     
-    // Check if we are on an AI Studio preview domain
-    const isAiStudio = host.includes('run.app');
+    // Validate preview server domains neutrally
+    const isCloudPreview = host.includes('run.app');
 
-    if (!isMainDomain && !isAiStudio) {
+    if (!isMainDomain && !isCloudPreview) {
       setDomainMismatch(true);
     }
 
@@ -52,13 +51,10 @@ export default function AdminLogin() {
     } catch (err: any) {
       if (err.code === 'auth/unauthorized-domain') {
         setError(<>
-          <p>Firebase Domain Error: Your domain ({window.location.hostname}) is not authorized.</p>
+          <p>Access Mismatch: This host domain ({window.location.hostname}) has not been authorized.</p>
           <p className="mt-2 text-xs">
-            Since you are on mobile, you can't see the Firebase menu. Click below to go directly to the settings:
+            Please register this domain in the security control interface or access the portal from your authorized support domain.
           </p>
-          <a href={`https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`} target="_blank" rel="noreferrer" className="block mt-2 bg-white/20 p-2 rounded text-white font-bold underline text-center">
-            Open Authorized Domains
-          </a>
         </>);
       } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         setError("Invalid email or password. Please use the Google Login if you haven't set an email password yet.");
@@ -79,11 +75,8 @@ export default function AdminLogin() {
     } catch (err: any) {
       if (err.code === 'auth/unauthorized-domain') {
         setError(<>
-          <p>Firebase Domain Error: Your domain ({window.location.hostname}) is not authorized.</p>
-          <a href={`https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`} target="_blank" rel="noreferrer" className="block mt-2 bg-white/20 p-2 rounded text-white font-bold underline text-center">
-            Click here to open Authorized Domains
-          </a>
-        </>);
+          <p>Access Mismatch: This host domain ({window.location.hostname}) has not been authorized.</p>
+          </>);
       } else {
         setError(err.message || "Failed to sign in with Google.");
       }
@@ -131,10 +124,10 @@ export default function AdminLogin() {
         
         {domainMismatch && (
           <div className="mb-6 bg-amber-500/10 border border-amber-500/30 p-4 rounded-lg">
-            <p className="text-xs text-amber-500 font-bold mb-2">AUTH DOMAIN NOTICE</p>
+            <p className="text-xs text-amber-500 font-bold mb-2">DOMAIN CHECK NOTICE</p>
             <p className="text-xs opacity-60 mb-3">
               You are currently on <strong>{window.location.hostname}</strong>. 
-              Firebase might reject login from this URL unless you've added it to "Authorized Domains" in your Firebase console. Please access this admin panel from your primary authorized domain.
+              Please verify that this hostname is authorized under your security setup.
             </p>
           </div>
         )}

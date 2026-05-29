@@ -227,7 +227,7 @@ export const mockSettings: GlobalSettings = savedSettings ? ((): GlobalSettings 
   try { return JSON.parse(savedSettings); } catch { return {} as GlobalSettings; }
 })() : {
   site_title: 'RUMMY STORE. Virtual E-Sports Store',
-  meta_description: 'The premier e-sports gaming review platform. Play and discover top games.',
+  meta_description: 'Play classic Rummy online with friends! Enjoy smooth gameplay, custom tables, and free daily tournaments. Download the official app on the Play Store and start playing instantly.',
   logo_url: '',
   favicon_url: '',
   helpline_whatsapp: '+1234567890',

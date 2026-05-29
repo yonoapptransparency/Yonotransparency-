@@ -676,7 +676,7 @@ const GithubSyncTab = React.memo(({ gitConfig, saveGitConfig, pushAllToGitHub, g
           
           <div className="space-y-4 text-xs leading-relaxed dark:text-gray-300">
             <p>
-              When clients visit your website directly (like deep-linked /app/filxfox), their browser has to connect to Firebase Firestore.
+              When clients visit your website directly (like deep-linked /app/filxfox), their browser has to connect to the cloud database.
             </p>
             <p>
               Due to serverless constraints, free web-servers can experience <strong>cold starts</strong>, resulting in blank pages or infinite loading loops for new visitors.
@@ -1521,7 +1521,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center bg-black/5">
         <h1 className="text-3xl font-black text-rose-600 mb-4 uppercase tracking-tighter italic">Access Restricted</h1>
         <p className="opacity-60 max-w-md mb-8 font-bold text-slate-600 dark:text-zinc-400">
-          This account is not authorized to manage the system. Only authorized administrators registered in the Firebase console database under the 'admins' collection can control the Admin Central.
+          This account is not authorized to manage the system. Only authorized administrators registered in the secure admin database can access the control panel.
         </p>
         <button onClick={handleLogout} className="bg-rose-600 hover:bg-rose-700 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-rose-600/20 transition-all active:scale-95">
           Sign Out Authority

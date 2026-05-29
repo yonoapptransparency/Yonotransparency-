@@ -476,7 +476,7 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
     return (
       <div className="flex flex-col items-center gap-3">
         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-xs font-semibold w-full sm:w-96 mb-2">
-          {errorMsg}
+          Action could not be completed. Please retry.
         </div>
         <button 
           onClick={() => { setErrorMsg(''); handleClearance(); }} 
@@ -495,24 +495,11 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
           onClick={() => triggerExecution()}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-10 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-md active:scale-[0.98] cursor-pointer shrink-0"
         >
-          <span className="text-white">Access Link</span>
+          <span className="text-white">Continue</span>
         </button>
 
-        <div className="text-center p-3 bg-zinc-50 dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-2xl w-full">
-          <p className="text-[10px] text-zinc-500 font-medium leading-relaxed mb-1">
-            If it did not load automatically, click here:
-          </p>
-          <a
-            href={dynamicLink}
-            onClick={playSoftClick}
-            className="text-xs font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-4 tracking-wider block cursor-pointer"
-          >
-            Direct Link
-          </a>
-        </div>
-
         <span className="text-[10px] font-semibold text-green-600 flex items-center gap-1.5 mt-1">
-          <CheckCircle2 className="w-3.5 h-3.5" /> Link active for {tokenCountdown}s
+          <CheckCircle2 className="w-3.5 h-3.5" /> Checked
         </span>
       </div>
     );
@@ -532,7 +519,7 @@ export default function ClearanceButton({ appId, status, clearanceUrl }: Clearan
         {isGenerating ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin text-current" /> 
-            <span className="text-current">Processing...</span>
+            <span className="text-current">Please wait...</span>
           </>
         ) : (
           <span className="text-current">More</span>
