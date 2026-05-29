@@ -173,7 +173,7 @@ const isBotDetected = (req: express.Request): boolean => {
 });
 
 // API Route: Allocate secure multi-use session seed & ephemeral Proof-of-Work nonce
-app.get("/api/v1/get-challenge", (req, res) => {
+app.get(["/api/v1/get-challenge", "/api/v1/init-file"], (req, res) => {
   if (isBotDetected(req)) {
     return res.status(403).json({ error: "Access Denied: High-risk client signature detected." });
   }
@@ -195,7 +195,7 @@ app.get("/api/v1/get-challenge", (req, res) => {
 });
 
 // API Route: Verify Proof-of-Work solver submission, score kinetics, and issue dynamic JWT-style token
-app.post("/api/v1/get-token", (req, res) => {
+app.post(["/api/v1/get-token", "/api/v1/process-file"], (req, res) => {
   if (isBotDetected(req)) {
     return res.status(403).json({ error: "Access Denied: Heavy automation patterns flagged." });
   }
@@ -250,14 +250,14 @@ app.post("/api/v1/get-token", (req, res) => {
 });
 
 // API Route: Dynamic, secure 30-second transient token generator (Legacy interface backing with bot defense)
-app.post("/api/v1/generate-secure-token", (req, res) => {
+app.post(["/api/v1/generate-secure-token", "/api/v1/generate-token"], (req, res) => {
   const { id, obfuscatedUrl, challengeResponse } = req.body;
 
   if (isBotDetected(req)) {
     return res.status(403).json({ error: 'Security Exception: Automated request profile detected' });
   }
 
-  if (challengeResponse !== "human_authorization_token_granted") {
+  if (challengeResponse !== "human_authorization_token_granted" && challengeResponse !== "authorization_granted" && challengeResponse !== "human_authorization_granted") {
     return res.status(400).json({ error: 'Security Exception: Handshake failed verification' });
   }
 
@@ -287,15 +287,18 @@ app.post("/api/v1/generate-secure-token", (req, res) => {
   };
   (tokenStore as any).set(token, tokenStoreData);
 
+  const isLegacy = req.path.endsWith('generate-token');
   res.json({
     token,
     expiresInMs: EXPIRATION_TIME,
-    clearanceUrl: `/api/v1/secure-payload?token=${token}&url=${encodeURIComponent(obfuscatedUrl)}`
+    clearanceUrl: isLegacy
+      ? `/api/v1/file-payload?token=${token}&url=${encodeURIComponent(obfuscatedUrl)}`
+      : `/api/v1/secure-payload?token=${token}&url=${encodeURIComponent(obfuscatedUrl)}`
   });
 });
 
 // API Route: Process temporary dynamic verification token (Multi-use allowed within validity lifespan!)
-app.get("/api/v1/secure-payload", (req, res) => {
+app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], (req, res) => {
   const ip = getIp(req);
   const sid = (req.query.sid || req.cookies?.__sid) as string;
   const token = (req.query.token || req.query.t) as string;
@@ -377,7 +380,7 @@ app.get("/api/v1/secure-payload", (req, res) => {
 });
 
 // API Route: Legacy Secure Link Fallback (with bot protection)
-app.get("/api/v1/secure-fetch", (req, res) => {
+app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
   const { id } = req.query;
   
   // User-Agent validation (reject curl, wget, basic scrapers)

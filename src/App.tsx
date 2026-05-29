@@ -5,25 +5,25 @@ import { Menu, Shield, ShieldCheck, Info, ArrowRight, X, LayoutGrid, Newspaper, 
 import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Lazy Load Pages for Performance
-const Home = lazy(() => import('./pages/Home'));
-const AppDetails = lazy(() => import('./pages/AppDetails'));
-const GatewayPage = lazy(() => import('./pages/GatewayPage'));
-const AdminLogin = lazy(() => import('./pages/AdminLogin'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
-const Privacy = lazy(() => import('./pages/Privacy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const Responsibility = lazy(() => import('./pages/Responsibility'));
-const NewApps = lazy(() => import('./pages/NewApps'));
-const NewsPage = lazy(() => import('./pages/NewsPage'));
-const NewsDetailPage = lazy(() => import('./pages/NewsDetailPage'));
-const Blogs = lazy(() => import('./pages/Blogs'));
-const BlogDetailPage = lazy(() => import('./pages/BlogDetailPage'));
-const VideosPage = lazy(() => import('./pages/VideosPage'));
-const VideoDetailPage = lazy(() => import('./pages/VideoDetailPage'));
-const FallbackRouteMatcher = lazy(() => import('./components/FallbackRouteMatcher'));
+// Direct Imports for Performance (No Lazy Loading for UI speed)
+import Home from './pages/Home';
+import AppDetails from './pages/AppDetails';
+import GatewayPage from './pages/GatewayPage';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Responsibility from './pages/Responsibility';
+import NewApps from './pages/NewApps';
+import NewsPage from './pages/NewsPage';
+import NewsDetailPage from './pages/NewsDetailPage';
+import Blogs from './pages/Blogs';
+import BlogDetailPage from './pages/BlogDetailPage';
+import VideosPage from './pages/VideosPage';
+import VideoDetailPage from './pages/VideoDetailPage';
+import FallbackRouteMatcher from './components/FallbackRouteMatcher';
 
 import Ticker from './components/Ticker';
 import SupportWidget from './components/SupportWidget';
@@ -568,7 +568,6 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
-      <Ticker />
       {memoizedHeader}
       
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-1.5 sm:py-3 pb-16 sm:pb-24 overflow-x-hidden relative">
@@ -611,6 +610,7 @@ function AppContent() {
         </Suspense>
       </main>
       
+      <Ticker />
       {memoizedFooter}
       {memoizedBottomNav}
       <BackToTop />

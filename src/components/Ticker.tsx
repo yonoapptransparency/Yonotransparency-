@@ -6,7 +6,7 @@ export default function Ticker() {
   if (!settings.ticker_text) return null;
 
   return (
-    <div className="bg-transparent py-3 overflow-hidden border-b border-black/5 dark:border-white/5 flex items-center relative z-[70] select-none pointer-events-none">
+    <div className="bg-transparent py-3 overflow-hidden border-t border-black/5 dark:border-white/5 flex items-center relative z-[70] select-none pointer-events-none">
       <div className="bg-blue-500 w-2 h-2 rounded-full absolute left-4 z-20 animate-pulse shadow-[0_0_12px_rgba(59,130,246,0.5)]" />
       
       <div className="flex whitespace-nowrap overflow-hidden pl-12 w-full relative">
