@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore } from 'firebase/firestore';
+import appletConfig from '../../firebase-applet-config.json';
 
 // Safely access the Firebase configuration from the injected window object
 // to prevent project details from being compiled or hardcoded into the static JS bundle.
@@ -19,7 +20,14 @@ declare global {
   }
 }
 
-const fallbackConfig = {
+// Check if local applet config has real keys to fall back on during static SPA deployments
+const isLocalConfigValid = appletConfig && 
+  appletConfig.apiKey && 
+  appletConfig.apiKey !== 'PLACEHOLDER' && 
+  appletConfig.apiKey.trim() !== '' && 
+  !appletConfig.apiKey.includes('YOUR_API_KEY');
+
+const fallbackConfig = isLocalConfigValid ? appletConfig : {
   projectId: "placeholder-project-id",
   appId: "placeholder-app-id",
   apiKey: "PLACEHOLDER",
