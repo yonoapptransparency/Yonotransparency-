@@ -239,177 +239,31 @@ export async function commitFileToGitHub({
   content: string;
   message: string;
 }) {
-  const cleanBranch = branch ? branch.trim() : 'main';
-  const cleanPath = path.replace(/^\/+/g, ''); // strip leading slashes
-  const cleanOwner = owner.trim();
-  const cleanToken = token.trim();
-  let cleanRepo = repo.trim();
+  const response = await fetch('/api/github-sync/commit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      owner,
+      repo,
+      token,
+      branch,
+      path,
+      content,
+      message
+    })
+  });
 
-  // 1. High-reliability pre-emptive repository casing alignment (cater for case mismatches e.g. rummystore vs rummystore-)
-  try {
-    const headerAuth = cleanToken.toLowerCase().startsWith('ghp_') 
-      ? `token ${cleanToken}` 
-      : `Bearer ${cleanToken}`;
-
-    const resolveRes = await fetch(
-      `https://api.github.com/users/${cleanOwner}/repos?per_page=100`,
-      {
-        headers: {
-          'Authorization': headerAuth,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      }
-    );
-    if (resolveRes.ok) {
-      const repos = await resolveRes.json();
-      if (Array.isArray(repos)) {
-        const matching = repos.find(r => r.name?.toLowerCase() === cleanRepo.toLowerCase());
-        if (matching && matching.name !== cleanRepo) {
-          console.log(`GitHub Sync: Correcting repository casing alignment from "${cleanRepo}" to "${matching.name}"`);
-          cleanRepo = matching.name;
-        }
-      }
-    } else {
-      // Attempt Org repositories endpoint in case owner is an Org
-      const orgResolveRes = await fetch(
-        `https://api.github.com/orgs/${cleanOwner}/repos?per_page=100`,
-        {
-          headers: {
-            'Authorization': headerAuth,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        }
-      );
-      if (orgResolveRes.ok) {
-        const repos = await orgResolveRes.json();
-        if (Array.isArray(repos)) {
-          const matching = repos.find(r => r.name?.toLowerCase() === cleanRepo.toLowerCase());
-          if (matching && matching.name !== cleanRepo) {
-            console.log(`GitHub Sync: Correcting Organization repository casing alignment from "${cleanRepo}" to "${matching.name}"`);
-            cleanRepo = matching.name;
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.warn("GitHub Repo casing alignment query not completed:", e);
-  }
-
-  const authHeader = cleanToken.toLowerCase().startsWith('ghp_') 
-    ? `token ${cleanToken}` 
-    : `Bearer ${cleanToken}`;
-
-  console.log(`GitHub Sync: Fetching SHA of ${cleanPath} on repo ${cleanOwner}/${cleanRepo} [branch: ${cleanBranch}]...`);
-  
-  let sha: string | undefined = undefined;
-  let getErrorContext = "";
-
-  try {
-    // Attempt 1: Fetch from target branch (cache-busted & search-encoded)
-    const res = await fetch(
-      `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${cleanPath}?ref=${encodeURIComponent(cleanBranch)}&_t=${Date.now()}`,
-      {
-        cache: 'no-store',
-        headers: {
-          'Authorization': authHeader,
-          'Accept': 'application/vnd.github.v3+json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
-      }
-    );
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && !Array.isArray(data) && data.sha) {
-        sha = data.sha;
-        console.log(`GitHub Sync: Target branch existing file SHA found: ${sha}`);
-      }
-    } else if (res.status === 404) {
-      console.log(`GitHub Sync: File not found on branch "${cleanBranch}". Attempting default branch fallback...`);
-      // Attempt 2: Fallback to default branch (without ref query) in case branch is being created or mismatched
-      const fallbackRes = await fetch(
-        `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${cleanPath}?_t=${Date.now()}`,
-        {
-          cache: 'no-store',
-          headers: {
-            'Authorization': authHeader,
-            'Accept': 'application/vnd.github.v3+json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
-          }
-        }
-      );
-
-      if (fallbackRes.ok) {
-        const fallbackData = await fallbackRes.json();
-        if (fallbackData && !Array.isArray(fallbackData) && fallbackData.sha) {
-          sha = fallbackData.sha;
-          console.log(`GitHub Sync: Default branch existing file SHA found on repo default branch: ${sha}`);
-        }
-      } else if (fallbackRes.status !== 404) {
-        const errJSON = await fallbackRes.json().catch(() => ({}));
-        getErrorContext = `Default branch lookup failed with status ${fallbackRes.status}: ${errJSON.message || 'Unknown error'}`;
-      }
-    } else {
-      const errJSON = await res.json().catch(() => ({}));
-      getErrorContext = `Target branch lookup failed with status ${res.status}: ${errJSON.message || 'Unknown error'}`;
-    }
-  } catch (e: any) {
-    console.warn("GitHub SHA Fetch error:", e);
-    getErrorContext = `Network/CORS error fetching repository contents: ${e.message || e}`;
-  }
-
-  // If there was an auth or permission error on the GET request, fail fast and don't proceed to PUT,
-  // which would result in a confusing "sha wasn't supplied" error.
-  if (getErrorContext && !sha) {
-    throw new Error(`GitHub Sync connection aborted. ${getErrorContext}\n\nPlease check your Repository config and Token permissions.`);
-  }
-
-  const encodedContent = b64EncodeUnicode(content);
-
-  const payload = {
-    message,
-    content: encodedContent,
-    branch: cleanBranch,
-    ...(sha ? { sha } : {})
-  };
-
-  console.log(`GitHub Sync: Initiating commit for ${cleanPath}...`);
-
-  const saveRes = await fetch(
-    `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${cleanPath}`,
-    {
-      method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
-      },
-      body: JSON.stringify(payload)
-    }
-  );
-
-  if (!saveRes.ok) {
-    const errText = await saveRes.text();
+  if (!response.ok) {
+    const errText = await response.text();
     let errMsg = errText;
     try {
       const errJSON = JSON.parse(errText);
       errMsg = errJSON.message || errText;
     } catch (_) {}
-
-    // Add smart troubleshooting context to common Github API errors
-    let enhancedTip = "";
-    if (errMsg.toLowerCase().includes("not found")) {
-      enhancedTip = "\n\n💡 Try these checks:\n1. Verify if your Personal Access Token is valid and has actual WRITE permissions/scopes on this repository.\n- Fine-Grained Token: Repository Permissions -> 'Contents' -> set to 'Read and write'\n- Classic Token: Ensure 'repo' checkbox is fully checked.\n2. Verify the repository name is exact: '" + cleanRepo + "' (casing-correct).\n3. Verify if your token has access to this organization or account.";
-    } else if (errMsg.toLowerCase().includes("credentials") || saveRes.status === 401) {
-      enhancedTip = "\n\n💡 Token is invalid or expired. Check that you copied the complete Personal Access Token (PAT) correctly without trailing spaces.";
-    }
-
-    throw new Error(errMsg + enhancedTip);
+    throw new Error(errMsg);
   }
 
-  const result = await saveRes.json();
-  console.log("GitHub Sync: Commit verified & published success!", result.commit?.sha);
-  return result;
+  return response.json();
 }
