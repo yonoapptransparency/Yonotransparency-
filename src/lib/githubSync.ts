@@ -302,10 +302,12 @@ export async function commitFileToGitHub({
   console.log(`GitHub Sync: Fetching SHA of ${cleanPath} on repo ${cleanOwner}/${cleanRepo} [branch: ${cleanBranch}]...`);
   
   let sha: string | undefined = undefined;
+  let getErrorContext = "";
 
   try {
+    // Attempt 1: Fetch from target branch (cache-busted & search-encoded)
     const res = await fetch(
-      `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${cleanPath}?ref=${cleanBranch}`,
+      `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${cleanPath}?ref=${encodeURIComponent(cleanBranch)}&_t=${Date.now()}`,
       {
         cache: 'no-store',
         headers: {
@@ -319,16 +321,49 @@ export async function commitFileToGitHub({
 
     if (res.ok) {
       const data = await res.json();
-      sha = data.sha;
-      console.log(`GitHub Sync: Existing file SHA found: ${sha}`);
+      if (data && !Array.isArray(data) && data.sha) {
+        sha = data.sha;
+        console.log(`GitHub Sync: Target branch existing file SHA found: ${sha}`);
+      }
     } else if (res.status === 404) {
-      console.log(`GitHub Sync: No existing file found at ${cleanPath}, creating fresh new file page!`);
+      console.log(`GitHub Sync: File not found on branch "${cleanBranch}". Attempting default branch fallback...`);
+      // Attempt 2: Fallback to default branch (without ref query) in case branch is being created or mismatched
+      const fallbackRes = await fetch(
+        `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/contents/${cleanPath}?_t=${Date.now()}`,
+        {
+          cache: 'no-store',
+          headers: {
+            'Authorization': authHeader,
+            'Accept': 'application/vnd.github.v3+json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        }
+      );
+
+      if (fallbackRes.ok) {
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData && !Array.isArray(fallbackData) && fallbackData.sha) {
+          sha = fallbackData.sha;
+          console.log(`GitHub Sync: Default branch existing file SHA found on repo default branch: ${sha}`);
+        }
+      } else if (fallbackRes.status !== 404) {
+        const errJSON = await fallbackRes.json().catch(() => ({}));
+        getErrorContext = `Default branch lookup failed with status ${fallbackRes.status}: ${errJSON.message || 'Unknown error'}`;
+      }
     } else {
-      const errRes = await res.json().catch(() => ({}));
-      console.warn("GitHub Fetch SHA status warning:", res.status, errRes);
+      const errJSON = await res.json().catch(() => ({}));
+      getErrorContext = `Target branch lookup failed with status ${res.status}: ${errJSON.message || 'Unknown error'}`;
     }
-  } catch (e) {
-    console.warn("GitHub SHA Fetch error (will assume new file):", e);
+  } catch (e: any) {
+    console.warn("GitHub SHA Fetch error:", e);
+    getErrorContext = `Network/CORS error fetching repository contents: ${e.message || e}`;
+  }
+
+  // If there was an auth or permission error on the GET request, fail fast and don't proceed to PUT,
+  // which would result in a confusing "sha wasn't supplied" error.
+  if (getErrorContext && !sha) {
+    throw new Error(`GitHub Sync connection aborted. ${getErrorContext}\n\nPlease check your Repository config and Token permissions.`);
   }
 
   const encodedContent = b64EncodeUnicode(content);
