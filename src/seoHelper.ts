@@ -248,7 +248,7 @@ async function getPagePreRender(urlPath: string, data: any): Promise<string> {
 }
 
 function renderHeader(settings: any) {
-  const siteTitle = getField(settings, 'site_title', 'RUMMY STORE');
+  const siteTitle = getField(settings, 'site_title', 'App Store');
   const logoUrl = getField(settings, 'logo_url');
   return `
     <header class="py-3 border-b border-black/5 dark:border-white/5 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
@@ -272,7 +272,7 @@ function renderHeader(settings: any) {
 }
 
 function renderFooter(settings: any) {
-  const siteTitle = getField(settings, 'site_title', 'RUMMY STORE');
+  const siteTitle = getField(settings, 'site_title', 'App Store');
   const logoUrl = getField(settings, 'logo_url');
   const metaDescription = getField(settings, 'meta_description');
   const disclaimerText = getField(settings, 'disclaimer_text');
@@ -308,7 +308,7 @@ function renderFooter(settings: any) {
 }
 
 function renderHome(apps: any[], settings: any, news: any[], blogs: any[], videos: any[]) {
-  const siteTitle = getField(settings, 'site_title', 'RUMMY STORE');
+  const siteTitle = getField(settings, 'site_title', 'App Store');
   const desc = getField(settings, 'meta_description');
   
   let appsHtml = '';
@@ -445,7 +445,7 @@ function renderAppDetails(slug: string, apps: any[], settings: any) {
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-black/5 shadow-sm h-fit text-left">
           <h3 class="text-sm font-bold mb-4 uppercase tracking-wider text-zinc-400">Specifications</h3>
           <table class="w-full text-xs text-left">
-            <tr class="border-b"><td class="py-2 text-zinc-400 font-semibold">Developer</td><td class="py-2 font-bold text-right text-zinc-900 dark:text-white">Rummy Store Certified</td></tr>
+            <tr class="border-b"><td class="py-2 text-zinc-400 font-semibold">Developer</td><td class="py-2 font-bold text-right text-zinc-900 dark:text-white">Store Certified</td></tr>
             <tr class="border-b"><td class="py-2 text-zinc-400 font-semibold">Package Name</td><td class="py-2 font-bold text-right text-zinc-900 dark:text-white truncate max-w-[150px]">${escapeHtml(pkg)}</td></tr>
             <tr class="border-b"><td class="py-2 text-zinc-400 font-semibold">Status</td><td class="py-2 font-bold text-right text-green-500">Safe & Clean</td></tr>
             <tr><td class="py-2 text-zinc-400 font-semibold">System Code</td><td class="py-2 font-bold text-right text-zinc-900 dark:text-white">Android / iOS</td></tr>
@@ -574,7 +574,7 @@ function renderAbout(settings: any) {
 
 function renderContact(settings: any) {
   const content = getField(settings, 'contact_content') || 'Get in touch for active client files help.';
-  const email = getField(settings, 'support_email', 'support@rummystore.in');
+  const email = getField(settings, 'support_email', 'support@example.com');
   return `<div class="max-w-3xl mx-auto py-12 text-left bg-white p-8 rounded-3xl border border-black/5"><h1 class="text-4xl font-bold mb-6">Contact Us</h1><p class="prose mb-6 leading-relaxed font-semibold">${content}</p><div class="p-6 bg-zinc-50 rounded-2xl"><strong>Email support address:</strong><p class="text-blue-500 font-bold mt-1">${escapeHtml(email)}</p></div></div>`;
 }
 
@@ -633,12 +633,12 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
   if (!data || !data.settings) return template;
 
   const { apps, settings, news, blogs, videos } = data;
-  const siteTitle = getField(settings, 'site_title', 'RUMMY STORE');
+  const siteTitle = getField(settings, 'site_title', 'App Store');
   let title = siteTitle;
   let description = getField(settings, 'meta_description', '');
   let keywords = getField(settings, 'seo_keywords', '');
   let ogImage = getField(settings, 'logo_url', '');
-  let author = 'RUMMY STORE';
+  let author = 'App Store';
   
   if (urlPath.startsWith('/app/')) {
     const slug = decodeURIComponent(urlPath.split('/app/')[1].split('/')[0].split('?')[0]);
@@ -648,8 +648,8 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
     });
     
     if (app) {
-      const appName = getField(app, 'name', 'Rummy App');
-      title = `${getField(app, 'seo_title') || appName} | ${siteTitle}`;
+      const appName = getField(app, 'name', 'App');
+      title = `${getField(app, 'seo_title') || appName}`;
       const descHtml = getField(app, 'description_html');
       const fallbackDesc = `Download the verified ${appName} app instantly. Smooth gameplay, professional reviews, e-sports integration, and exclusive daily features.`;
       description = getField(app, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
@@ -665,8 +665,8 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
     });
     
     if (app) {
-      const appName = getField(app, 'name', 'Rummy App');
-      title = `${getField(app, 'seo_title') || appName} - Technical Info | ${siteTitle}`;
+      const appName = getField(app, 'name', 'App');
+      title = `${getField(app, 'seo_title') || appName} - Technical Info`;
       const descHtml = getField(app, 'description_html');
       const fallbackDesc = `Download options, package size, status, and technical specifications for ${appName}.`;
       description = getField(app, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
@@ -687,7 +687,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       description = getField(newsItem, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
       keywords = getField(newsItem, 'seo_keywords');
       ogImage = getField(newsItem, 'og_image_url') || getField(newsItem, 'logo_url') || ogImage;
-      author = getField(newsItem, 'ceo_name') || 'RUMMY STORE';
+      author = getField(newsItem, 'ceo_name') || 'App Store';
     }
   } else if (urlPath.startsWith('/blog/') && urlPath.length > 6) {
     const slug = decodeURIComponent(urlPath.split('/blog/')[1].split('/')[0].split('?')[0]);
@@ -703,7 +703,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       description = getField(blogItem, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
       keywords = getField(blogItem, 'seo_keywords');
       ogImage = getField(blogItem, 'cover_url') || ogImage;
-      author = getField(blogItem, 'author') || 'RUMMY STORE';
+      author = getField(blogItem, 'author') || 'App Store';
     }
   } else if (urlPath.startsWith('/videos/') && urlPath.length > 8) {
     const slug = decodeURIComponent(urlPath.split('/videos/')[1].split('/')[0].split('?')[0]);
@@ -765,7 +765,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://rummystore.in${escapeHtml(urlPath)}" />
+    <meta property="og:url" content="https://example.com${escapeHtml(urlPath)}" />
     ${ogImage ? `<meta property="og:image" content="${escapeHtml(ogImage)}" />` : ''}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />

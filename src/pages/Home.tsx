@@ -5,7 +5,7 @@ import { useData } from '../contexts/DataContext';
 import { Search, ShieldAlert, ShieldCheck, Sparkles, ArrowRight, TrendingUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion } from 'framer-motion';
-import { FlipkartBanner, PlayStoreTabs, TopChartItem, AppListItem } from '../components/PlayStoreUI';
+import { FeaturedBanner, PlayStoreTabs, TopChartItem, AppListItem } from '../components/PlayStoreUI';
 
 export default function Home() {
   const { apps: mockApps, settings: mockSettings } = useData();
@@ -87,7 +87,7 @@ export default function Home() {
         <title>{mockSettings.site_title}</title>
         <meta name="description" content={mockSettings.meta_description} />
         {mockSettings.seo_keywords && <meta name="keywords" content={mockSettings.seo_keywords} />}
-        <meta name="author" content="RUMMY STORE" />
+        <meta name="author" content="App Store" />
         <meta name="robots" content="index, follow" />
         
         <meta property="og:type" content="website" />
@@ -122,7 +122,7 @@ export default function Home() {
       <div className="pt-4 px-4" />
 
       {!searchTerm && activeTab.toLowerCase() !== 'categories' && activeTab.toLowerCase() !== 'top charts' && (
-        <FlipkartBanner items={bannerItems} />
+        <FeaturedBanner items={bannerItems} />
       )}
 
       {/* Grid of New Apps - Compact & Glossy (Hidden if searching) */}

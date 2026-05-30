@@ -210,7 +210,7 @@ export default function GatewayPage() {
         </Link>
       </div>
       <Helmet>
-        <title>{`${app.seo_title || app.name} - Technical Info | ${mockSettings.site_title || 'RUMMY STORE'}`}</title>
+        <title>{app.seo_title || app.name}</title>
         <meta name="description" content={app.seo_description || (app.description_html ? app.description_html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().substring(0, 160) : `Technical specifications and download details for ${app.name}.`)} />
         {app.seo_keywords && <meta name="keywords" content={`${app.seo_keywords}, info ${app.name}, ${app.name} technical info`} />}
         <meta property="og:title" content={`${app.seo_title || app.name} - Technical Profile`} />

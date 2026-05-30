@@ -3,7 +3,7 @@ import CryptoJS from 'crypto-js';
 // Derive a unique key to make it harder to guess or decrypt externally
 const getStorageSecret = (): string => {
   const base = "RUMMY_PORTAL_CLIENT_SEC_2026_PROD_SHIELD";
-  return base + "_KINETICS_HASH_4917";
+  return base + "_KINETICS_HASH_V2";
 };
 
 // Obfuscate local storage keys so they aren't easily searchable (e.g. from extensions)
@@ -14,7 +14,7 @@ export function getObfuscatedKey(key: string): string {
       hash = (hash << 5) - hash + key.charCodeAt(i);
       hash |= 0;
     }
-    return `_rs_sec_chunk_${Math.abs(hash).toString(16)}`;
+    return `_app_sec_chunk_${Math.abs(hash).toString(16)}`;
   }
   return key;
 }

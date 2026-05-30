@@ -8,7 +8,7 @@ interface BannerProps {
   items: any[];
 }
 
-export const FlipkartBanner = React.memo(({ items }: BannerProps) => {
+export const FeaturedBanner = React.memo(({ items }: BannerProps) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = React.useState(0);
 

@@ -10,7 +10,8 @@ import { motion } from 'framer-motion';
 export default function AppDetails() {
   const { apps: mockApps, settings: mockSettings, loading, appsSyncedWithServer, serverAppsFetched, refreshAll } = useData();
   const { slug: routeSlug, "*": splat } = useParams();
-  const slug = routeSlug || splat?.replace(/^\/|\/$/g, '').split('/')[0];
+  const decodedSplat = splat ? decodeURIComponent(splat) : '';
+  const slug = routeSlug || decodedSplat.replace(/^\/|\/$/g, '').split('/')[0];
   const app = mockApps.find(a => a.slug?.toLowerCase() === slug?.toLowerCase());
   
   const [triedRefresh, setTriedRefresh] = useState(false);
@@ -100,7 +101,7 @@ export default function AppDetails() {
     );
   }
 
-  const title = `${app.seo_title || app.name} | ${mockSettings.site_title || 'RUMMY STORE'}`;
+  const title = app.seo_title || app.name;
   
   const stripHtml = (html: string) => {
     if (!html) return '';
@@ -192,7 +193,7 @@ export default function AppDetails() {
         <title>{title}</title>
         <meta name="description" content={desc} />
         {app.seo_keywords && <meta name="keywords" content={app.seo_keywords} />}
-        <meta name="author" content="RUMMY STORE" />
+        <meta name="author" content="App Store" />
         <meta name="robots" content="index, follow" />
         {app.target_region && <meta name="geo.region" content={app.target_region} />}
         {app.target_region && <meta name="coverage" content={app.target_region} />}
@@ -229,7 +230,7 @@ export default function AppDetails() {
                 <img src={app.icon_url || undefined} alt={app.name} width={128} height={128} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl sm:text-5xl font-bold bg-zinc-800 text-zinc-500">
-                  {app.name.substring(0, 1)}
+                  {(app.name || 'A').substring(0, 1)}
                 </div>
               )}
             </div>
@@ -260,7 +261,7 @@ export default function AppDetails() {
               {[
                 { label: 'Version', value: app.version },
                 { label: 'Size', value: app.file_size },
-                { label: 'Type', value: app.category.split(',')[0] },
+                { label: 'Type', value: app.category ? app.category.split(',')[0] : 'App' },
                 { label: 'Rating', value: app.rating ? app.rating.toFixed(1) : '5.0', icon: Star },
               ].map((item, i) => (
                 <div key={i} className="text-center py-2 px-1 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-black/5 dark:border-white/5">

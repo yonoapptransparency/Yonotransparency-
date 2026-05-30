@@ -265,7 +265,7 @@ function Header() {
             </nav>
             
             <div className="mt-auto pt-6 border-t border-black/5 dark:border-white/5 text-center shrink-0">
-              <span className="text-xs text-zinc-400 font-medium">&copy; {new Date().getFullYear()} {settings.site_title || 'Rummy Store'}</span>
+              <span className="text-xs text-zinc-400 font-medium">&copy; {new Date().getFullYear()} {settings.site_title || 'App Store'}</span>
             </div>
           </motion.div>
         )}
@@ -508,19 +508,6 @@ function AppContent() {
   const memoizedBottomNav = useMemo(() => <BottomNav />, [location.pathname]);
 
   useEffect(() => {
-    // Simplify metadata update for better performance feel
-    document.title = settings.site_title || 'RUMMY STORE';
-    
-    const setMeta = (selector: string, content: string) => {
-      const el = document.querySelector(selector);
-      if (el) el.setAttribute('content', content);
-    };
-
-    if (settings.meta_description) {
-      setMeta('meta[name="description"]', settings.meta_description);
-      setMeta('meta[property="og:description"]', settings.meta_description);
-    }
-
     // Dynamically synchronize favicon with firebase database changes live across all selectors!
     if (settings.favicon_url) {
       const targetUrl = settings.favicon_url;

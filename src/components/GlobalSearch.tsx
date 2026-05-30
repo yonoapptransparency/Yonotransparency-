@@ -22,14 +22,15 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
 
   const results = query.length > 0 
     ? apps.filter(app => {
+        if (!app || !app.name) return false;
         const searchLower = query.toLowerCase();
         return app.name.toLowerCase().includes(searchLower) || 
                app.seo_title?.toLowerCase().includes(searchLower) ||
                app.category?.toLowerCase().includes(searchLower);
       }).sort((a, b) => {
         // Direct matches first
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
+        const aName = (a.name || '').toLowerCase();
+        const bName = (b.name || '').toLowerCase();
         const q = query.toLowerCase();
         if (aName === q) return -1;
         if (bName === q) return 1;
@@ -41,10 +42,6 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
-    if (e.key === 'Enter' && results.length > 0) {
-      navigate(`/${results[0].slug}`);
-      onClose();
-    }
   };
 
   return (
@@ -68,7 +65,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
-                if (results.length > 0) {
+                if (results.length > 0 && results[0]?.slug) {
                   navigate(`/${results[0].slug}`);
                   onClose();
                 }
@@ -88,6 +85,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                 enterKeyHint="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Find anything... (Apps, Tools, Games)"
                 className="w-full h-20 pl-16 pr-20 bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-[2.5rem] shadow-xl text-xl font-medium focus:outline-none focus:border-blue-500/30 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 dark:text-white"
               />
