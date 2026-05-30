@@ -371,6 +371,70 @@ const BannersTab = React.memo(({ banners, handleAddBanner, handleRemoveBanner, h
   </div>
 ));
 
+const GithubTab = React.memo(({ pushAllToGitHub, gitConfig, saveGitConfig }: any) => {
+  const [logs, setLogs] = React.useState<string[]>([]);
+  const [syncing, setSyncing] = React.useState(false);
+
+  const handleManualSync = async () => {
+    setSyncing(true);
+    setLogs(["Starting Manual GitHub Sync..."]);
+    try {
+      await pushAllToGitHub(undefined, (msg: string) => {
+        setLogs(prev => [...prev, msg]);
+      });
+      setLogs(prev => [...prev, "Sync completed successfully!"]);
+    } catch (err: any) {
+      setLogs(prev => [...prev, `ERROR: ${err.message || 'Push failed'}`]);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in space-y-8">
+      <h2 className="text-2xl font-black mb-8 border-b-4 border-pink-500/20 pb-4 dark:text-white uppercase italic tracking-tighter flex items-center gap-2">
+        <Github className="w-8 h-8" /> Source Control & External Sync
+      </h2>
+      
+      <div className="bg-rose-500/10 border-2 border-rose-500/20 rounded-2xl p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl"></div>
+        <h3 className="text-xl font-bold text-rose-600 mb-2 font-mono flex items-center gap-2">
+           <ShieldAlert className="w-5 h-5" /> Security Notice
+        </h3>
+        <p className="text-sm font-bold text-rose-700/80 mb-2">
+          Secure links and `more_information_url` are automatically scrubbed during this sync to prevent data exposure. Safe sync mode is active.
+        </p>
+      </div>
+
+      <div className="bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-6 space-y-6">
+        <h3 className="font-black text-slate-800 dark:text-white border-b border-black/10 dark:border-white/10 pb-2 uppercase tracking-widest text-xs italic">Live Synchronization Logs</h3>
+        
+        <div className="bg-slate-900 border-2 border-slate-700 rounded-xl p-4 h-[250px] overflow-y-auto font-mono text-xs text-green-400 space-y-1 shadow-inner">
+          {logs.length === 0 ? (
+            <p className="opacity-50 italic">System ready to synchronize target repository...</p>
+          ) : (
+            logs.map((log, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="opacity-50">[{new Date().toLocaleTimeString()}]</span>
+                <span>{log}</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        <button 
+          onClick={handleManualSync} 
+          disabled={syncing || !gitConfig?.token} 
+          className="w-full min-h-[60px] bg-indigo-600 disabled:bg-indigo-600/50 hover:bg-indigo-700 text-white font-black rounded-xl uppercase tracking-widest italic shadow-xl shadow-indigo-600/20 transition-all flex items-center justify-center gap-3 active:scale-95"
+        >
+          {syncing ? <RefreshCw className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+          {syncing ? 'Synchronizing Repository...' : 'Trigger Full Static Build Sync'}
+        </button>
+      </div>
+    </div>
+  );
+});
+
 const SettingsTab = React.memo(({ mockSettings, handleSaveSettings, saving }: any) => (
   <div className="animate-fade-in">
     <h2 className="text-2xl font-black mb-8 border-b-4 border-pink-500/20 pb-4 dark:text-white uppercase italic tracking-tighter">Global Identity Settings (God-Mode)</h2>
@@ -1457,6 +1521,7 @@ export default function AdminDashboard() {
             <h3 className="text-[10px] font-black opacity-30 uppercase tracking-[0.4em] italic mb-2 ml-4 dark:text-white">Authority</h3>
             
             <SidebarItem id="reviews" label="Moderation" icon={ShieldAlert} active={activeTab === 'reviews'} onClick={handleTabChange} />
+            <SidebarItem id="github" label="GitHub Sync" icon={Github} active={activeTab === 'github'} onClick={handleTabChange} />
             <SidebarItem id="settings" label="Global Config" icon={Settings} active={activeTab === 'settings'} onClick={handleTabChange} />
           </div>
 
@@ -1648,6 +1713,9 @@ export default function AdminDashboard() {
                      }} className="bg-pink-500 text-white px-20 py-5 rounded-[2.5rem] font-black uppercase tracking-widest italic shadow-2xl shadow-pink-500/40 animate-pulse">Sync Banners</button>
                    </div>
                 </div>
+              )}
+              {activeTab === 'github' && (
+                <GithubTab pushAllToGitHub={pushAllToGitHub} gitConfig={gitConfig} />
               )}
               {activeTab === 'settings' && (
                 <SettingsTab key={mockSettings.site_title || 'settings'} mockSettings={mockSettings} handleSaveSettings={handleSaveSettings} saving={saving} />

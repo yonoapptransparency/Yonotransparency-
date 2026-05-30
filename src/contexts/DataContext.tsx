@@ -343,16 +343,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         
         if (snap.exists()) {
           const numChunks = snap.data().numChunks || 1;
+          const fetchPromises = [];
           for (let i = 0; i < numChunks; i++) {
-            try {
-              const chunkSnap = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
-              if (chunkSnap.exists() && chunkSnap.data().items) {
-                loadedApps.push(...chunkSnap.data().items);
+            fetchPromises.push((async () => {
+              try {
+                const chunkSnap = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
+                if (chunkSnap.exists() && chunkSnap.data().items) {
+                  return chunkSnap.data().items;
+                }
+              } catch (err) {
+                console.warn(`Failed to fetch chunk ${i}`, err);
               }
-            } catch (err) {
-              console.warn(`Failed to fetch chunk ${i}`, err);
-            }
+              return [];
+            })());
           }
+          const chunkResults = await Promise.all(fetchPromises);
+          chunkResults.forEach(items => loadedApps.push(...items));
           fetchedData = true;
         } else {
           // Fallback to old apps document
@@ -369,7 +375,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         
         if (fetchedData) {
           const data = loadedApps;
-          setApps(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
+          setApps(prev => prev.length === data.length && JSON.stringify(prev.map(p => ({id: p.id, sl: p.serial_number}))) === JSON.stringify(data.map(d => ({id: d.id, sl: d.serial_number}))) ? prev : data);
           secureStorage.setItem('rummystore_apps', JSON.stringify(data));
           
           setAppsSyncedWithServer(true);
@@ -398,7 +404,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'settings'), (snap) => {
         if (snap.exists()) {
           const data = snap.data() as GlobalSettings;
-          setSettings(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
+          setSettings(prev => prev.site_title === data.site_title && prev.last_updated === data.last_updated ? prev : data);
           secureStorage.setItem('rummystore_settings', JSON.stringify(data));
           
           setSettingsSyncedWithServer(true);
@@ -422,7 +428,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'news'), (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
-          setNews(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
+          setNews(prev => prev.length === data.length && prev[0]?.id === data[0]?.id ? prev : data);
           secureStorage.setItem('rummystore_news', JSON.stringify(data));
           
           setNewsSyncedWithServer(true);
@@ -443,7 +449,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'blogs'), (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
-          setBlogs(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
+          setBlogs(prev => prev.length === data.length && prev[0]?.id === data[0]?.id ? prev : data);
           secureStorage.setItem('rummystore_blogs', JSON.stringify(data));
           
           setBlogsSyncedWithServer(true);
@@ -464,7 +470,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'videos'), (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
-          setVideos(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
+          setVideos(prev => prev.length === data.length && prev[0]?.id === data[0]?.id ? prev : data);
           secureStorage.setItem('rummystore_videos', JSON.stringify(data));
           
           setVideosSyncedWithServer(true);
@@ -703,13 +709,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const pushAllToGitHub = React.useCallback(async (customConfig?: GitConfig) => {
+  const pushAllToGitHub = React.useCallback(async (customConfig?: GitConfig, onProgress?: (msg: string) => void) => {
     const configToUse = customConfig || gitConfig;
     if (!configToUse) {
       throw new Error("GitHub synchronization is not configured.");
     }
-    console.log("GitHub Sync: Manually pushing all static data to repository...");
+    const log = (msg: string) => {
+      console.log(msg);
+      if (onProgress) onProgress(msg);
+    };
+
+    log("GitHub Sync: Manually pushing all static data to repository...");
+    log("GitHub Sync: Generating secure payload (stripping more_information_url)...");
     const updatedCode = generateStaticDataFileCode(apps, settings, news, blogs, videos);
+    
+    log(`GitHub Sync: Payload generated successfully (${apps.length} apps, ${news.length} news items).`);
+    log("GitHub Sync: Uploading to GitHub...");
+    
     await commitFileToGitHub({
       owner: configToUse.owner,
       repo: configToUse.repo,
@@ -719,7 +735,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       content: updatedCode,
       message: `Admin Release: Manual platform synchronization triggered`
     });
-    console.log("GitHub Sync: Manual push successful.");
+    log("GitHub Sync: Manual push successful!");
   }, [gitConfig, apps, settings, news, blogs, videos]);
 
   const testCloudConnection = React.useCallback(async () => {
