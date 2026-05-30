@@ -201,7 +201,7 @@ async function startServer() {
         const slug = app.slug?.stringValue;
         if (slug) {
           xml += `  <url>\n`;
-          xml += `    <loc>${host}/app/${escapeHtmlForSitemap(slug)}</loc>\n`;
+          xml += `    <loc>${host}/${escapeHtmlForSitemap(slug)}</loc>\n`;
           xml += `    <changefreq>weekly</changefreq>\n`;
           xml += `    <priority>0.9</priority>\n`;
           xml += `  </url>\n`;

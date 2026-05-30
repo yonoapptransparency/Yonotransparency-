@@ -54,7 +54,7 @@ export default function NewApps() {
           <motion.div key={app.id} variants={itemVariants}>
             <Link 
               onClick={triggerNewAppHaptic} 
-              to={`/app/${app.slug}`} 
+              to={`/${app.slug}`} 
               className="bg-white dark:bg-zinc-900 p-4 rounded-[20px] transition-all group flex gap-4 items-center relative overflow-hidden block border border-black/5 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 shadow-sm"
             >
               <div className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden bg-white dark:bg-zinc-800 border border-black/5 dark:border-white/5 shadow-sm relative z-10">

@@ -129,7 +129,7 @@ export default function GatewayPage() {
   }
 
   // Graceful interstitial for slow database cold-starts or deep links on first visit
-  if (!app && (!serverAppsFetched || isRefreshing)) {
+  if (!app && (!serverAppsFetched || isRefreshing || !triedRefresh)) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[40vh] text-center px-4 max-w-sm mx-auto">
         <div className="w-8 h-8 border-[3px] border-black/10 dark:border-white/10 border-t-blue-500 rounded-full animate-spin mb-4"></div>
@@ -200,7 +200,7 @@ export default function GatewayPage() {
     <div className="animate-fade-in select-none pb-20">
       <div className="px-4 mb-6 max-w-4xl mx-auto pt-6">
         <Link 
-          to={`/app/${app.slug}`} 
+          to={`/${app.slug}`} 
           className="inline-flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors group"
         >
           <div className="p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 group-hover:-translate-x-1 transition-transform">
@@ -403,7 +403,7 @@ export default function GatewayPage() {
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {mockApps.filter(a => a.is_new && a.id !== app.id).slice(0, 4).map(discoverApp => (
-            <Link key={discoverApp.id} to={`/app/${discoverApp.slug}`} className="bg-zinc-50 dark:bg-zinc-800/30 p-6 flex flex-col items-center text-center transition-all border border-black/5 dark:border-white/5 rounded-[24px] hover:border-black/10 dark:hover:border-white/10 group">
+            <Link key={discoverApp.id} to={`/${discoverApp.slug}`} className="bg-zinc-50 dark:bg-zinc-800/30 p-6 flex flex-col items-center text-center transition-all border border-black/5 dark:border-white/5 rounded-[24px] hover:border-black/10 dark:hover:border-white/10 group">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[18px] overflow-hidden mb-4 bg-white dark:bg-zinc-900 shadow-sm border border-black/5 dark:border-white/5 group-hover:scale-105 transition-transform">
                  {discoverApp.icon_url && <img src={discoverApp.icon_url} alt="" className="w-full h-full object-cover"/>}
               </div>

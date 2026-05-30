@@ -42,7 +42,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
     if (e.key === 'Enter' && results.length > 0) {
-      navigate(`/app/${results[0].slug}`);
+      navigate(`/${results[0].slug}`);
       onClose();
     }
   };
@@ -69,7 +69,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
               onSubmit={(e) => {
                 e.preventDefault();
                 if (results.length > 0) {
-                  navigate(`/app/${results[0].slug}`);
+                  navigate(`/${results[0].slug}`);
                   onClose();
                 }
               }}
@@ -117,7 +117,7 @@ export default function GlobalSearch({ isOpen, onClose }: { isOpen: boolean; onC
                     {results.length > 0 ? results.map((app) => (
                       <Link 
                         key={app.id} 
-                        to={`/app/${app.slug}`}
+                        to={`/${app.slug}`}
                         onClick={onClose}
                         className="flex items-center gap-4 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-2xl transition-all group"
                       >

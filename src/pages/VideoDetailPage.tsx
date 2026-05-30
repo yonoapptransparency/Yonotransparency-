@@ -90,7 +90,7 @@ export default function VideoDetailPage() {
   }
 
   // Graceful interstitial for slow database cold-starts or deep links on first visit
-  if (!videoItem && (!serverVideosFetched || !videosSyncedWithServer || isRefreshing)) {
+  if (!videoItem && (!serverVideosFetched || !videosSyncedWithServer || isRefreshing || !triedRefresh)) {
     return (
       <div className="flex flex-col items-center justify-center py-20 min-h-[40vh] text-center px-4 max-w-sm mx-auto">
         <div className="w-8 h-8 border-[3px] border-black/10 dark:border-white/10 border-t-blue-500 rounded-full animate-spin mb-4"></div>

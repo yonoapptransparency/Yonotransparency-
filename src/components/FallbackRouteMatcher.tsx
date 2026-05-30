@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Navigate, Link } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
+import AppDetails from '../pages/AppDetails';
 
 export default function FallbackRouteMatcher() {
   const location = useLocation();
@@ -58,12 +59,13 @@ export default function FallbackRouteMatcher() {
         .finally(() => {
           setTriedRefresh(true);
           setIsRefreshing(false);
+          // Wait for next render cycle to evaluate state
         });
       setResolvedType('loading');
       return;
     }
 
-    if (isRefreshing) {
+    if (isRefreshing || !triedRefresh) {
       setResolvedType('loading');
       return;
     }
@@ -81,7 +83,7 @@ export default function FallbackRouteMatcher() {
   }
 
   if (resolvedType === 'app') {
-    return <Navigate to={`/app/${slug}`} replace />;
+    return <AppDetails />;
   }
 
   if (resolvedType === 'news') {

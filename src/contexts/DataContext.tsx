@@ -105,19 +105,44 @@ const DataContext = createContext<DataContextType | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const [apps, setApps] = useState<AppConfig[]>(() => {
-    return mockApps;
+    try {
+      const cached = secureStorage.getItem('rummystore_apps');
+      return cached ? JSON.parse(cached) : mockApps;
+    } catch {
+      return mockApps;
+    }
   });
   const [settings, setSettings] = useState<GlobalSettings>(() => {
-    return mockSettings;
+    try {
+      const cached = secureStorage.getItem('rummystore_settings');
+      return cached ? JSON.parse(cached) : mockSettings;
+    } catch {
+      return mockSettings;
+    }
   });
   const [news, setNews] = useState<NewsItem[]>(() => {
-    return mockNews;
+    try {
+      const cached = secureStorage.getItem('rummystore_news');
+      return cached ? JSON.parse(cached) : mockNews;
+    } catch {
+      return mockNews;
+    }
   });
   const [blogs, setBlogs] = useState<BlogPost[]>(() => {
-    return mockBlogs;
+    try {
+      const cached = secureStorage.getItem('rummystore_blogs');
+      return cached ? JSON.parse(cached) : mockBlogs;
+    } catch {
+      return mockBlogs;
+    }
   });
   const [videos, setVideos] = useState<VideoItem[]>(() => {
-    return mockVideos;
+    try {
+      const cached = secureStorage.getItem('rummystore_videos');
+      return cached ? JSON.parse(cached) : mockVideos;
+    } catch {
+      return mockVideos;
+    }
   });
   // Fast persistent loading state management - initialized to false to enable instant display of statically compiled fallbacks
   const [loading, setLoading] = useState(false);
@@ -222,14 +247,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     const checkLoaded = (docName: keyof typeof loadedDocs) => {
       loadedDocs[docName] = true;
-      if (loadedDocs.apps && loadedDocs.settings) {
+      if (loadedDocs.apps && loadedDocs.settings && loadedDocs.news && loadedDocs.blogs && loadedDocs.videos) {
         setLoading(false);
+        setLoadedFromServer(true);
       }
     };
 
     // Safety fallback - prevent any hanging sync loops after max 3 seconds
     const timeout = setTimeout(() => {
       setLoading(false);
+      setLoadedFromServer(true);
     }, 3000);
 
     // Fast sync fallback for deep links (especially new apps not in cache) - set to 3 seconds for snappy visual performance
@@ -703,7 +730,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       await Promise.all(docsToFetch.map(async (d) => {
         try {
           if (d.path === 'apps') {
-            const snapMeta = await withServerConfirmation(() => getDoc(doc(db, 'store_data', 'apps_meta')), 3000);
+            const snapMeta = await withServerConfirmation(() => getDoc(doc(db, 'store_data', 'apps_meta')), 10000);
             if (snapMeta.exists()) {
               const numChunks = snapMeta.data().numChunks || 1;
               const allApps = [];
@@ -721,7 +748,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               secureStorage.setItem('rummystore_apps', JSON.stringify(allApps));
             } else {
               // Fallback to old document
-              const oldSnap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', 'apps')), 3000);
+              const oldSnap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', 'apps')), 10000);
               if (oldSnap.exists() && oldSnap.data().items) {
                 const data = oldSnap.data().items;
                 setApps(data);
@@ -729,8 +756,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               }
             }
           } else {
-            // Use standard getDoc instead of getDocFromServer for instant cached fallbacks or clean short 3s check
-            const snap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', d.path)), 3000);
+            // Use standard getDoc instead of getDocFromServer for instant cached fallbacks or clean short check
+            const snap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', d.path)), 10000);
             if (snap.exists()) {
               const data = (d as any).key ? (snap.data() as any)[(d as any).key] : snap.data();
               d.setter(data);

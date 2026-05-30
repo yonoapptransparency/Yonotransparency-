@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { getAdminPath } from '../lib/utils';
 import { LayoutDashboard, Users, FileText, Settings, ShieldAlert, Shield, LogOut, Save, Upload, Type, Link as LinkIcon, ToggleLeft, Layers, Newspaper, Plus, Trash2, Video as VideoIcon, Github, GitBranch, RefreshCw } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { auth, db } from '../lib/firebase';
@@ -1357,7 +1358,8 @@ export default function AdminDashboard() {
   }
 
   if (!user) {
-    return <Navigate to="/admin/login" />;
+    const adminPath = getAdminPath();
+    return <Navigate to={`/${adminPath}/login`} />;
   }
 
   if (isAdminUser === false) {
@@ -1548,7 +1550,7 @@ export default function AdminDashboard() {
                                 <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400">Target Redirect Link</label>
                                 <span className="text-[9px] font-black text-pink-500 uppercase tracking-wider">Quick Link Tool</span>
                               </div>
-                              <input type="text" value={banner.link} onChange={(e) => handleBannerChange(banner.id, 'link', e.target.value)} className="w-full bg-white dark:bg-slate-900 border-2 border-pink-500/20 dark:border-pink-500/20 rounded-xl p-3 text-xs font-mono dark:text-white" placeholder="Link URL (/app/slug or http://...)" />
+                              <input type="text" value={banner.link} onChange={(e) => handleBannerChange(banner.id, 'link', e.target.value)} className="w-full bg-white dark:bg-slate-900 border-2 border-pink-500/20 dark:border-pink-500/20 rounded-xl p-3 text-xs font-mono dark:text-white" placeholder="Link URL (/slug or http://...)" />
                               
                               <div className="mt-2 flex flex-wrap gap-2">
                                 <select 
@@ -1562,7 +1564,7 @@ export default function AdminDashboard() {
                                 >
                                   <option value="">Link to App...</option>
                                   {appsList.map((a: any) => (
-                                    <option key={a.id} value={`/app/${a.slug}`}>{a.name}</option>
+                                    <option key={a.id} value={`/${a.slug}`}>{a.name}</option>
                                   ))}
                                 </select>
 

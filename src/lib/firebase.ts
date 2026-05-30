@@ -1,6 +1,10 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore } from 'firebase/firestore';
+
+// Allow Vite to statically bundle the configuration file
+import appletConfig from '../../firebase-applet-config.json';
+
 declare global {
   interface Window {
     __FIREBASE_CONFIG__?: {
@@ -16,21 +20,8 @@ declare global {
   }
 }
 
-// Check if local applet config has real keys to fall back on during static SPA deployments
-const isLocalConfigValid = false; // We rely exclusively on the injected window.__FIREBASE_CONFIG__ now.
-
-const fallbackConfig = {
-  projectId: "placeholder-project-id",
-  appId: "placeholder-app-id",
-  apiKey: "PLACEHOLDER",
-  authDomain: "placeholder-project.firebaseapp.com",
-  firestoreDatabaseId: "(default)",
-  storageBucket: "placeholder-project.firebasestorage.app",
-  messagingSenderId: "000000000",
-  measurementId: ""
-};
-
-const firebaseConfig = (typeof window !== 'undefined' && window.__FIREBASE_CONFIG__) || fallbackConfig;
+// We rely on either the injected config (for SSR/dynamic routes) or the statically bundled config (for dumb static hosting)
+const firebaseConfig = (typeof window !== 'undefined' && window.__FIREBASE_CONFIG__) || appletConfig;
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -41,6 +32,7 @@ export const db = initializeFirestore(app, {
 }, firebaseConfig.firestoreDatabaseId === '(default)' ? undefined : firebaseConfig.firestoreDatabaseId);
 
 export const isFirebaseConfigured = firebaseConfig.apiKey !== 'PLACEHOLDER' && firebaseConfig.apiKey.trim() !== '' && !firebaseConfig.apiKey.includes('YOUR_API_KEY');
+
 
 
 

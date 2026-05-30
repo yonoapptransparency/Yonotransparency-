@@ -223,7 +223,7 @@ export const AppListItem = React.memo(({ app, index }: { app: any; index?: numbe
       className="will-change-[opacity,transform]"
     >
       <Link 
-        to={`/app/${app.slug}`}
+        to={`/${app.slug}`}
         onClick={() => {
           if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(10);
@@ -290,7 +290,7 @@ export const TopChartItem = React.memo(({ rank, app }: TopChartItemProps) => {
       className="will-change-[opacity,transform]"
     >
       <Link 
-        to={`/app/${app.slug}`}
+        to={`/${app.slug}`}
         onClick={() => {
           if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(10);

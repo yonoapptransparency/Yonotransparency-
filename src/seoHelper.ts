@@ -5,7 +5,7 @@ import { getAdminPath } from './lib/utils';
 
 let cachedData: any = null;
 let lastFetchTime = 0;
-const CACHE_TTL = 1000; // 1 second cache for instant updates and excellent performance
+const CACHE_TTL = 120000; // 2 minutes cache to prevent extreme blocking on each pageload
 
 function parseFirestoreValue(value: any): any {
   if (!value) return null;
@@ -218,7 +218,19 @@ async function getPagePreRender(urlPath: string, data: any): Promise<string> {
   } else if (cleanPathLower === '/responsibility') {
     bodyContent = renderResponsibility(settings);
   } else {
-    bodyContent = renderHome(apps, settings, news, blogs, videos);
+    // Dynamic fallback for canonical root-level slugs (new direct path structure)
+    const possibleSlug = cleanPathLower.replace(/^\/|\/$/g, '');
+    if (apps.some((a: any) => a.slug?.toLowerCase() === possibleSlug)) {
+      bodyContent = renderAppDetails(possibleSlug, apps, settings);
+    } else if (news.some((n: any) => n.slug?.toLowerCase() === possibleSlug)) {
+      bodyContent = renderNewsDetail(possibleSlug, news, settings);
+    } else if (blogs.some((b: any) => b.slug?.toLowerCase() === possibleSlug)) {
+      bodyContent = renderBlogDetail(possibleSlug, blogs, settings);
+    } else if (videos.some((v: any) => v.slug?.toLowerCase() === possibleSlug)) {
+      bodyContent = renderVideoDetail(possibleSlug, videos, settings);
+    } else {
+      bodyContent = renderHome(apps, settings, news, blogs, videos);
+    }
   }
 
   const header = renderHeader(settings);
@@ -311,7 +323,7 @@ function renderHome(apps: any[], settings: any, news: any[], blogs: any[], video
     const isNew = app.is_new === true || (app.is_new && app.is_new.booleanValue === true);
     
     appsHtml += `
-      <a href="/app/${encodeURIComponent(slug)}" class="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl transition border-b border-black/5 dark:border-white/5">
+      <a href="/${encodeURIComponent(slug)}" class="flex items-center gap-4 p-4 hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl transition border-b border-black/5 dark:border-white/5">
         <span class="text-sm font-bold text-zinc-400 shrink-0 w-8 text-center">${i + 1}</span>
         <img src="${icon || 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&fit=crop'}" class="w-16 h-16 rounded-[18px] object-cover bg-white shadow-sm shrink-0" alt="${escapeHtml(name)}"/>
         <div class="flex-1 min-w-0 text-left">
@@ -373,7 +385,7 @@ function renderNewApps(apps: any[], settings: any) {
     const icon = getField(app, 'icon_url');
     
     grid += `
-      <a href="/app/${encodeURIComponent(slug)}" class="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-black/5 text-center flex flex-col items-center">
+      <a href="/${encodeURIComponent(slug)}" class="p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-black/5 text-center flex flex-col items-center">
         <img src="${icon || 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&fit=crop'}" class="w-20 h-20 rounded-2xl object-cover mb-3 shadow-sm bg-white" alt="icon"/>
         <h3 class="font-bold text-sm text-zinc-900 dark:text-white truncate w-full">${escapeHtml(name)}</h3>
         <p class="text-xs text-zinc-500 mt-1 truncate w-full">${escapeHtml(cat)}</p>
@@ -460,7 +472,7 @@ function renderGateway(slug: string, apps: any[], settings: any) {
         <p class="text-xs text-zinc-400 uppercase tracking-widest font-black mb-6">Download Redirection Hub</p>
         <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-semibold mb-8">You are accessing the download redirect portal to initiate the application package extraction on your device. Ensure you have a stable network connection.</p>
         <a href="/" class="block w-full py-4 bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 text-white font-bold rounded-2xl">Download / Install Client</a>
-        <a href="/app/${encodeURIComponent(slug)}" class="block text-xs font-semibold text-blue-500 hover:underline mt-4">Read Technical Security Description</a>
+        <a href="/${encodeURIComponent(slug)}" class="block text-xs font-semibold text-blue-500 hover:underline mt-4">Read Technical Security Description</a>
       </div>
     </div>
   `;
@@ -714,6 +726,21 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       }
       if (videoId) {
         ogImage = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      }
+    }
+  } else {
+    // Dynamic mapping for root-level routes
+    const possibleSlug = decodeURIComponent(urlPath.replace(/^\/|\/$/g, '').split('?')[0]);
+    if (possibleSlug && possibleSlug !== '') {
+      const app = apps.find((a: any) => getField(a, 'slug')?.toLowerCase() === possibleSlug.toLowerCase());
+      if (app) {
+        const appName = getField(app, 'name', 'Rummy App');
+        title = `${getField(app, 'seo_title') || appName} | ${siteTitle}`;
+        const descHtml = getField(app, 'description_html');
+        const fallbackDesc = `Download the verified ${appName} app instantly. Smooth gameplay, professional reviews, e-sports integration, and exclusive daily features.`;
+        description = getField(app, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
+        keywords = getField(app, 'seo_keywords');
+        ogImage = getField(app, 'og_image_url') || getField(app, 'icon_url') || ogImage;
       }
     }
   }
