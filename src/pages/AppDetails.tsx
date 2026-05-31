@@ -1,11 +1,11 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useData } from '../contexts/DataContext';
-import { ShieldCheck, ShieldAlert, ArrowRight, ArrowLeft, Star, Sparkles, Info, FileText } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, ArrowRight, ArrowLeft, Star, Sparkles, Info, FileText, Share2, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { AppListItem } from '../components/PlayStoreUI';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AppDetails() {
   const { apps: mockApps, settings: mockSettings, loading, appsSyncedWithServer, serverAppsFetched, refreshAll } = useData();
@@ -108,8 +108,25 @@ export default function AppDetails() {
     const stripped = html.replace(/<[^>]*>?/gm, ' ');
     return stripped.replace(/\s+/g, ' ').trim();
   };
+
+  const cleanSeoDescription = (rawDesc: string) => {
+    if (!rawDesc) return '';
+    const trimmed = rawDesc.trim();
+    if (trimmed.startsWith('<') || trimmed.includes('<meta ')) {
+      const metaMatch = trimmed.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+      if (metaMatch && metaMatch[1]) {
+        return metaMatch[1].trim();
+      }
+      const ogMatch = trimmed.match(/<meta\s+property=["']og:description["']\s+content=["'](.*?)["']/i);
+      if (ogMatch && ogMatch[1]) {
+        return ogMatch[1].trim();
+      }
+      return stripHtml(trimmed).substring(0, 160);
+    }
+    return trimmed;
+  };
   
-  const desc = app.seo_description || (app.description_html ? stripHtml(app.description_html).substring(0, 160) : `${app.name} application specifications`);
+  const desc = cleanSeoDescription(app.seo_description) || (app.description_html ? stripHtml(app.description_html).substring(0, 160) : `${app.name} application specifications`);
   const ogImage = app.og_image_url || app.icon_url;
 
   const faqSchema = app.faqs && app.faqs.length > 0 ? {
@@ -176,8 +193,53 @@ export default function AppDetails() {
       });
   }, [mockApps, app.category, app.id]);
 
+  const [shareToast, setShareToast] = useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        setShareToast(true);
+        setTimeout(() => setShareToast(false), 2050);
+      })
+      .catch((err) => {
+        console.error('Failed to copy text: ', err);
+      });
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title || app.name,
+          text: desc || `Check out ${app.name} specification on our platform.`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Error sharing:', err);
+          copyToClipboard();
+        }
+      }
+    } else {
+      copyToClipboard();
+    }
+  };
+
   return (
-    <div className="animate-fade-in max-w-5xl mx-auto select-none">
+    <div className="animate-fade-in max-w-[1550px] mx-auto select-none px-3 sm:px-6 md:px-10">
+      <AnimatePresence>
+        {shareToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-full shadow-xl flex items-center gap-2 border border-white/10 dark:border-black/5"
+          >
+            <Check className="w-4 h-4 text-green-500 font-bold animate-bounce" />
+            <span className="text-sm font-semibold tracking-wide">Link copied to clipboard!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="px-4 mb-4">
         <Link 
           to="/" 
@@ -222,7 +284,7 @@ export default function AppDetails() {
           </script>
         )}
       </Helmet>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="w-full">
         <div className="pt-2 pb-6 sm:pt-4 sm:pb-10 mb-6 flex flex-col items-center text-center relative transition-all duration-300 border-b border-black/5 dark:border-white/5">
           <div className="relative mb-6">
             <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-[22px] overflow-hidden shrink-0 shadow-lg bg-white border border-black/5 dark:border-white/10 group">
@@ -274,18 +336,33 @@ export default function AppDetails() {
               ))}
             </div>
   
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto min-w-[280px] flex justify-center cursor-pointer select-none"
-            >
-              <Link 
-                to={`/info/${app.slug}`} 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-10 rounded-[20px] flex items-center justify-center gap-2 transition-all text-[15px] shadow-lg shadow-blue-600/20"
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center select-none mt-2">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto min-w-[200px]"
               >
-                More <ArrowRight className="w-5 h-5" />
-              </Link>
-            </motion.div>
+                <Link 
+                  to={`/info/${app.slug}`} 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-[20px] flex items-center justify-center gap-2 transition-all text-[15px] shadow-lg shadow-blue-600/20"
+                >
+                  More <ArrowRight className="w-5 h-5" />
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto min-w-[200px]"
+              >
+                <button 
+                  onClick={handleShare}
+                  className="w-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold py-4 px-8 rounded-[20px] flex items-center justify-center gap-2 transition-all text-[15px] border border-black/5 dark:border-white/5 shadow-sm"
+                >
+                  <Share2 className="w-5 h-5 text-blue-500" /> Share app
+                </button>
+              </motion.div>
+            </div>
           </div>
         </div>
 
@@ -306,7 +383,7 @@ export default function AppDetails() {
       </div>
 
       {/* RESTORED SAFETY & INFO BOXES */}
-      <div className="px-1 space-y-3 mb-8 max-w-3xl mx-auto">
+      <div className="px-1 space-y-3 mb-8 w-full">
 
         {app.red_box_msg && app.red_box_msg.trim() !== '.' && app.red_box_msg.trim() !== '' && (
           <div className="bg-rose-50/50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 p-4 rounded-2xl flex items-start gap-4 shadow-sm group">

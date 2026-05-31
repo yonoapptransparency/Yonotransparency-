@@ -38,14 +38,16 @@ export default function VideosPage() {
   }, [mockVideos, searchTerm]);
 
   return (
-    <div className="animate-fade-in min-h-screen plain-content px-4">
-      <div className="mb-10">
+    <div className="animate-fade-in min-h-screen max-w-[1550px] mx-auto plain-content px-3 sm:px-6 md:px-10">
+      <div className="mb-12 pt-4">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] opacity-40 hover:opacity-100 transition-opacity"
+          className="inline-flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors group"
         >
-          <ArrowLeft className="w-3 h-3" />
-          Gateway
+          <div className="p-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 group-hover:-translate-x-1 transition-transform">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
+          Home
         </Link>
       </div>
 

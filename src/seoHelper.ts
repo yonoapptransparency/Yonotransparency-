@@ -37,7 +37,7 @@ function parseFirestoreDoc(docFields: any): any {
   return obj;
 }
 
-function getField(obj: any, key: string, fallback = ''): string {
+export function getField(obj: any, key: string, fallback = ''): string {
   if (!obj) return fallback;
   const value = obj[key];
   if (value === undefined || value === null) return fallback;
@@ -50,7 +50,7 @@ function getField(obj: any, key: string, fallback = ''): string {
   return String(value);
 }
 
-async function fetchStoreData() {
+export async function fetchStoreData() {
   const now = Date.now();
   if (cachedData && (now - lastFetchTime) < CACHE_TTL) {
     return cachedData;
@@ -92,11 +92,11 @@ async function fetchStoreData() {
 
     // Parallel Group 1: Fetch metadata and global collections concurrently
     const [settingsRes, newsRes, blogsRes, videosRes, metaRes] = await Promise.all([
-      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/settings?nocache=${now}`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
-      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/news?nocache=${now}`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
-      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/blogs?nocache=${now}`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
-      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/videos?nocache=${now}`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
-      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_meta?nocache=${now}`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null)
+      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/settings`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
+      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/news`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
+      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/blogs`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
+      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/videos`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null),
+      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_meta`, { cache: 'no-store', headers: cacheHeaders }).catch(() => null)
     ]);
 
     let numChunks = 5; // Default fallback chunks
@@ -107,9 +107,9 @@ async function fetchStoreData() {
       }
     }
 
-    // Parallel Group 2: Fetch only the necessary app chunks using cache-busted fetch requests
+    // Parallel Group 2: Fetch only the necessary app chunks
     const chunkPromises = Array.from({ length: numChunks }).map((_, i) => 
-      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_chunk_${i}?nocache=${now}`, {
+      fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_chunk_${i}`, {
         cache: 'no-store',
         headers: cacheHeaders
       })
@@ -173,6 +173,23 @@ function stripHtml(html: string) {
   if (!html) return '';
   const stripped = html.replace(/<[^>]*>?/gm, ' ');
   return stripped.replace(/\s+/g, ' ').trim();
+}
+
+function cleanSeoDescription(desc: string): string {
+  if (!desc) return '';
+  const trimmed = desc.trim();
+  if (trimmed.startsWith('<') || trimmed.includes('<meta ')) {
+    const metaMatch = trimmed.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+    if (metaMatch && metaMatch[1]) {
+      return metaMatch[1].trim();
+    }
+    const ogMatch = trimmed.match(/<meta\s+property=["']og:description["']\s+content=["'](.*?)["']/i);
+    if (ogMatch && ogMatch[1]) {
+      return ogMatch[1].trim();
+    }
+    return stripHtml(trimmed).substring(0, 160);
+  }
+  return trimmed;
 }
 
 async function getPagePreRender(urlPath: string, data: any): Promise<string> {
@@ -239,7 +256,7 @@ async function getPagePreRender(urlPath: string, data: any): Promise<string> {
   return `
     <div class="flex flex-col min-h-screen">
       ${header}
-      <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-1.5 sm:py-3 pb-16 sm:pb-24 overflow-x-hidden relative">
+      <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-1.5 sm:py-3 pb-16 sm:pb-24 overflow-x-hidden relative">
         ${bodyContent}
       </main>
       ${footer}
@@ -281,7 +298,7 @@ function renderFooter(settings: any) {
 
   return `
     <footer class="pt-12 pb-8 border-t border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950 mt-12 text-center text-zinc-500 dark:text-zinc-400">
-      <div class="max-w-5xl mx-auto px-6">
+      <div class="max-w-7xl mx-auto px-6">
         <h3 class="text-xl font-bold flex items-center justify-center gap-2 text-zinc-900 dark:text-white mb-2">
           ${logoUrl ? `<img src="${escapeHtml(logoUrl)}" class="w-8 h-8 object-contain" alt="Logo" />` : ''}
           <span>${escapeHtml(siteTitle)}</span>
@@ -296,7 +313,7 @@ function renderFooter(settings: any) {
           <a href="/responsibility">Safety</a>
         </div>
         
-        <div class="max-w-3xl mx-auto flex flex-col gap-4 text-left text-xs text-zinc-500 leading-relaxed">
+        <div class="max-w-7xl mx-auto flex flex-col gap-4 text-left text-xs text-zinc-500 leading-relaxed">
           ${disclaimerText ? `<div class="bg-white dark:bg-zinc-900 border border-black/5 rounded-2xl p-6"><strong>Disclaimer:</strong> ${disclaimerText}</div>` : ''}
           ${ethicsText ? `<div class="bg-white dark:bg-zinc-900 border border-black/5 rounded-2xl p-6"><strong>Ethics & Safety:</strong> ${ethicsText}</div>` : ''}
           ${importantNotice ? `<div class="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 rounded-2xl p-6"><strong>Notice:</strong> ${importantNotice}</div>` : ''}
@@ -628,7 +645,7 @@ function getSafeFirebaseConfig(): any {
   }
 }
 
-export async function injectSeoTags(template: string, urlPath: string): Promise<string> {
+export async function injectSeoTags(template: string, urlPath: string, hostUrl?: string): Promise<string> {
   let data = await fetchStoreData();
   if (!data || !data.settings) return template;
 
@@ -652,7 +669,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       title = `${getField(app, 'seo_title') || appName}`;
       const descHtml = getField(app, 'description_html');
       const fallbackDesc = `Download the verified ${appName} app instantly. Smooth gameplay, professional reviews, e-sports integration, and exclusive daily features.`;
-      description = getField(app, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
+      description = cleanSeoDescription(getField(app, 'seo_description')) || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
       keywords = getField(app, 'seo_keywords');
       ogImage = getField(app, 'og_image_url') || getField(app, 'icon_url') || ogImage;
     }
@@ -669,7 +686,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       title = `${getField(app, 'seo_title') || appName} - Technical Info`;
       const descHtml = getField(app, 'description_html');
       const fallbackDesc = `Download options, package size, status, and technical specifications for ${appName}.`;
-      description = getField(app, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
+      description = cleanSeoDescription(getField(app, 'seo_description')) || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
       keywords = `${getField(app, 'seo_keywords')}, info ${appName}, secure ${appName}`;
       ogImage = getField(app, 'og_image_url') || getField(app, 'icon_url') || ogImage;
     }
@@ -684,7 +701,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       const itemTitle = getField(newsItem, 'title', 'Latest News');
       title = `${getField(newsItem, 'seo_title') || itemTitle} | ${siteTitle}`;
       const descHtml = getField(newsItem, 'description') || getField(newsItem, 'content');
-      description = getField(newsItem, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
+      description = cleanSeoDescription(getField(newsItem, 'seo_description')) || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
       keywords = getField(newsItem, 'seo_keywords');
       ogImage = getField(newsItem, 'og_image_url') || getField(newsItem, 'logo_url') || ogImage;
       author = getField(newsItem, 'ceo_name') || 'App Store';
@@ -700,7 +717,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       const itemTitle = getField(blogItem, 'title', 'Blog Post');
       title = `${getField(blogItem, 'seo_title') || itemTitle} | ${siteTitle}`;
       const descHtml = getField(blogItem, 'excerpt') || getField(blogItem, 'content');
-      description = getField(blogItem, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
+      description = cleanSeoDescription(getField(blogItem, 'seo_description')) || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
       keywords = getField(blogItem, 'seo_keywords');
       ogImage = getField(blogItem, 'cover_url') || ogImage;
       author = getField(blogItem, 'author') || 'App Store';
@@ -716,7 +733,7 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
       const itemTitle = getField(videoItem, 'title', 'Video Specs');
       title = `${getField(videoItem, 'seo_title') || itemTitle} | ${siteTitle}`;
       const descHtml = getField(videoItem, 'description');
-      description = getField(videoItem, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
+      description = cleanSeoDescription(getField(videoItem, 'seo_description')) || (descHtml ? stripHtml(descHtml).substring(0, 160) : '');
       keywords = getField(videoItem, 'seo_keywords');
       const youtubeUrl = getField(videoItem, 'youtube_url');
       let videoId = '';
@@ -738,24 +755,55 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
         title = `${getField(app, 'seo_title') || appName} | ${siteTitle}`;
         const descHtml = getField(app, 'description_html');
         const fallbackDesc = `Download the verified ${appName} app instantly. Smooth gameplay, professional reviews, e-sports integration, and exclusive daily features.`;
-        description = getField(app, 'seo_description') || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
+        description = cleanSeoDescription(getField(app, 'seo_description')) || (descHtml ? stripHtml(descHtml).substring(0, 160) : fallbackDesc);
         keywords = getField(app, 'seo_keywords');
         ogImage = getField(app, 'og_image_url') || getField(app, 'icon_url') || ogImage;
       }
     }
   }
 
+  const fallbackHost = hostUrl || 'https://rummystore.com';
+  const cleanHost = fallbackHost.replace(/\/+$/, '');
+  const absoluteUrl = `${cleanHost}${urlPath}`;
+
+  let absoluteOgImage = ogImage;
+  if (ogImage) {
+    const trimmedOg = ogImage.trim();
+    if (trimmedOg.startsWith('//')) {
+      absoluteOgImage = `https:${trimmedOg}`;
+    } else if (!trimmedOg.startsWith('http://') && !trimmedOg.startsWith('https://')) {
+      const cleanImg = trimmedOg.startsWith('/') ? trimmedOg : `/${trimmedOg}`;
+      absoluteOgImage = `${cleanHost}${cleanImg}`;
+    } else {
+      absoluteOgImage = trimmedOg;
+    }
+  }
+
   const faviconUrl = getField(settings, 'favicon_url');
+  let absoluteFaviconUrl = faviconUrl;
+  if (faviconUrl) {
+    const trimmedFav = faviconUrl.trim();
+    if (trimmedFav.startsWith('//')) {
+      absoluteFaviconUrl = `https:${trimmedFav}`;
+    } else if (!trimmedFav.startsWith('http://') && !trimmedFav.startsWith('https://')) {
+      const cleanFav = trimmedFav.startsWith('/') ? trimmedFav : `/${trimmedFav}`;
+      absoluteFaviconUrl = `${cleanHost}${cleanFav}`;
+    } else {
+      absoluteFaviconUrl = trimmedFav;
+    }
+  }
+
   const isAdmin = urlPath.startsWith(`/${getAdminPath()}`);
 
   // Construct replacement tags
   const tags = isAdmin ? `
     <title>Admin Portal</title>
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
-    ${faviconUrl ? `
-    <link rel="icon" type="image/x-icon" href="${escapeHtml(faviconUrl)}" />
-    <link rel="shortcut icon" href="${escapeHtml(faviconUrl)}" />
-    <link rel="apple-touch-icon" href="${escapeHtml(faviconUrl)}" />
+    ${absoluteFaviconUrl ? `
+    <link rel="icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="icon" type="image/png" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="shortcut icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="apple-touch-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
     ` : ''}
   ` : `
     <title>${escapeHtml(title)}</title>
@@ -765,16 +813,17 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://example.com${escapeHtml(urlPath)}" />
-    ${ogImage ? `<meta property="og:image" content="${escapeHtml(ogImage)}" />` : ''}
+    <meta property="og:url" content="${escapeHtml(absoluteUrl)}" />
+    ${absoluteOgImage ? `<meta property="og:image" content="${escapeHtml(absoluteOgImage)}" />` : ''}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(title)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
-    ${ogImage ? `<meta name="twitter:image" content="${escapeHtml(ogImage)}" />` : ''}
-    ${faviconUrl ? `
-    <link rel="icon" type="image/x-icon" href="${escapeHtml(faviconUrl)}" />
-    <link rel="shortcut icon" href="${escapeHtml(faviconUrl)}" />
-    <link rel="apple-touch-icon" href="${escapeHtml(faviconUrl)}" />
+    ${absoluteOgImage ? `<meta name="twitter:image" content="${escapeHtml(absoluteOgImage)}" />` : ''}
+    ${absoluteFaviconUrl ? `
+    <link rel="icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="icon" type="image/png" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="shortcut icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="apple-touch-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
     ` : ''}
   `;
 

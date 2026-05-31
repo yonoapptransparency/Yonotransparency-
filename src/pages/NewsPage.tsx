@@ -16,7 +16,7 @@ export default function NewsPage() {
   );
 
   return (
-    <div className="animate-fade-in min-h-screen plain-content px-4">
+    <div className="animate-fade-in min-h-screen max-w-[1550px] mx-auto plain-content px-3 sm:px-6 md:px-10">
       <div className="mb-10">
         <Link 
           to="/" 

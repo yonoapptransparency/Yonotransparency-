@@ -174,17 +174,41 @@ export default function GatewayPage() {
     }))
   } : null;
 
+  const stripHtml = (html: string) => {
+    if (!html) return '';
+    const stripped = html.replace(/<[^>]*>?/gm, ' ');
+    return stripped.replace(/\s+/g, ' ').trim();
+  };
+
+  const cleanSeoDescription = (rawDesc: string) => {
+    if (!rawDesc) return '';
+    const trimmed = rawDesc.trim();
+    if (trimmed.startsWith('<') || trimmed.includes('<meta ')) {
+      const metaMatch = trimmed.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
+      if (metaMatch && metaMatch[1]) {
+        return metaMatch[1].trim();
+      }
+      const ogMatch = trimmed.match(/<meta\s+property=["']og:description["']\s+content=["'](.*?)["']/i);
+      if (ogMatch && ogMatch[1]) {
+        return ogMatch[1].trim();
+      }
+      return stripHtml(trimmed).substring(0, 160);
+    }
+    return trimmed;
+  };
+
+  const cleanedAppDesc = cleanSeoDescription(app.seo_description) || (app.description_html ? stripHtml(app.description_html).substring(0, 160) : `${app.name} technical specs.`);
+
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": app.name,
-    "description": app.seo_description || (app.description_html ? app.description_html.replace(/<[^>]*>?/gm, '').substring(0, 160) : `${app.name} technical specs.`),
+    "description": cleanedAppDesc,
     "applicationCategory": app.category,
     "operatingSystem": "All",
     "softwareVersion": app.version,
     "image": app.og_image_url || app.icon_url,
     "offers": {
-      "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD"
     }
@@ -197,8 +221,8 @@ export default function GatewayPage() {
   };
 
   return (
-    <div className="animate-fade-in select-none pb-20">
-      <div className="px-4 mb-6 max-w-4xl mx-auto pt-6">
+    <div className="animate-fade-in select-none pb-20 max-w-[1550px] mx-auto px-3 sm:px-6 md:px-10">
+      <div className="mb-6 pt-6">
         <Link 
           to={`/${app.slug}`} 
           className="inline-flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors group"
@@ -211,10 +235,10 @@ export default function GatewayPage() {
       </div>
       <Helmet>
         <title>{app.seo_title || app.name}</title>
-        <meta name="description" content={app.seo_description || (app.description_html ? app.description_html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().substring(0, 160) : `Technical specifications and download details for ${app.name}.`)} />
+        <meta name="description" content={cleanedAppDesc} />
         {app.seo_keywords && <meta name="keywords" content={`${app.seo_keywords}, info ${app.name}, ${app.name} technical info`} />}
         <meta property="og:title" content={`${app.seo_title || app.name} - Technical Profile`} />
-        <meta property="og:description" content={app.seo_description || (app.description_html ? app.description_html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().substring(0, 160) : `Detailed information and specifications for ${app.name}.`)} />
+        <meta property="og:description" content={cleanedAppDesc} />
         <meta property="og:image" content={app.og_image_url || app.icon_url} />
         <meta name="robots" content="index, follow" />
         {app.canonical_url && <link rel="canonical" href={app.canonical_url} />}
@@ -249,7 +273,7 @@ export default function GatewayPage() {
       </div>
 
       {/* Main Specs and Info Hub */}
-      <div className="max-w-4xl mx-auto px-4 mb-10">
+      <div className="w-full mb-10">
         <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-black/5 dark:border-white/5 rounded-[32px] p-6 sm:p-10 shadow-sm">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
             {/* Left side: App Presentation */}
@@ -279,7 +303,7 @@ export default function GatewayPage() {
 
       {/* FAQ Intel */}
       {app.faqs && app.faqs.length > 0 && (
-        <div className="max-w-4xl mx-auto mb-16 px-4">
+        <div className="w-full mb-16 px-4">
           <div className="py-12 border-t border-black/5 dark:border-white/5">
             <h2 className="text-xl font-bold mb-8 text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <Info className="w-5 h-5 text-blue-500" /> FAQ
@@ -305,7 +329,7 @@ export default function GatewayPage() {
       )}
 
       {/* Strict Section Order 1: Admin Alert Boxes */}
-      <div className="space-y-4 mb-20 max-w-4xl mx-auto px-4">
+      <div className="space-y-4 mb-20 w-full px-4">
         {app.red_box_msg && app.red_box_msg.trim() !== '.' && app.red_box_msg.trim() !== '' && (
           <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 p-6 rounded-[24px]">
             <h3 className="font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-2 mb-2 text-sm tracking-wide">
@@ -333,7 +357,7 @@ export default function GatewayPage() {
       </div>
 
       {/* Strict Section Order 2: Massive Description */}
-      <div className="py-16 mb-20 max-w-4xl mx-auto px-4 border-t border-black/5 dark:border-white/5">
+      <div className="py-16 mb-20 w-full px-4 border-t border-black/5 dark:border-white/5">
         <h2 className="text-3xl sm:text-4xl font-bold mb-10 tracking-tight text-zinc-900 dark:text-zinc-100">Technical Details</h2>
         <div 
           className="prose prose-zinc dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-blue-500"
@@ -342,7 +366,7 @@ export default function GatewayPage() {
       </div>
 
       {/* Strict Section Order 3: Peer Reviews */}
-      <div className="max-w-4xl mx-auto mb-12 px-4">
+      <div className="w-full mb-12 px-4">
         <h2 className="text-2xl font-bold mb-8 flex items-center gap-2 tracking-tight text-zinc-900 dark:text-zinc-100">
           <MessageSquare className="w-6 h-6 text-blue-500" /> User Reviews
         </h2>
@@ -379,7 +403,7 @@ export default function GatewayPage() {
       </div>
 
       {/* Strict Section Order 4: Helpline Block */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-8 max-w-4xl mx-auto mt-20 mb-32 px-4">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-8 w-full mt-20 mb-32 px-4">
         {mockSettings.helpline_whatsapp && (
           <a href={`https://wa.me/${mockSettings.helpline_whatsapp.replace('+','')}`} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 text-zinc-500 hover:text-green-600 dark:hover:text-green-400 transition-colors font-semibold text-sm">
             WhatsApp Support
@@ -415,13 +439,13 @@ export default function GatewayPage() {
       </div>
       
       {/* Transparency Footer */}
-      <div className="max-w-4xl mx-auto px-4 mb-20 text-center">
+      <div className="w-full mb-20 text-center">
           <h2 
             className="text-3xl sm:text-5xl font-bold mb-12 tracking-tight text-zinc-900 dark:text-zinc-100"
             dangerouslySetInnerHTML={{ __html: mockSettings.portal_heading || mockSettings.site_title || 'Platform Review' }}
           />
           
-          <div className="space-y-6 max-w-2xl mx-auto text-left">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 w-full text-left">
             <div className="p-8 border border-black/5 dark:border-white/5 rounded-[24px] bg-zinc-50 dark:bg-zinc-800/30">
               <h3 className="font-semibold text-xs uppercase tracking-wider text-zinc-900 dark:text-zinc-100 mb-3">
                 {mockSettings.disclaimer_heading || 'Legal'}

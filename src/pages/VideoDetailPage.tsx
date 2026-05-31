@@ -136,7 +136,7 @@ export default function VideoDetailPage() {
   }
 
   return (
-    <div className="animate-fade-in max-w-4xl mx-auto pb-12 px-4">
+    <div className="animate-fade-in max-w-[1550px] mx-auto px-3 sm:px-6 md:px-10 pb-12">
       <Helmet>
         <title>{videoItem.title} - {mockSettings.site_title}</title>
         <meta name="description" content={videoItem.description} />

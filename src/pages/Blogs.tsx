@@ -13,7 +13,7 @@ export default function Blogs() {
   }, []);
 
   return (
-    <div className="animate-fade-in max-w-5xl mx-auto py-8 plain-content px-4">
+    <div className="animate-fade-in max-w-[1550px] mx-auto py-12 plain-content px-3 sm:px-6 md:px-10">
       <Helmet>
         <title>Intelligence Logs & Stories - {mockSettings.site_title}</title>
         <meta name="description" content="In-depth logs, stories, and articles about our secure ecosystem." />

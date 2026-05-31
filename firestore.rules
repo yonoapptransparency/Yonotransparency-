@@ -33,7 +33,7 @@ service cloud.firestore {
     }
     
     match /admins/{docId} {
-      allow read: if true;
+      allow read: if request.auth != null && (request.auth.uid == docId || request.auth.token.email == docId || isAdmin());
       allow write: if isAdmin();
     }
     

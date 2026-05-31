@@ -5,7 +5,7 @@ import path from "path";
 import crypto from "crypto";
 import compression from "compression";
 import fs from "fs";
-import { injectSeoTags } from "./src/seoHelper";
+import { injectSeoTags, fetchStoreData, getField } from "./src/seoHelper";
 import CryptoJS from "crypto-js";
 
 // Cryptographic secrets for hashing, signature verification, and session identifiers
@@ -155,6 +155,41 @@ async function startServer() {
   const isInvalidClient = (req: express.Request): boolean => {
     return false;
   };
+
+  // API Routes: Dynamic Favicon and Apple-Touch-Icon router for Worldwide SEO & AI crawlers
+  app.get([
+    '/favicon.ico',
+    '/apple-touch-icon.png',
+    '/apple-touch-icon-precomposed.png',
+    '/favicon-32x32.png',
+    '/favicon-16x16.png',
+    '/logo.png'
+  ], async (req, res, next) => {
+    console.log('--- FAVICON/LOGO ROUTE HIT ---', req.originalUrl);
+    try {
+      const data = await fetchStoreData();
+      if (data && data.settings) {
+        let redirectUrl = '';
+        if (req.originalUrl.includes('logo.png')) {
+          redirectUrl = getField(data.settings, 'logo_url');
+          if (!redirectUrl) redirectUrl = getField(data.settings, 'favicon_url');
+        } else {
+          redirectUrl = getField(data.settings, 'favicon_url');
+          if (!redirectUrl) redirectUrl = getField(data.settings, 'logo_url');
+        }
+
+        console.log('--- FAVICON/LOGO ROUTE RESOLVED ---', redirectUrl);
+        if (typeof redirectUrl === 'string' && redirectUrl.startsWith('http')) {
+          res.set('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+          console.log('--- FAVICON/LOGO ROUTE REDIRECTING ---', redirectUrl);
+          return res.redirect(302, redirectUrl);
+        }
+      }
+    } catch (err) {
+      console.error("Favicon/Logo redirect routing failed:", err);
+    }
+    return next();
+  });
 
   // API Route: Dynamic Sitemap Generation for SEO
   app.get('/sitemap.xml', async (req, res) => {
@@ -913,7 +948,10 @@ const rateLimitMap = new Map<string, number[]>();
       try {
         let template = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
         template = await vite.transformIndexHtml(req.originalUrl, template);
-        template = await injectSeoTags(template, req.originalUrl);
+        const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
+        const host = req.headers["x-forwarded-host"] || req.get("host") || "localhost:3000";
+        const hostUrl = `${String(protocol).split(',')[0].trim()}://${String(host).split(',')[0].trim()}`;
+        template = await injectSeoTags(template, req.originalUrl, hostUrl);
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
       } catch (e: any) {
         vite.ssrFixStacktrace(e);
@@ -941,7 +979,10 @@ const rateLimitMap = new Map<string, number[]>();
       const templatePath = path.join(distPath, 'index.html');
       try {
         let template = fs.readFileSync(templatePath, 'utf-8');
-        template = await injectSeoTags(template, req.originalUrl);
+        const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+        const host = req.headers["x-forwarded-host"] || req.get("host") || "localhost:3000";
+        const hostUrl = `${String(protocol).split(',')[0].trim()}://${String(host).split(',')[0].trim()}`;
+        template = await injectSeoTags(template, req.originalUrl, hostUrl);
         res.status(200).set({ 'Content-Type': 'text/html' }).send(template);
       } catch (e) {
         console.error(e);

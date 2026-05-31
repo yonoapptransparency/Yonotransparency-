@@ -279,8 +279,8 @@ function Header() {
 function Footer() {
   const { settings } = useData();
   return (
-    <footer className="pt-16 pb-8 border-t border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950 mt-12">
-      <div className="max-w-5xl mx-auto flex flex-col items-center text-center px-6">
+    <footer className="pt-16 pb-8 border-t border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950 mt-12 w-full">
+      <div className="max-w-[1550px] mx-auto flex flex-col items-center text-center px-4 sm:px-8 w-full">
         <h3 className="text-2xl font-bold tracking-tight mb-3 flex items-center gap-2">
           <div className="p-1">
             {settings.logo_url ? (
@@ -299,10 +299,10 @@ function Footer() {
             {settings.site_title}
           </span>
         </h3>
-        <p className="text-[15px] mb-8 max-w-xl text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+        <p className="text-[15px] mb-8 max-w-xl text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium px-2">
           {settings.meta_description}
         </p>
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[13px] font-medium mb-16 text-zinc-600 dark:text-zinc-400">
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[13px] font-medium mb-16 text-zinc-600 dark:text-zinc-400 px-2">
           <Link to="/" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Home</Link>
           <Link to="/about" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">About</Link>
           <Link to="/contact" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Contact</Link>
@@ -313,21 +313,21 @@ function Footer() {
         </div>
         
         {(settings.disclaimer_text || settings.ethics_discrimination_text) && (
-          <div className="max-w-4xl w-full flex flex-col gap-6 mb-12">
+          <div className="max-w-[1550px] w-full flex flex-col gap-6 mb-12">
             {settings.disclaimer_text && (
-              <div className="bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-3xl p-8 sm:p-10 text-left shadow-sm">
-                <h4 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-white">{settings.disclaimer_heading || 'Disclaimer'}</h4>
+              <div className="bg-white dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 rounded-2xl p-4 sm:p-6 md:p-8 text-left shadow-sm w-full">
+                <h4 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-white uppercase tracking-wider">{settings.disclaimer_heading || 'Disclaimer'}</h4>
                 <div 
-                  className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-3xl"
+                  className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed disclaimer-content"
                   dangerouslySetInnerHTML={{ __html: settings.disclaimer_text }}
                 />
               </div>
             )}
             {settings.ethics_discrimination_text && (
-              <div className="bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-3xl p-8 sm:p-10 text-left shadow-sm">
-                <h4 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-white">{settings.ethics_heading || 'Ethics & Safety'}</h4>
+              <div className="bg-white dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 rounded-2xl p-4 sm:p-6 md:p-8 text-left shadow-sm w-full">
+                <h4 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-white uppercase tracking-wider">{settings.ethics_heading || 'Ethics & Safety'}</h4>
                 <div 
-                  className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-3xl"
+                  className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed disclaimer-content"
                   dangerouslySetInnerHTML={{ __html: settings.ethics_discrimination_text }}
                 />
               </div>
@@ -336,11 +336,11 @@ function Footer() {
         )}
 
         {settings.important_notice && (
-          <div className="max-w-4xl w-full mb-12">
-            <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-3xl p-8 sm:p-10 text-left">
-              <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">{settings.important_notice_heading || 'Notice'}</h4>
+          <div className="max-w-[1550px] w-full mb-12">
+            <div className="bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-4 sm:p-6 md:p-8 text-left">
+              <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wider">{settings.important_notice_heading || 'Notice'}</h4>
               <div 
-                className="text-sm text-blue-800 dark:text-blue-200/80 leading-relaxed max-w-3xl"
+                className="text-sm text-blue-800 dark:text-blue-200/80 leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: settings.important_notice }}
               />
             </div>
@@ -561,7 +561,7 @@ function AppContent() {
       <ScrollToTop />
       {memoizedHeader}
       
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-1.5 sm:py-3 pb-16 sm:pb-24 overflow-x-hidden relative">
+      <main className="flex-1 w-full max-w-[1550px] mx-auto px-3 sm:px-6 md:px-10 py-3 pb-16 sm:pb-24 overflow-x-hidden relative">
         <Suspense fallback={<LoadingScreen />}>
           <AnimatePresence mode="wait">
             <motion.div

@@ -25,7 +25,7 @@ export default function NewApps() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-20 px-4 select-none">
+    <div className="max-w-[1550px] mx-auto pb-20 px-3 sm:px-6 md:px-10 select-none">
       <div className="px-1 mb-2 pt-4">
         <Link 
           to="/" 

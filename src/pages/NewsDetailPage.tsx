@@ -131,7 +131,7 @@ export default function NewsDetailPage() {
   }
 
   return (
-    <div className="animate-fade-in max-w-4xl mx-auto px-4 plain-content mb-20">
+    <div className="animate-fade-in max-w-[1550px] mx-auto px-3 sm:px-6 md:px-10 plain-content mb-20">
       <Helmet>
         <title>{newsItem.title} - {mockSettings.site_title}</title>
         <meta name="description" content={newsItem.description} />

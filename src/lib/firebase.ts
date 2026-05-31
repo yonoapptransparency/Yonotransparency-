@@ -26,9 +26,9 @@ const firebaseConfig = (typeof window !== 'undefined' && window.__FIREBASE_CONFI
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
-// EXPERIMENTAL FORCE LONG POLLING IS REQUIRED for Indian Mobile ISPs!
+// EXPERIMENTAL FORCE LONG POLLING IS REQUIRED for Indian Mobile ISPs and Sandbox environments!
 export const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling: true
+  experimentalForceLongPolling: true
 }, firebaseConfig.firestoreDatabaseId === '(default)' ? undefined : firebaseConfig.firestoreDatabaseId);
 
 export const isFirebaseConfigured = firebaseConfig.apiKey !== 'PLACEHOLDER' && firebaseConfig.apiKey.trim() !== '' && !firebaseConfig.apiKey.includes('YOUR_API_KEY');

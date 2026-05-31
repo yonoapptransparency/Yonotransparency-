@@ -8,7 +8,7 @@ export default function Terms() {
   const { settings: mockSettings } = useData();
   
   return (
-    <div className="max-w-4xl mx-auto plain-content px-4 animate-fade-in pb-20">
+    <div className="max-w-[1550px] mx-auto plain-content px-3 sm:px-6 md:px-10 animate-fade-in pb-20">
       <div className="mb-12 pt-4">
         <Link 
           to="/" 
@@ -29,9 +29,9 @@ export default function Terms() {
           Terms & Conditions
         </h1>
         
-        <div className="bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 shadow-sm rounded-[32px] p-8 sm:p-12 mb-16">
+        <div className="bg-white dark:bg-zinc-900/50 border border-black/5 dark:border-white/5 shadow-sm rounded-2xl p-5 sm:p-8 md:p-14 mb-16 max-w-none">
           <div 
-            className="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed"
+            className="prose prose-zinc dark:prose-invert max-w-none text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed"
             dangerouslySetInnerHTML={{ __html: (mockSettings.terms_content || '').replace(/\n/g, '<br/>') }}
           />
         </div>
