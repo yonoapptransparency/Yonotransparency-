@@ -794,13 +794,8 @@ export async function injectSeoTags(template: string, urlPath: string): Promise<
   // Insert new tags and configuration before head close
   newTemplate = newTemplate.replace('</head>', `${configScript}${tags}</head>`);
 
-  // Server-side SEO Pre-render content skeleton injection
-  try {
-    const preRenderedHtml = await getPagePreRender(urlPath, { apps, settings, news, blogs, videos });
-    newTemplate = newTemplate.replace(/<div id="root">\s*<\/div>/i, `<div id="root">${preRenderedHtml}</div>`);
-  } catch (err) {
-    console.error('Server Static SEO pre-rendering failed:', err);
-  }
+  // Dynamic SEO meta head tag replacement is complete.
+  // We bypass full HTML body pre-rendering inside <div id="root"> to prevent duplicate markup or static layout conflicts behind the React client.
   
   return newTemplate;
 }
