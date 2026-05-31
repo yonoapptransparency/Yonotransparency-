@@ -800,10 +800,11 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
     <title>Admin Portal</title>
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
     ${absoluteFaviconUrl ? `
-    <link rel="icon" href="${escapeHtml(absoluteFaviconUrl)}" />
-    <link rel="icon" type="image/png" href="${escapeHtml(absoluteFaviconUrl)}" />
-    <link rel="shortcut icon" href="${escapeHtml(absoluteFaviconUrl)}" />
-    <link rel="apple-touch-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     ` : ''}
   ` : `
     <title>${escapeHtml(title)}</title>
@@ -820,10 +821,11 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     ${absoluteOgImage ? `<meta name="twitter:image" content="${escapeHtml(absoluteOgImage)}" />` : ''}
     ${absoluteFaviconUrl ? `
-    <link rel="icon" href="${escapeHtml(absoluteFaviconUrl)}" />
-    <link rel="icon" type="image/png" href="${escapeHtml(absoluteFaviconUrl)}" />
-    <link rel="shortcut icon" href="${escapeHtml(absoluteFaviconUrl)}" />
-    <link rel="apple-touch-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     ` : ''}
   `;
 

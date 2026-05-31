@@ -169,24 +169,54 @@ async function startServer() {
     try {
       const data = await fetchStoreData();
       if (data && data.settings) {
-        let redirectUrl = '';
+        let imageUrl = '';
         if (req.originalUrl.includes('logo.png')) {
-          redirectUrl = getField(data.settings, 'logo_url');
-          if (!redirectUrl) redirectUrl = getField(data.settings, 'favicon_url');
+          imageUrl = getField(data.settings, 'logo_url');
+          if (!imageUrl) imageUrl = getField(data.settings, 'favicon_url');
         } else {
-          redirectUrl = getField(data.settings, 'favicon_url');
-          if (!redirectUrl) redirectUrl = getField(data.settings, 'logo_url');
+          imageUrl = getField(data.settings, 'favicon_url');
+          if (!imageUrl) imageUrl = getField(data.settings, 'logo_url');
         }
 
-        console.log('--- FAVICON/LOGO ROUTE RESOLVED ---', redirectUrl);
-        if (typeof redirectUrl === 'string' && redirectUrl.startsWith('http')) {
-          res.set('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
-          console.log('--- FAVICON/LOGO ROUTE REDIRECTING ---', redirectUrl);
-          return res.redirect(302, redirectUrl);
+        console.log('--- FAVICON/LOGO ROUTE RESOLVED ---', imageUrl);
+        if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
+          try {
+            // Dynamic image proxy to bypass CORS/Same-origin and 302 redirect failure in indexing scrapers
+            const response = await fetch(imageUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            });
+            if (response.ok) {
+              const arrayBuffer = await response.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              const originalContentType = response.headers.get('content-type');
+              
+              // Map output content types properly based on request pattern
+              let contentType = originalContentType || 'image/png';
+              if (req.originalUrl.includes('.ico')) {
+                contentType = 'image/x-icon';
+              } else if (req.originalUrl.includes('.png')) {
+                contentType = 'image/png';
+              }
+              
+              res.set('Content-Type', contentType);
+              res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=43200'); // Cache 1 day with 12h SWR
+              console.log('--- FAVICON/LOGO PROXIED SECURELY ---', contentType, response.status);
+              return res.status(200).send(buffer);
+            } else {
+              console.warn(`Favicon proxy fetch returned status ${response.status}. Falling back to 302 redirect.`);
+              res.set('Cache-Control', 'public, max-age=3600');
+              return res.redirect(302, imageUrl);
+            }
+          } catch (fetchErr) {
+            console.error("Failed to proxy favicon content, falling back to 302 redirect:", fetchErr);
+            return res.redirect(302, imageUrl);
+          }
         }
       }
     } catch (err) {
-      console.error("Favicon/Logo redirect routing failed:", err);
+      console.error("Favicon/Logo proxy routing failed:", err);
     }
     return next();
   });
