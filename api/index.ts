@@ -4,9 +4,9 @@ import crypto from "crypto";
 import compression from "compression";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import CryptoJS from "crypto-js";
 import { fetchStoreData, getField } from "../src/seoHelper";
+import firebaseConfig from "../firebase-applet-config.json";
 
 const app = express();
 
@@ -17,31 +17,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 function getRawFirebaseConfig(): any {
-  try {
-    const possiblePaths = [
-      path.join(process.cwd(), 'firebase-applet-config.json'),
-      path.join(process.cwd(), 'api/firebase-applet-config.json'),
-    ];
-    
-    try {
-      const filename = fileURLToPath(import.meta.url);
-      const dirname = path.dirname(filename);
-      possiblePaths.push(path.join(dirname, 'firebase-applet-config.json'));
-      possiblePaths.push(path.join(dirname, '../firebase-applet-config.json'));
-      possiblePaths.push(path.join(dirname, '../../firebase-applet-config.json'));
-    } catch (e) {
-      // ignore in environments without import.meta.url
-    }
-
-    for (const p of possiblePaths) {
-      if (fs.existsSync(p)) {
-        return JSON.parse(fs.readFileSync(p, 'utf8'));
-      }
-    }
-  } catch (err) {
-    console.error("Error reading firebase config in api:", err);
-  }
-  return null;
+  return firebaseConfig;
 }
 
 // Cryptographic secrets for hashing, signature verification, and session identifiers
