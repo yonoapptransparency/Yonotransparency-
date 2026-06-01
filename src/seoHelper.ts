@@ -290,10 +290,7 @@ export async function fetchStoreData() {
   }
 }
 
-// Pre-load data in background on server start to completely eliminate first-load blocking latency
-fetchStoreData().catch(err => {
-  console.warn("Initial data pre-load failed (will retry dynamically on demand):", err);
-});
+
 
 function escapeHtml(unsafe: string) {
   if (!unsafe) return '';
