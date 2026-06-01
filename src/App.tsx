@@ -34,6 +34,14 @@ export function preloadComponent(name: string, importFn: () => Promise<{ default
     })
     .catch((err) => {
       console.error(`[Preloader] Failed to resolve chunk for ${name}:`, err);
+      // If it is a chunk load failure (which happens after structural deployment), auto-reload the window to fetch fresh scripts.
+      if (err?.message?.includes('Failed to fetch dynamically imported module')) {
+        const hasReloaded = sessionStorage.getItem(`reloaded_chunk_${name}`);
+        if (!hasReloaded) {
+          sessionStorage.setItem(`reloaded_chunk_${name}`, 'true');
+          window.location.reload();
+        }
+      }
       delete loadingPromises[name];
       throw err;
     });
