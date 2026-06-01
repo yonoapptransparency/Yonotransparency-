@@ -631,9 +631,32 @@ export default function UserReviews({ appId, appTitle, overallRating = 5.0 }: Us
             )}
 
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-10">
-                <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
-                <span className="text-xs font-semibold mt-2 text-zinc-400">Loading reviews...</span>
+              <div className="space-y-3.5 animate-pulse">
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <div key={idx} className="p-5 border rounded-2xl flex gap-4 bg-zinc-50/50 dark:bg-zinc-900/30 border-black/5 dark:border-white/5 text-left">
+                    {/* Avatar Circle skeleton */}
+                    <div className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-800 shrink-0" />
+                    {/* Content Column skeleton */}
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-800 rounded" />
+                        <div className="h-2 w-16 bg-zinc-200 dark:bg-zinc-805 rounded" />
+                      </div>
+                      {/* Rating stars row skeleton */}
+                      <div className="flex items-center gap-0.5 mt-0.5 select-none">
+                        {Array.from({ length: 5 }).map((_, s) => (
+                          <div key={s} className="w-3 h-3 rounded-full bg-zinc-200 dark:bg-zinc-800" />
+                        ))}
+                      </div>
+                      {/* Lines of text skeleton */}
+                      <div className="space-y-1.5 pt-1.5">
+                        <div className="h-2.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded" />
+                        <div className="h-2.5 w-[92%] bg-zinc-200 dark:bg-zinc-800 rounded" />
+                        <div className="h-2.5 w-[65%] bg-zinc-200 dark:bg-zinc-805 rounded" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : reviews.length === 0 ? (
               <div className="text-center py-10 border border-dashed border-black/5 dark:border-white/10 rounded-2xl">

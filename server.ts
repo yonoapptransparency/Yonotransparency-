@@ -201,6 +201,41 @@ async function startServer() {
   // Compression & cookieParser initialization
   app.use(compression());
   app.use(cookieParser());
+
+  // High-performance Security and Privacy Headers Middleware
+  app.disable("x-powered-by");
+  app.use((req, res, next) => {
+    // Hide original tech stack and enforce custom secure label
+    res.removeHeader("X-Powered-By");
+    res.setHeader("X-Powered-By", "SecureServer/1.0");
+
+    // XSS Mitigation
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+
+    // MIME Sniffing Mitigation
+    res.setHeader("X-Content-Type-Options", "nosniff");
+
+    // Referrer tracking control for top-notch privacy
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+
+    // Transport protection
+    if (process.env.NODE_ENV === "production" || req.headers["x-forwarded-proto"] === "https") {
+      res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    }
+
+    // Modern frame protection (Content Security Policy)
+    // Completely blocks malicious third-party site framing whilst allowing full preview capability in Google AI Studio
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; " +
+      "img-src 'self' data: blob: https:; " +
+      "connect-src 'self' https: wss:; " +
+      "frame-ancestors 'self' https://*.google.com https://*.studio https://*.run.app https://*.rummyapp.online http://localhost:*;"
+    );
+
+    next();
+  });
+
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -1048,19 +1083,21 @@ const rateLimitMap = new Map<string, number[]>();
     });
 
   } else {
-    // Production static files with aggressive caching for assets
     const distPath = path.join(process.cwd(), 'dist');
+
+    // Specifically handle assets (JS, CSS, Images, Fonts) with long-term immutable caching FIRST
+    app.use('/assets', express.static(path.join(distPath, 'assets'), {
+      maxAge: '1y',
+      immutable: true,
+      fallthrough: false
+    }));
+
+    // Production static files with aggressive caching for dynamic views and elements
     app.use(express.static(distPath, {
       maxAge: '1d', // Cache for 1 day instead of 1 year for safety but performance
       etag: true,
       lastModified: true,
       index: false
-    }));
-    
-    // Specifically handle assets (JS, CSS, Images) with long-term caching
-    app.use('/assets', express.static(path.join(distPath, 'assets'), {
-      maxAge: '1y',
-      immutable: true
     }));
     
     app.get('*', async (req, res) => {

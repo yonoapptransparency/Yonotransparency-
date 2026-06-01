@@ -2,29 +2,145 @@ import { DataProvider, useData } from './contexts/DataContext';
 import { useLocation, BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { Menu, Shield, ShieldCheck, Info, ArrowRight, X, LayoutGrid, Newspaper, Sparkles, Send, MoreHorizontal, Search, Video } from 'lucide-react';
-import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useMemo, Suspense, lazy, ComponentType, LazyExoticComponent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Code-Splitting: Lazy load main routes to reduce initial payload bundle and optimize speed
-const Home = lazy(() => import('./pages/Home'));
-const AppDetails = lazy(() => import('./pages/AppDetails'));
-const GatewayPage = lazy(() => import('./pages/GatewayPage'));
-const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
-const Privacy = lazy(() => import('./pages/Privacy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const Responsibility = lazy(() => import('./pages/Responsibility'));
-const NewApps = lazy(() => import('./pages/NewApps'));
-const NewsPage = lazy(() => import('./pages/NewsPage'));
-const NewsDetailPage = lazy(() => import('./pages/NewsDetailPage'));
-const Blogs = lazy(() => import('./pages/Blogs'));
-const BlogDetailPage = lazy(() => import('./pages/BlogDetailPage'));
-const VideosPage = lazy(() => import('./pages/VideosPage'));
-const VideoDetailPage = lazy(() => import('./pages/VideoDetailPage'));
+// Polished, high-performance loading screen that can be referenced by the preloader system
+function LoadingScreen() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
+      <div className="w-8 h-8 border-[3px] border-black/10 dark:border-white/10 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+      <p className="text-sm font-medium tracking-wide text-zinc-500 animate-pulse">Loading...</p>
+    </div>
+  );
+}
 
-// Lazy load admin pages to keep admin code out of public bundle
-const AdminLogin = lazy(() => import('./pages/AdminLogin'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+// --- HIGH PERFORMANCE CUSTOM ROUTE PRELOADER ENGINE ---
+// Caches resolved ES modules to bypass React Suspense triggers and provide completely synchronous, zero-lag rendering.
+const resolvedComponents: Record<string, ComponentType<any>> = {};
+const loadingPromises: Record<string, Promise<any>> = {};
+
+export function preloadComponent(name: string, importFn: () => Promise<{ default: ComponentType<any> }>) {
+  if (resolvedComponents[name]) {
+    return Promise.resolve(resolvedComponents[name]);
+  }
+  if (loadingPromises[name]) {
+    return loadingPromises[name];
+  }
+  const promise = importFn()
+    .then((mod) => {
+      resolvedComponents[name] = mod.default;
+      return mod.default;
+    })
+    .catch((err) => {
+      console.error(`[Preloader] Failed to resolve chunk for ${name}:`, err);
+      delete loadingPromises[name];
+      throw err;
+    });
+  loadingPromises[name] = promise;
+  return promise;
+}
+
+function getPreloadedComponent(
+  name: string,
+  importFn: () => Promise<{ default: ComponentType<any> }>,
+  Fallback: ComponentType<any>
+) {
+  return function PreloadedComponentWrapper(props: any) {
+    const [Comp, setComp] = useState<ComponentType<any> | null>(() => resolvedComponents[name] || null);
+
+    useEffect(() => {
+      let active = true;
+      if (!Comp) {
+        preloadComponent(name, importFn)
+          .then((resolved) => {
+            if (active) {
+              setComp(() => resolved);
+            }
+          })
+          .catch(() => {});
+      }
+      return () => {
+        active = false;
+      };
+    }, [Comp]);
+
+    if (Comp) {
+      return <Comp {...props} />;
+    }
+    return <Fallback {...props} />;
+  };
+}
+
+// Helper utility to make lazy imports bulletproof against redeployment chunk-load/fetch errors
+function lazyRetry<T extends ComponentType<any>>(
+  componentImport: () => Promise<{ default: T }>
+): LazyExoticComponent<T> {
+  return lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error: any) {
+      console.warn("Chunk loading/network anomaly detected. Reloading viewport payload...", error);
+      // Automatically refresh the page to pull the latest production build from the server.
+      window.location.reload();
+      return new Promise(() => {}) as Promise<{ default: T }>;
+    }
+  });
+}
+
+// Code-Splitting Loaders: Registered explicitly so both lazy routers and smart background prefetch workers can invoke them
+const loaders = {
+  Home: () => import('./pages/Home'),
+  AppDetails: () => import('./pages/AppDetails'),
+  GatewayPage: () => import('./pages/GatewayPage'),
+  About: () => import('./pages/About'),
+  Contact: () => import('./pages/Contact'),
+  Privacy: () => import('./pages/Privacy'),
+  Terms: () => import('./pages/Terms'),
+  Responsibility: () => import('./pages/Responsibility'),
+  NewApps: () => import('./pages/NewApps'),
+  NewsPage: () => import('./pages/NewsPage'),
+  NewsDetailPage: () => import('./pages/NewsDetailPage'),
+  Blogs: () => import('./pages/Blogs'),
+  BlogDetailPage: () => import('./pages/BlogDetailPage'),
+  VideosPage: () => import('./pages/VideosPage'),
+  VideoDetailPage: () => import('./pages/VideoDetailPage'),
+  AdminLogin: () => import('./pages/AdminLogin'),
+  AdminDashboard: () => import('./pages/AdminDashboard'),
+};
+
+// Start prefetching page assets at parse-time before React bundle initialization even finishes!
+const initialPath = window.location.pathname;
+if (initialPath === '/' || initialPath === '') {
+  preloadComponent('Home', loaders.Home).catch(() => {});
+  // Pre-fetch details bundle 200ms later during blank network periods
+  setTimeout(() => preloadComponent('AppDetails', loaders.AppDetails).catch(() => {}), 200);
+} else if (initialPath.startsWith('/app/')) {
+  preloadComponent('AppDetails', loaders.AppDetails).catch(() => {});
+  // Pre-fetch home bundle 200ms later
+  setTimeout(() => preloadComponent('Home', loaders.Home).catch(() => {}), 200);
+} else {
+  preloadComponent('Home', loaders.Home).catch(() => {});
+  preloadComponent('AppDetails', loaders.AppDetails).catch(() => {});
+}
+
+const Home = getPreloadedComponent('Home', loaders.Home, LoadingScreen);
+const AppDetails = getPreloadedComponent('AppDetails', loaders.AppDetails, LoadingScreen);
+const GatewayPage = lazyRetry(loaders.GatewayPage);
+const About = lazyRetry(loaders.About);
+const Contact = lazyRetry(loaders.Contact);
+const Privacy = lazyRetry(loaders.Privacy);
+const Terms = lazyRetry(loaders.Terms);
+const Responsibility = lazyRetry(loaders.Responsibility);
+const NewApps = lazyRetry(loaders.NewApps);
+const NewsPage = lazyRetry(loaders.NewsPage);
+const NewsDetailPage = lazyRetry(loaders.NewsDetailPage);
+const Blogs = lazyRetry(loaders.Blogs);
+const BlogDetailPage = lazyRetry(loaders.BlogDetailPage);
+const VideosPage = lazyRetry(loaders.VideosPage);
+const VideoDetailPage = lazyRetry(loaders.VideoDetailPage);
+const AdminLogin = lazyRetry(loaders.AdminLogin);
+const AdminDashboard = lazyRetry(loaders.AdminDashboard);
 
 import FallbackRouteMatcher from './components/FallbackRouteMatcher';
 
@@ -480,13 +596,82 @@ function BackToTop() {
   );
 }
 
-function LoadingScreen() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
-      <div className="w-8 h-8 border-[3px] border-black/10 dark:border-white/10 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-      <p className="text-sm font-medium tracking-wide text-zinc-500 animate-pulse">Loading...</p>
-    </div>
-  );
+function BackgroundPrefetcher() {
+  const location = useLocation();
+  const { apps = [], news = [] } = useData();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const isHome = path === '/' || path === '';
+    const isAppPage = path.startsWith('/app/');
+
+    // Helper functions for smart prefetching with modern idle triggers
+    const triggerPrefetch = (prefetchFn: () => void) => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(prefetchFn, { timeout: 3500 });
+      } else {
+        setTimeout(prefetchFn, 800);
+      }
+    };
+
+    const preloadImage = (url: string) => {
+      if (!url) return;
+      const img = new Image();
+      img.src = url;
+    };
+
+    if (isHome) {
+      console.log("[Prefetcher] User is on Homepage. Preloading AppDetails code chunk & top apps' branding...");
+      
+      // 1. Immediately request the main app details page bundle chunk and populate synchronous preloader cache
+      triggerPrefetch(() => {
+        preloadComponent('AppDetails', loaders.AppDetails).catch(() => {});
+        preloadComponent('NewApps', loaders.NewApps).catch(() => {});
+        preloadComponent('GatewayPage', loaders.GatewayPage).catch(() => {});
+      });
+
+      // 2. Preload primary image assets for the top apps so they render list items and pages instantly on click
+      triggerPrefetch(() => {
+        apps.slice(0, 10).forEach(app => {
+          if (app.icon_url) preloadImage(app.icon_url);
+          if (app.og_image_url) preloadImage(app.og_image_url);
+        });
+      });
+    } else if (isAppPage) {
+      // Find current app slug from pathname
+      const slug = decodeURIComponent(path.split('/app/')[1]?.split('/')[0]?.split('?')[0] || '');
+      console.log(`[Prefetcher] User is on App Details page (${slug}). Preloading Home code chunk & other apps' assets...`);
+
+      // 1. Immediately request the primary dashboard bundle chunk and cache synchronously
+      triggerPrefetch(() => {
+        preloadComponent('Home', loaders.Home).catch(() => {});
+        preloadComponent('GatewayPage', loaders.GatewayPage).catch(() => {});
+      });
+
+      // 2. Preload assets of OTHER apps in our catalog so navigating between them is completely seamless
+      triggerPrefetch(() => {
+        const otherApps = apps.filter(app => app.slug?.toLowerCase() !== slug.toLowerCase());
+        otherApps.slice(0, 8).forEach(app => {
+          if (app.icon_url) preloadImage(app.icon_url);
+          if (app.og_image_url) preloadImage(app.og_image_url);
+        });
+
+        if (news && news.length > 0) {
+          news.slice(0, 2).forEach(n => {
+            if (n.logo_url) preloadImage(n.logo_url);
+          });
+        }
+      });
+    } else {
+      // Other pages: prefetch critical Home and AppDetails views
+      triggerPrefetch(() => {
+        preloadComponent('Home', loaders.Home).catch(() => {});
+        preloadComponent('AppDetails', loaders.AppDetails).catch(() => {});
+      });
+    }
+  }, [location.pathname, apps, news]);
+
+  return null;
 }
 
 function AppContent() {
@@ -737,6 +922,7 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <BackgroundPrefetcher />
       <ScrollToTop />
       {memoizedHeader}
       
