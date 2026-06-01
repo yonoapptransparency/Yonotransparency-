@@ -839,6 +839,24 @@ function AppContent() {
     // Dynamic document title assignment
     document.title = pageTitle;
 
+    // Dynamic favicon update
+    const siteFavicon = settings.logo_url || 'https://y4q7avawns.ucarecd.net/b391a2fa-42f7-4b3a-a0d5-605cb22aead4/-/preview/1000x1000/';
+    let linkIcon = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+    if (!linkIcon) {
+      linkIcon = document.createElement('link');
+      linkIcon.rel = 'icon';
+      document.head.appendChild(linkIcon);
+    }
+    linkIcon.href = siteFavicon;
+    
+    let linkAppleIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
+    if (!linkAppleIcon) {
+      linkAppleIcon = document.createElement('link');
+      linkAppleIcon.rel = 'apple-touch-icon';
+      document.head.appendChild(linkAppleIcon);
+    }
+    linkAppleIcon.href = siteFavicon;
+
     // Standard Meta tags mapping
     setMetaTag('description', pageDesc);
     setMetaTag('keywords', pageKeywords);

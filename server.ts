@@ -458,7 +458,6 @@ async function startServer() {
       let isDbAdmin = false;
       if (email === 'defentechscholar@gmail.com' && user.emailVerified === true) {
         isDbAdmin = true;
-        console.log("verifyAdminToken: isDbAdmin via hardcoded email!");
       }
       if (!isDbAdmin && user.emailVerified === true) {
         try {

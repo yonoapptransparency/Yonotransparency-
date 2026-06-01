@@ -589,7 +589,6 @@ app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
       let isDbAdmin = false;
       if (email === 'defentechscholar@gmail.com' && user.emailVerified === true) {
         isDbAdmin = true;
-        console.log("verifyAdminToken: isDbAdmin via hardcoded email!");
       }
       if (!isDbAdmin && user.emailVerified === true) {
         try {
