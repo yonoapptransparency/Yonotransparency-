@@ -245,18 +245,14 @@ export async function commitFileToGitHub({
 }) {
   let idToken = '';
   
-  if (typeof window !== 'undefined' && window.localStorage.getItem('_admin_session_bypass_token') === 'authorized_dev') {
-     idToken = 'authorized_dev';
-  } else {
-    try {
-      const { getAuth } = await import('firebase/auth');
-      const auth = getAuth();
-      if (auth.currentUser) {
-        idToken = await auth.currentUser.getIdToken();
-      }
-    } catch (e) {
-      console.warn("Could not retrieve current user idToken for Github commit authentication:", e);
+  try {
+    const { getAuth } = await import('firebase/auth');
+    const auth = getAuth();
+    if (auth.currentUser) {
+      idToken = await auth.currentUser.getIdToken();
     }
+  } catch (e) {
+    console.warn("Could not retrieve current user idToken for Github commit authentication:", e);
   }
 
   const headers: Record<string, string> = {

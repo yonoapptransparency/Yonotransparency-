@@ -144,8 +144,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       return mockVideos;
     }
   });
-  // Fast persistent loading state management - initialized to false to enable instant display of statically compiled fallbacks
-  const [loading, setLoading] = useState(false);
+  // Fast persistent loading state management - initialized to true to prevent raw data flash
+  const [loading, setLoading] = useState(true);
   
   const [loadedFromServer, setLoadedFromServer] = useState(false);
   const [appsSyncedWithServer, setAppsSyncedWithServer] = useState(false);
@@ -224,19 +224,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Snappy background loading: mark everything loaded instantly to support zero-lag local navigation
-    setLoadedFromServer(true);
-    setAppsSyncedWithServer(true);
-    setSettingsSyncedWithServer(true);
-    setNewsSyncedWithServer(true);
-    setBlogsSyncedWithServer(true);
-    setVideosSyncedWithServer(true);
-    setServerAppsFetched(true);
-    setServerNewsFetched(true);
-    setServerBlogsFetched(true);
-    setServerVideosFetched(true);
-    setLoading(false);
-
     const loadedDocs = {
       apps: false,
       settings: false,
@@ -279,6 +266,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       if (!isFirebaseConfigured) {
           setIsConnected(false);
           setLoadedFromServer(true);
+          setLoading(false);
           return;
       }
       try {
@@ -375,7 +363,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         
         if (fetchedData) {
           const data = loadedApps;
-          setApps(prev => prev.length === data.length && JSON.stringify(prev.map(p => ({id: p.id, sl: p.serial_number}))) === JSON.stringify(data.map(d => ({id: d.id, sl: d.serial_number}))) ? prev : data);
+          setApps(data);
           secureStorage.setItem('rummystore_apps', JSON.stringify(data));
           
           setAppsSyncedWithServer(true);
@@ -404,7 +392,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'settings'), (snap) => {
         if (snap.exists()) {
           const data = snap.data() as GlobalSettings;
-          setSettings(prev => prev.site_title === data.site_title && prev.last_updated === data.last_updated ? prev : data);
+          setSettings(data);
           secureStorage.setItem('rummystore_settings', JSON.stringify(data));
           
           setSettingsSyncedWithServer(true);
@@ -428,7 +416,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'news'), (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
-          setNews(prev => prev.length === data.length && prev[0]?.id === data[0]?.id ? prev : data);
+          setNews(data);
           secureStorage.setItem('rummystore_news', JSON.stringify(data));
           
           setNewsSyncedWithServer(true);
@@ -449,7 +437,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'blogs'), (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
-          setBlogs(prev => prev.length === data.length && prev[0]?.id === data[0]?.id ? prev : data);
+          setBlogs(data);
           secureStorage.setItem('rummystore_blogs', JSON.stringify(data));
           
           setBlogsSyncedWithServer(true);
@@ -470,7 +458,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       onSnapshot(doc(db, 'store_data', 'videos'), (snap) => {
         if (snap.exists()) {
           const data = snap.data().items || [];
-          setVideos(prev => prev.length === data.length && prev[0]?.id === data[0]?.id ? prev : data);
+          setVideos(data);
           secureStorage.setItem('rummystore_videos', JSON.stringify(data));
           
           setVideosSyncedWithServer(true);

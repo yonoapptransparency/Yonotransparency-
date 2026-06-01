@@ -899,6 +899,38 @@ export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isAdminUser, setIsAdminUser] = useState<boolean | null>(null);
+  
+  // Security Stopwatch (Auto-logout after 15 mins)
+  const [sessionTimeLeft, setSessionTimeLeft] = useState(15 * 60);
+
+  useEffect(() => {
+    let timerId: any;
+    if (user && isAdminUser) {
+      timerId = setInterval(() => {
+        setSessionTimeLeft((prev) => {
+          if (prev <= 1) {
+            handleLogout();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerId);
+  }, [user, isAdminUser]);
+
+  useEffect(() => {
+    const resetTimer = () => setSessionTimeLeft(15 * 60);
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    return () => {
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+    };
+  }, []);
+
   const [confirmConfig, setConfirmConfig] = React.useState<{
     isOpen: boolean;
     title: string;
@@ -1582,6 +1614,12 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex gap-4 items-center flex-wrap mt-4 md:mt-0">
+            <div className="flex flex-col items-end mr-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 italic">Security Stopwatch</span>
+              <span className={`font-mono font-black text-xl tracking-tighter ${sessionTimeLeft < 60 ? 'text-rose-600 animate-pulse' : 'text-slate-800 dark:text-slate-200'}`}>
+                {Math.floor(sessionTimeLeft / 60).toString().padStart(2, '0')}:{(sessionTimeLeft % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
             <button 
               onClick={handleReloadCloudData} 
               disabled={saving}
