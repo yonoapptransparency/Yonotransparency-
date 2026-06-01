@@ -22,6 +22,7 @@ export function getObfuscatedKey(key: string): string {
 export const secureStorage = {
   getItem: (key: string): string | null => {
     try {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
       const realKey = getObfuscatedKey(key);
       const raw = localStorage.getItem(realKey);
       if (!raw) {
@@ -42,6 +43,7 @@ export const secureStorage = {
   
   setItem: (key: string, value: string): void => {
     try {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
       const realKey = getObfuscatedKey(key);
       localStorage.setItem(realKey, value);
       
@@ -56,6 +58,7 @@ export const secureStorage = {
   
   removeItem: (key: string): void => {
     try {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
       const realKey = getObfuscatedKey(key);
       localStorage.removeItem(realKey);
       localStorage.removeItem(key); // Also clean up legacy plain-text entry if any
@@ -66,6 +69,7 @@ export const secureStorage = {
   
   clear: (): void => {
     try {
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
       localStorage.clear();
     } catch (e) {
       console.warn("Storage clear failed:", e);
