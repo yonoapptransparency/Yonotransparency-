@@ -144,10 +144,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       return mockVideos;
     }
   });
-  // Fast persistent loading state management - initialized to true to prevent raw data flash
-  const [loading, setLoading] = useState(true);
+  // Fast persistent loading state management - initialized dynamically based on cache
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !secureStorage.getItem('rummystore_apps');
+    } catch {
+      return true;
+    }
+  });
   
-  const [loadedFromServer, setLoadedFromServer] = useState(false);
+  const [loadedFromServer, setLoadedFromServer] = useState(() => {
+    try {
+      return !!secureStorage.getItem('rummystore_apps');
+    } catch {
+      return false;
+    }
+  });
   const [appsSyncedWithServer, setAppsSyncedWithServer] = useState(false);
   const [settingsSyncedWithServer, setSettingsSyncedWithServer] = useState(false);
   const [newsSyncedWithServer, setNewsSyncedWithServer] = useState(false);
@@ -224,6 +236,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    try {
+      if (secureStorage.getItem('rummystore_apps')) {
+        // Snappy background loading: if we have cache, assume synced initially to avoid blocking UI components
+        setAppsSyncedWithServer(true);
+        setSettingsSyncedWithServer(true);
+        setNewsSyncedWithServer(true);
+        setBlogsSyncedWithServer(true);
+        setVideosSyncedWithServer(true);
+        setServerAppsFetched(true);
+        setServerNewsFetched(true);
+        setServerBlogsFetched(true);
+        setServerVideosFetched(true);
+      }
+    } catch (e) {
+      console.warn("Rapid initialization skipped", e);
+    }
+
     const loadedDocs = {
       apps: false,
       settings: false,
