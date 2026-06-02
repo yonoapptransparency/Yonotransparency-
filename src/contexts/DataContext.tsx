@@ -104,7 +104,10 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
+  const initialData = (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__) || null;
+
   const [apps, setApps] = useState<AppConfig[]>(() => {
+    if (initialData?.apps) return initialData.apps;
     try {
       const cached = secureStorage.getItem('rummystore_apps');
       return cached ? JSON.parse(cached) : mockApps;
@@ -113,6 +116,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [settings, setSettings] = useState<GlobalSettings>(() => {
+    if (initialData?.settings) return initialData.settings;
     try {
       const cached = secureStorage.getItem('rummystore_settings');
       return cached ? JSON.parse(cached) : mockSettings;
@@ -121,6 +125,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [news, setNews] = useState<NewsItem[]>(() => {
+    if (initialData?.news) return initialData.news;
     try {
       const cached = secureStorage.getItem('rummystore_news');
       return cached ? JSON.parse(cached) : mockNews;
@@ -129,6 +134,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [blogs, setBlogs] = useState<BlogPost[]>(() => {
+    if (initialData?.blogs) return initialData.blogs;
     try {
       const cached = secureStorage.getItem('rummystore_blogs');
       return cached ? JSON.parse(cached) : mockBlogs;
@@ -137,6 +143,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [videos, setVideos] = useState<VideoItem[]>(() => {
+    if (initialData?.videos) return initialData.videos;
     try {
       const cached = secureStorage.getItem('rummystore_videos');
       return cached ? JSON.parse(cached) : mockVideos;
@@ -148,6 +155,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   
   const [loadedFromServer, setLoadedFromServer] = useState(() => {
+    if (initialData) return true;
     try {
       return !!secureStorage.getItem('rummystore_apps');
     } catch {
@@ -155,6 +163,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [appsSyncedWithServer, setAppsSyncedWithServer] = useState(() => {
+    if (initialData?.apps) return true;
     try {
       return !!secureStorage.getItem('rummystore_apps');
     } catch {
@@ -162,6 +171,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [settingsSyncedWithServer, setSettingsSyncedWithServer] = useState(() => {
+    if (initialData?.settings) return true;
     try {
       return !!secureStorage.getItem('rummystore_settings');
     } catch {
@@ -169,6 +179,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [newsSyncedWithServer, setNewsSyncedWithServer] = useState(() => {
+    if (initialData?.news) return true;
     try {
       return !!secureStorage.getItem('rummystore_news');
     } catch {
@@ -176,6 +187,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [blogsSyncedWithServer, setBlogsSyncedWithServer] = useState(() => {
+    if (initialData?.blogs) return true;
     try {
       return !!secureStorage.getItem('rummystore_blogs');
     } catch {
@@ -183,6 +195,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [videosSyncedWithServer, setVideosSyncedWithServer] = useState(() => {
+    if (initialData?.videos) return true;
     try {
       return !!secureStorage.getItem('rummystore_videos');
     } catch {
@@ -386,6 +399,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     const unsubs = [
       onSnapshot(doc(db, 'store_data', 'apps_meta'), async (snap) => {
+        if (snap.metadata.fromCache && (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__)) return;
         let loadedApps: any[] = [];
         let fetchedData = false;
         
@@ -450,6 +464,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         checkLoaded('apps');
       }),
       onSnapshot(doc(db, 'store_data', 'settings'), (snap) => {
+        if (snap.metadata.fromCache && (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__)) return;
         if (snap.exists()) {
           const data = snap.data() as GlobalSettings;
           setSettings(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
@@ -474,6 +489,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         checkLoaded('settings');
       }),
       onSnapshot(doc(db, 'store_data', 'news'), (snap) => {
+        if (snap.metadata.fromCache && (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__)) return;
         if (snap.exists()) {
           const data = snap.data().items || [];
           setNews(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
@@ -495,6 +511,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         checkLoaded('news');
       }),
       onSnapshot(doc(db, 'store_data', 'blogs'), (snap) => {
+        if (snap.metadata.fromCache && (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__)) return;
         if (snap.exists()) {
           const data = snap.data().items || [];
           setBlogs(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
@@ -516,6 +533,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         checkLoaded('blogs');
       }),
       onSnapshot(doc(db, 'store_data', 'videos'), (snap) => {
+        if (snap.metadata.fromCache && (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__)) return;
         if (snap.exists()) {
           const data = snap.data().items || [];
           setVideos(prev => JSON.stringify(prev) === JSON.stringify(data) ? prev : data);
