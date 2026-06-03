@@ -19,8 +19,11 @@ export const WebsiteTitleHero = React.memo(({ settings }: WebsiteTitleHeroProps)
   if (!visible) return null;
 
   // Defaults
-  const text = settings.hero_title_text || 'RUMMY STORE GAMING DIRECTORY';
-  const subtitle = settings.hero_title_subtitle || 'COMPREHENSIVE SOCIAL CASUAL E-SPORTS METRICS & UNBIASED INTEGRITY REVIEWS';
+  const text = settings.hero_title_text ?? '';
+  const subtitle = settings.hero_title_subtitle ?? '';
+  
+  if (!text && !subtitle) return null;
+
   const style = settings.hero_title_style || 'modern';
   const color = settings.hero_title_color || 'classic-dark';
   const animation = settings.hero_title_animation || 'fade-in';

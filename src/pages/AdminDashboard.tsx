@@ -402,7 +402,7 @@ const GithubTab = React.memo(({ pushAllToGitHub, gitConfig, saveGitConfig }: any
            <ShieldAlert className="w-5 h-5" /> Security Notice
         </h3>
         <p className="text-sm font-bold text-rose-700/80 mb-2">
-          Secure links and `more_information_url` are automatically scrubbed during this sync to prevent data exposure. Safe sync mode is active.
+          Secure links are included to ensure files work when pushed to the public repo.
         </p>
       </div>
 

@@ -127,7 +127,7 @@ export interface VideoItem {
 // All defaults explicitly empty strings and arrays
 export const mockApps: AppConfig[] = [];
 export const mockSettings: GlobalSettings = {
-  site_title: "Store",
+  site_title: "",
   meta_description: "",
   logo_url: "",
   favicon_url: "",

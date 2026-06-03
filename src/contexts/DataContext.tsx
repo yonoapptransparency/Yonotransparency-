@@ -120,7 +120,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     try {
       const cached = secureStorage.getItem('rummystore_settings');
       return cached ? JSON.parse(cached) : {
-        site_title: "Store",
+        site_title: "",
         meta_description: "",
         logo_url: "",
         favicon_url: "",
@@ -136,7 +136,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       };
     } catch {
       return {
-        site_title: "Store",
+        site_title: "",
         meta_description: "",
         logo_url: "",
         favicon_url: "",
@@ -180,7 +180,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   });
   // Fast persistent loading state management - initialized dynamically based on cache
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => {
+    if (initialData) return false;
+    try {
+      const cached = secureStorage.getItem('rummystore_settings');
+      return !cached;
+    } catch {
+      return true;
+    }
+  });
   
   const [loadedFromServer, setLoadedFromServer] = useState(() => {
     if (initialData) return true;
@@ -618,11 +626,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       
       for (let i = 0; i < numChunks; i++) {
         const chunk = JSON.parse(JSON.stringify(newApps.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)));
-        chunk.forEach((app: any) => { 
-          delete app.more_information_url; 
-          delete app.encrypted_download_url;
-          delete app.download_url;
-        });
         await setDoc(doc(db, 'store_data', `apps_chunk_${i}`), { items: chunk });
       }
       
@@ -833,7 +836,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     };
 
     log("GitHub Sync: Manually pushing all static data to repository...");
-    log("GitHub Sync: Generating secure payload (stripping more_information_url)...");
+    log("GitHub Sync: Generating secure payload...");
     const updatedCode = generateStaticDataFileCode(apps, settings, news, blogs, videos);
     
     log(`GitHub Sync: Payload generated successfully (${apps.length} apps, ${news.length} news items).`);

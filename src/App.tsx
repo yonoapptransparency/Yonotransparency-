@@ -709,7 +709,7 @@ function AppContent() {
       return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
     };
 
-    const siteTitle = settings.site_title || 'App Store';
+    const siteTitle = settings.site_title || '';
     let pageTitle = siteTitle;
     let pageDesc = settings.meta_description || '';
     let pageKeywords = settings.seo_keywords || '';
