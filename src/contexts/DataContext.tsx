@@ -110,45 +110,73 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (initialData?.apps) return initialData.apps;
     try {
       const cached = secureStorage.getItem('rummystore_apps');
-      return cached ? JSON.parse(cached) : mockApps;
+      return cached ? JSON.parse(cached) : [];
     } catch {
-      return mockApps;
+      return [];
     }
   });
   const [settings, setSettings] = useState<GlobalSettings>(() => {
     if (initialData?.settings) return initialData.settings;
     try {
       const cached = secureStorage.getItem('rummystore_settings');
-      return cached ? JSON.parse(cached) : mockSettings;
+      return cached ? JSON.parse(cached) : {
+        site_title: "Store",
+        meta_description: "",
+        logo_url: "",
+        favicon_url: "",
+        helpline_whatsapp: "",
+        helpline_telegram: "",
+        support_email: "",
+        disclaimer_text: "",
+        ethics_discrimination_text: "",
+        ticker_text: "",
+        animations_enabled: true,
+        categories: [],
+        banners: []
+      };
     } catch {
-      return mockSettings;
+      return {
+        site_title: "Store",
+        meta_description: "",
+        logo_url: "",
+        favicon_url: "",
+        helpline_whatsapp: "",
+        helpline_telegram: "",
+        support_email: "",
+        disclaimer_text: "",
+        ethics_discrimination_text: "",
+        ticker_text: "",
+        animations_enabled: true,
+        categories: [],
+        banners: []
+      };
     }
   });
   const [news, setNews] = useState<NewsItem[]>(() => {
     if (initialData?.news) return initialData.news;
     try {
       const cached = secureStorage.getItem('rummystore_news');
-      return cached ? JSON.parse(cached) : mockNews;
+      return cached ? JSON.parse(cached) : [];
     } catch {
-      return mockNews;
+      return [];
     }
   });
   const [blogs, setBlogs] = useState<BlogPost[]>(() => {
     if (initialData?.blogs) return initialData.blogs;
     try {
       const cached = secureStorage.getItem('rummystore_blogs');
-      return cached ? JSON.parse(cached) : mockBlogs;
+      return cached ? JSON.parse(cached) : [];
     } catch {
-      return mockBlogs;
+      return [];
     }
   });
   const [videos, setVideos] = useState<VideoItem[]>(() => {
     if (initialData?.videos) return initialData.videos;
     try {
       const cached = secureStorage.getItem('rummystore_videos');
-      return cached ? JSON.parse(cached) : mockVideos;
+      return cached ? JSON.parse(cached) : [];
     } catch {
-      return mockVideos;
+      return [];
     }
   });
   // Fast persistent loading state management - initialized dynamically based on cache
@@ -409,12 +437,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           for (let i = 0; i < numChunks; i++) {
             fetchPromises.push((async () => {
               try {
-                const chunkSnap = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
+                const chunkSnap = await getDocFromServer(doc(db, 'store_data', `apps_chunk_${i}`));
                 if (chunkSnap.exists() && chunkSnap.data().items) {
                   return chunkSnap.data().items;
                 }
               } catch (err) {
-                console.warn(`Failed to fetch chunk ${i}`, err);
+                console.warn(`Failed to fetch chunk ${i} explicitly from server, falling back to cache`, err);
+                try {
+                  const localChunkSnap = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
+                  if (localChunkSnap.exists() && localChunkSnap.data().items) return localChunkSnap.data().items;
+                } catch (e) { }
               }
               return [];
             })());
@@ -451,6 +483,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           }
           checkLoaded('apps');
         } else {
+          setApps([]);
+          secureStorage.setItem('rummystore_apps', JSON.stringify([]));
           setAppsSyncedWithServer(true);
           setServerAppsFetched(true);
           setLoadedFromServer(true);
@@ -500,6 +534,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           
           checkLoaded('news');
         } else {
+          setNews([]);
+          secureStorage.setItem('rummystore_news', JSON.stringify([]));
           setNewsSyncedWithServer(true);
           setServerNewsFetched(true);
           checkLoaded('news');
@@ -522,6 +558,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           
           checkLoaded('blogs');
         } else {
+          setBlogs([]);
+          secureStorage.setItem('rummystore_blogs', JSON.stringify([]));
           setBlogsSyncedWithServer(true);
           setServerBlogsFetched(true);
           checkLoaded('blogs');
@@ -544,6 +582,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           
           checkLoaded('videos');
         } else {
+          setVideos([]);
+          secureStorage.setItem('rummystore_videos', JSON.stringify([]));
           setVideosSyncedWithServer(true);
           setServerVideosFetched(true);
           checkLoaded('videos');
@@ -578,8 +618,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       
       for (let i = 0; i < numChunks; i++) {
         const chunk = JSON.parse(JSON.stringify(newApps.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)));
-        // Mistake 6 Fix: Never expose URLs in the public client database chunks
-        chunk.forEach((app: any) => { delete app.more_information_url; });
+        chunk.forEach((app: any) => { 
+          delete app.more_information_url; 
+          delete app.encrypted_download_url;
+          delete app.download_url;
+        });
         await setDoc(doc(db, 'store_data', `apps_chunk_${i}`), { items: chunk });
       }
       
@@ -852,7 +895,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               const allApps = [];
               for(let i=0; i<numChunks; i++) {
                 try {
-                  const snapChunk = await getDoc(doc(db, 'store_data', `apps_chunk_${i}`));
+                  const snapChunk = await withServerConfirmation(() => getDocFromServer(doc(db, 'store_data', `apps_chunk_${i}`)), 10000);
                   if(snapChunk.exists() && snapChunk.data().items) {
                     allApps.push(...snapChunk.data().items);
                   }
@@ -869,15 +912,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 const data = oldSnap.data().items;
                 setApps(data);
                 secureStorage.setItem('rummystore_apps', JSON.stringify(data));
+              } else {
+                setApps([]);
+                secureStorage.setItem('rummystore_apps', JSON.stringify([]));
               }
             }
           } else {
-            // Use standard getDoc instead of getDocFromServer for instant cached fallbacks or clean short check
-            const snap = await withServerConfirmation(() => getDoc(doc(db, 'store_data', d.path)), 10000);
+            // Use getDocFromServer to ensure it receives fresh updates
+            const snap = await withServerConfirmation(() => getDocFromServer(doc(db, 'store_data', d.path)), 10000);
             if (snap.exists()) {
               const data = (d as any).key ? (snap.data() as any)[(d as any).key] : snap.data();
               d.setter(data);
               secureStorage.setItem(`rummystore_${d.path}`, JSON.stringify(data));
+            } else if ((d as any).key === 'items') {
+              d.setter([]);
+              secureStorage.setItem(`rummystore_${d.path}`, JSON.stringify([]));
             }
           }
         } catch (fetchErr) {

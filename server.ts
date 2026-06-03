@@ -574,6 +574,7 @@ async function startServer() {
               'Accept': 'application/vnd.github.v3+json',
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache',
+              'If-None-Match': '',
               'User-Agent': 'node-fetch'
             }
           }
@@ -596,6 +597,7 @@ async function startServer() {
                 'Accept': 'application/vnd.github.v3+json',
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
+                'If-None-Match': '',
                 'User-Agent': 'node-fetch'
               }
             }
@@ -1150,10 +1152,17 @@ const rateLimitMap = new Map<string, number[]>();
         const host = req.headers["x-forwarded-host"] || req.get("host") || "localhost:3000";
         const hostUrl = `${String(protocol).split(',')[0].trim()}://${String(host).split(',')[0].trim()}`;
         template = await injectSeoTags(template, req.originalUrl, hostUrl);
-        res.status(200).set({ 'Content-Type': 'text/html' }).send(template);
+        res.status(200).set({ 
+          'Content-Type': 'text/html',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }).send(template);
       } catch (e) {
         console.error(e);
-        res.sendFile(templatePath);
+        res.status(200).set({
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }).sendFile(templatePath);
       }
     });
   }

@@ -94,7 +94,7 @@ const DashboardTab = React.memo(({ apps, news }: { apps: any[], news: any[] }) =
         <div className="text-2xl font-bold text-amber-500">12</div>
       </div>
       <div className="bg-black/5 p-4 rounded-xl border border-black/10">
-        <div className="opacity-60 text-sm mb-1">Safe Links Encrypted</div>
+        <div className="opacity-60 text-sm mb-1">Safe Links Secured</div>
         <div className="text-2xl font-bold text-pink-500">100%</div>
       </div>
     </div>
@@ -229,7 +229,7 @@ const AppsTab = React.memo(({ appsList, editingAppId, setEditingAppId, handleDel
 
           <div className="border border-black/10 dark:border-white/10 rounded-xl p-4 bg-black/5 dark:bg-white/5 space-y-4">
              <h3 className="font-bold text-lg dark:text-white flex items-center gap-2"><LinkIcon className="w-4 h-4 text-pink-500"/> File Access Config</h3>
-             <label className="block text-sm font-medium opacity-60 dark:text-white">More Information URL (Ciphertext shown - input new http URL to change)</label>
+             <label className="block text-sm font-medium opacity-60 dark:text-white">More Information URL (Secured string shown - input new http URL to change)</label>
              <input type="text" name="more_information_url" defaultValue={editApp?.more_information_url} placeholder="https://..." className="w-full bg-white dark:bg-slate-900 border border-pink-500/30 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 min-h-[48px] dark:text-white" />
           </div>
 
@@ -903,6 +903,27 @@ export default function AdminDashboard() {
   // Security Stopwatch (Auto-logout after 15 mins)
   const [sessionTimeLeft, setSessionTimeLeft] = useState(15 * 60);
 
+  const syncSecureVault = async () => {
+    try {
+      const items = Array.from(cachedSecureMapRef.current.entries()).map(([k, v]) => ({ id: k, url: v }));
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch('/api/v1/admin/encrypt-links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ items })
+      });
+      if (res.ok) {
+        const { encrypted } = await res.json();
+        await setDoc(doc(db, 'store_data', 'sec_vault'), { encryptedData: encrypted, lastUpdated: new Date().toISOString() });
+      }
+    } catch (e) {
+      console.error("Failed to sync secure vault:", e);
+    }
+  };
+
   useEffect(() => {
     let timerId: any;
     if (user && isAdminUser) {
@@ -1068,9 +1089,12 @@ export default function AdminDashboard() {
           const secureMap = cachedSecureMapRef.current || new Map();
           const mergedApps = mockApps.map(a => ({...a, more_information_url: secureMap.get(a.id) || a.more_information_url }));
           
-          // Only update if structural changes actually happened to avoid overwriting pending edits
           setAppsList(prev => {
-             if (JSON.stringify(prev.map(p => p.id)) !== JSON.stringify(mergedApps.map(m => m.id))) {
+             // If we are actively editing an app, we might want to preserve the editing state. 
+             // However, the form relies on `editApp` which is derived from `appsList`.
+             // To avoid overwriting with the EXACT identical state and causing re-renders,
+             // only update if stringified contents differ.
+             if (JSON.stringify(prev) !== JSON.stringify(mergedApps)) {
                  return mergedApps;
              }
              return prev; 
@@ -1280,7 +1304,7 @@ export default function AdminDashboard() {
       if (inputUrl && !inputUrl.startsWith('U2FsdGVkX1')) {
          try {
             const idToken = await auth.currentUser?.getIdToken();
-            const res = await fetch('/api/v1/admin/encrypt', {
+            const res = await fetch('/api/v1/adminURL/g', {
                method: 'POST',
                headers: {
                   'Content-Type': 'application/json',
@@ -1291,20 +1315,22 @@ export default function AdminDashboard() {
             if (res.ok) {
                encryptedUrlVal = (await res.json()).encrypted;
             } else {
-               alert(`Failed to encrypt URL: ${await res.text()}`);
+               alert(`Failed to secure URL: ${await res.text()}`);
                return; // Abort save if encryption fails
             }
          } catch (err: any) {
-            console.error("Failed to encrypt URL", err);
-            alert(`Failed to encrypt URL: ${err.message}`);
+            console.error("Failed to secure URL", err);
+            alert(`Failed to secure URL: ${err.message}`);
             return;
          }
       } else if (inputUrl) {
          encryptedUrlVal = inputUrl;
       }
       
+      const actualAppId = editingAppId || Math.random().toString(36).substr(2, 9);
+      
       const appData = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: actualAppId,
         name,
         slug,
         seo_title: formData.get('seo_title') as string || '',
@@ -1343,19 +1369,20 @@ export default function AdminDashboard() {
       };
       
       if (encryptedUrlVal) {
-          cachedSecureMapRef.current.set(appData.id, encryptedUrlVal);
+          cachedSecureMapRef.current.set(actualAppId, encryptedUrlVal);
       } else {
-          cachedSecureMapRef.current.delete(appData.id);
+          cachedSecureMapRef.current.delete(actualAppId);
       }
       
       let updatedApps;
       if (editingAppId) {
-        updatedApps = appsList.map(a => a.id === editingAppId ? { ...a, ...appData, id: a.id, created_at: a.created_at, screenshots: a.screenshots } : a);
+        updatedApps = appsList.map(a => a.id === editingAppId ? { ...a, ...appData, created_at: a.created_at, screenshots: a.screenshots } : a);
       } else {
         updatedApps = [...appsList, appData];
       }
       
       await saveMockApps(updatedApps);
+      await syncSecureVault();
       setAppsList(updatedApps);
       triggerHaptic();
       setEditingAppId(null);
@@ -1377,8 +1404,10 @@ export default function AdminDashboard() {
       cancelText: 'Cancel',
       onConfirm: async () => {
         try {
+          cachedSecureMapRef.current.delete(id);
           const updatedApps = appsList.filter(a => a.id !== id);
           await saveMockApps(updatedApps);
+          await syncSecureVault();
           setAppsList(updatedApps);
         } catch (err: any) {
           alert('Error deleting app: ' + err.message);
@@ -1603,7 +1632,7 @@ export default function AdminDashboard() {
               ) : (
                 <Shield className="w-16 h-16 text-rose-500" />
               )}
-              <div className="absolute -top-2 -right-2 bg-rose-500 text-[8px] font-black text-white px-2 py-1 rounded-full uppercase tracking-tighter shadow-[0_0_10px_rgba(244,63,94,0.5)]">Encrypted Hub</div>
+              <div className="absolute -top-2 -right-2 bg-rose-500 text-[8px] font-black text-white px-2 py-1 rounded-full uppercase tracking-tighter shadow-[0_0_10px_rgba(244,63,94,0.5)]">Secured Hub</div>
             </div>
             <div>
               <h1 className="text-3xl font-black text-rose-500 uppercase tracking-widest italic">Restricted Admin Access</h1>

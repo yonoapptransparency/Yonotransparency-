@@ -36,6 +36,8 @@ export function generateStaticDataFileCode(
   const cleanApps = JSON.parse(JSON.stringify(apps)).map((app: any) => {
     // Top Security: Scrub sensitive payloads to prevent bot and hacker scraping from public repo
     delete app.more_information_url;
+    delete app.encrypted_download_url;
+    delete app.download_url;
     return app;
   });
   const cleanSettings = JSON.parse(JSON.stringify(settings));
@@ -125,7 +127,6 @@ export interface AppConfig {
   developer: string;
   icon_url: string;
   screenshots: string[];
-  more_information_url?: string;
   description_html: string;
   red_box_msg: string;
   yellow_box_msg: string;
