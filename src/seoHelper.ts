@@ -109,7 +109,7 @@ export async function fetchStoreData() {
 
   if (isFetchingStoreData) {
      // If a fetch is already in flight, return the best data we have to avoid blocking duplicate requests
-     return cachedData || { apps: mockApps, settings: mockSettings, news: mockNews, blogs: mockBlogs, videos: mockVideos };
+     return cachedData || { apps: [], settings: {}, news: [], blogs: [], videos: [] };
   }
 
   try {
@@ -191,17 +191,17 @@ export async function fetchStoreData() {
     return cachedData;
   } catch (error) {
     console.error('Failed to fetch store data for SEO:', error);
-    const mockFallback = {
-      apps: mockApps,
-      settings: mockSettings,
-      news: mockNews,
-      blogs: mockBlogs,
-      videos: mockVideos
+    const nullFallback = {
+      apps: [],
+      settings: {},
+      news: [],
+      blogs: [],
+      videos: []
     };
     if (!cachedData) {
-      cachedData = mockFallback;
+      cachedData = nullFallback;
     }
-    return cachedData || mockFallback;
+    return cachedData || nullFallback;
   } finally {
     isFetchingStoreData = false;
   }
@@ -901,12 +901,15 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
 
   // Dynamically inject fully pre-rendered body content inside <div id="root"> for crawlers and indexers.
   // When the React client mounts, it will cleanly overwrite the markup with interactive components.
+  // UPDATE: Disabled pre-rendering body injection to prevent visual flashes of mismatched SSR HTML before client-side hydration.
+  /*
   try {
     const preRenderedBody = await getPagePreRender(urlPath, data);
     newTemplate = newTemplate.replace(/<div\s+id=["']root["'][^>]*>.*?<\/div>/ims, `<div id="root">${preRenderedBody}</div>`);
   } catch (renderErr) {
     console.error("Static pre-rendering body injection failed:", renderErr);
   }
+  */
   
   return newTemplate;
 }

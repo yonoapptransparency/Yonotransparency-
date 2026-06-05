@@ -107,43 +107,87 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const initialData = (typeof window !== 'undefined' && (window as any).__INITIAL_DATA__) || null;
 
   const [apps, setApps] = useState<AppConfig[]>(() => {
-    if (initialData?.apps) return initialData.apps;
-    return [];
+    if (initialData?.apps && initialData.apps.length > 0) return initialData.apps;
+    try {
+      const cached = secureStorage.getItem('rummystore_apps');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
   });
   const [settings, setSettings] = useState<GlobalSettings>(() => {
-    if (initialData?.settings) return initialData.settings;
-    return {
-      site_title: "",
-      meta_description: "",
-      logo_url: "",
-      favicon_url: "",
-      helpline_whatsapp: "",
-      helpline_telegram: "",
-      support_email: "",
-      disclaimer_text: "",
-      ethics_discrimination_text: "",
-      ticker_text: "",
-      animations_enabled: true,
-      categories: [],
-      banners: []
-    };
+    if (initialData?.settings && initialData.settings.site_title) return initialData.settings;
+    try {
+      const cached = secureStorage.getItem('rummystore_settings');
+      return cached ? JSON.parse(cached) : {
+        site_title: "",
+        meta_description: "",
+        logo_url: "",
+        favicon_url: "",
+        helpline_whatsapp: "",
+        helpline_telegram: "",
+        support_email: "",
+        disclaimer_text: "",
+        ethics_discrimination_text: "",
+        ticker_text: "",
+        animations_enabled: true,
+        categories: [],
+        banners: []
+      };
+    } catch {
+      return {
+        site_title: "",
+        meta_description: "",
+        logo_url: "",
+        favicon_url: "",
+        helpline_whatsapp: "",
+        helpline_telegram: "",
+        support_email: "",
+        disclaimer_text: "",
+        ethics_discrimination_text: "",
+        ticker_text: "",
+        animations_enabled: true,
+        categories: [],
+        banners: []
+      };
+    }
   });
   const [news, setNews] = useState<NewsItem[]>(() => {
-    if (initialData?.news) return initialData.news;
-    return [];
+    if (initialData?.news && initialData.news.length > 0) return initialData.news;
+    try {
+      const cached = secureStorage.getItem('rummystore_news');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
   });
   const [blogs, setBlogs] = useState<BlogPost[]>(() => {
-    if (initialData?.blogs) return initialData.blogs;
-    return [];
+    if (initialData?.blogs && initialData.blogs.length > 0) return initialData.blogs;
+    try {
+      const cached = secureStorage.getItem('rummystore_blogs');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
   });
   const [videos, setVideos] = useState<VideoItem[]>(() => {
-    if (initialData?.videos) return initialData.videos;
-    return [];
+    if (initialData?.videos && initialData.videos.length > 0) return initialData.videos;
+    try {
+      const cached = secureStorage.getItem('rummystore_videos');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
   });
   // Fast persistent loading state management - initialized dynamically based on cache
   const [loading, setLoading] = useState(() => {
-    if (initialData) return false;
-    return true;
+    if (initialData?.apps && initialData.apps.length > 0) return false;
+    try {
+      const cachedApps = secureStorage.getItem('rummystore_apps');
+      return !cachedApps || cachedApps === '[]';
+    } catch {
+      return true;
+    }
   });
   
   useEffect(() => {
@@ -152,7 +196,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   
   const [loadedFromServer, setLoadedFromServer] = useState(() => {
     if (initialData) return true;
-    return false;
+    try {
+      return !!secureStorage.getItem('rummystore_apps');
+    } catch {
+      return false;
+    }
   });
   const [appsSyncedWithServer, setAppsSyncedWithServer] = useState(() => {
     if (initialData?.apps) return true;
