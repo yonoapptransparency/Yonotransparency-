@@ -837,7 +837,7 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
     }
   }
 
-  const faviconUrl = getField(settings, 'favicon_url');
+  const faviconUrl = getField(settings, 'favicon_url') || getField(settings, 'logo_url');
   let absoluteFaviconUrl = faviconUrl;
   if (faviconUrl) {
     const trimmedFav = faviconUrl.trim();
@@ -858,11 +858,9 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
     <title>Admin Portal</title>
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
     ${absoluteFaviconUrl ? `
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/x-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="shortcut icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="apple-touch-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
     ` : ''}
   ` : `
     <title>${escapeHtml(title)}</title>
@@ -878,11 +876,9 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     ${absoluteOgImage ? `<meta name="twitter:image" content="${escapeHtml(absoluteOgImage)}" />` : ''}
     ${absoluteFaviconUrl ? `
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/x-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="shortcut icon" href="${escapeHtml(absoluteFaviconUrl)}" />
+    <link rel="apple-touch-icon" href="${escapeHtml(absoluteFaviconUrl)}" />
     ` : ''}
   `;
 

@@ -527,11 +527,11 @@ const SettingsTab = React.memo(({ mockSettings, handleSaveSettings, saving }: an
             <textarea name="ethics_discrimination_text" rows={3} defaultValue={mockSettings.ethics_discrimination_text} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 dark:text-white font-medium"></textarea>
           </div>
           <div>
-            <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Important Notice Heading (Handshake Gateway Page)</label>
+            <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Important Notice Heading (More Information URL Page)</label>
             <input type="text" name="important_notice_heading" defaultValue={mockSettings.important_notice_heading} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 dark:text-white font-bold" />
           </div>
           <div>
-            <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Important Notice Content (Handshake Gateway Page Body)</label>
+            <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Important Notice Content (More Information URL Page Body)</label>
             <textarea name="important_notice" rows={2} defaultValue={mockSettings.important_notice} className="w-full bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-4 focus:ring-4 focus:ring-pink-500/20 dark:text-white font-medium"></textarea>
           </div>
         </div>
