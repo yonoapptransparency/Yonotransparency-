@@ -378,6 +378,23 @@ const GithubTab = React.memo(({ pushAllToGitHub, gitConfig, saveGitConfig, gener
   const [syncing, setSyncing] = React.useState(false);
   const [showPreview, setShowPreview] = React.useState(false);
   const [previewContent, setPreviewContent] = React.useState<string>("");
+  const [localConfig, setLocalConfig] = React.useState(gitConfig || { owner: '', repo: '', branch: 'main', token: '' });
+
+  React.useEffect(() => {
+    if (gitConfig) {
+      setLocalConfig(gitConfig);
+    }
+  }, [gitConfig]);
+
+  const handleSaveConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await saveGitConfig(localConfig);
+      alert('GitHub Configuration Saved successfully.');
+    } catch (err: any) {
+      alert(`Error saving GitHub config: ${err.message}`);
+    }
+  };
 
   const handleManualSync = async () => {
     setSyncing(true);
@@ -420,6 +437,33 @@ const GithubTab = React.memo(({ pushAllToGitHub, gitConfig, saveGitConfig, gener
         <p className="text-sm font-bold text-rose-700/80 mb-2">
           The more_information_url (your private download links) are specifically blocked from being sent to GitHub to keep them 100% private and secure.
         </p>
+      </div>
+
+      <div className="bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-6">
+        <h3 className="font-black text-slate-800 dark:text-white border-b border-black/10 dark:border-white/10 pb-2 mb-6 uppercase tracking-widest text-xs italic">Repository Configuration</h3>
+        <form onSubmit={handleSaveConfig} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Repository Owner</label>
+              <input type="text" value={localConfig.owner || ''} onChange={e => setLocalConfig({...localConfig, owner: e.target.value})} className="w-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-xl p-3 focus:border-pink-500 font-mono text-sm dark:text-white" required />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Repository Name</label>
+              <input type="text" value={localConfig.repo || ''} onChange={e => setLocalConfig({...localConfig, repo: e.target.value})} className="w-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-xl p-3 focus:border-pink-500 font-mono text-sm dark:text-white" required />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">Branch</label>
+              <input type="text" value={localConfig.branch || ''} onChange={e => setLocalConfig({...localConfig, branch: e.target.value})} placeholder="main" className="w-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-xl p-3 focus:border-pink-500 font-mono text-sm dark:text-white" required />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black opacity-60 mb-1 uppercase tracking-widest italic dark:text-white">GitHub Fine-grained PAT</label>
+              <input type="password" value={localConfig.token || ''} onChange={e => setLocalConfig({...localConfig, token: e.target.value})} placeholder="github_pat_..." className="w-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-xl p-3 focus:border-pink-500 font-mono text-sm dark:text-white" required />
+            </div>
+          </div>
+          <button type="submit" className="mt-4 px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-lg transition-all flex items-center gap-2">
+            <Save className="w-5 h-5" /> Save Configuration
+          </button>
+        </form>
       </div>
 
       <div className="bg-black/5 dark:bg-white/5 border-2 border-black/10 dark:border-white/10 rounded-2xl p-6 space-y-6">
