@@ -394,8 +394,8 @@ export default function AppDetails() {
                 </div>
               )}
               {isActuallyComingSoon && (
-                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center backdrop-blur-[1px] rounded-[16px]">
-                  <div className="bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+                <div className="absolute top-1 right-1 pointer-events-none">
+                  <div className="bg-amber-500/95 backdrop-blur-[1px] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-[1px] rounded shadow-[0_2px_4px_rgba(0,0,0,0.1)] border border-amber-400">
                     Soon
                   </div>
                 </div>

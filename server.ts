@@ -1222,6 +1222,8 @@ const rateLimitMap = new Map<string, number[]>();
 
   app.listen(PORT as number, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
+    // Eagerly populate cache so first user gets instant response
+    fetchStoreData().catch(e => console.log("Silent initial cache warming failed: ", e));
   });
 }
 

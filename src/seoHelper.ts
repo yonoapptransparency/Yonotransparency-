@@ -69,11 +69,25 @@ export function getField(obj: any, key: string, fallback = ''): string {
 export async function fetchStoreData() {
   const now = Date.now();
 
-  // If we have cached data, always serve it instantly if it's fresh (5 seconds)
-  if (cachedData && (now - lastFetchTime) < 5000) {
+  const isStale = (now - lastFetchTime) > CACHE_TTL;
+  const isSuperStale = (now - lastFetchTime) > (CACHE_TTL * 15); // Require a blocking fetch after 30 mins
+
+  // STALE-WHILE-REVALIDATE Pattern:
+  // If we have cached data and it's not super stale, return it DIRECTLY so the user gets instant page loads.
+  if (cachedData && !isSuperStale) {
+    if (isStale && !isFetchingStoreData) {
+      // Background revalidation without blocking
+      doFetchStoreData().catch(e => console.error("Background store fetch failed:", e));
+    }
     return cachedData;
   }
 
+  // Blocking fetch only if no cache or extremely stale
+  return await doFetchStoreData();
+}
+
+async function doFetchStoreData() {
+  const now = Date.now();
   const config = getRawFirebaseConfig();
   if (!config) {
     console.warn('No firebase config found for SEO rendering, using static mock fallback.');

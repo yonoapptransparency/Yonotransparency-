@@ -321,8 +321,8 @@ export const AppListItem = React.memo(({ app, index }: { app: any; index?: numbe
               }}
             />
             {isActuallyComingSoon && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
-                <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+              <div className="absolute top-1 right-1 pointer-events-none">
+                <div className="bg-amber-500/95 backdrop-blur-[1px] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-[1px] rounded shadow-sm border border-amber-400">
                   Soon
                 </div>
               </div>
@@ -413,8 +413,8 @@ export const TopChartItem = React.memo(({ rank, app }: TopChartItemProps) => {
               }}
             />
             {isActuallyComingSoon && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
-                <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+              <div className="absolute top-1 right-1 pointer-events-none">
+                <div className="bg-amber-500/95 backdrop-blur-[1px] text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-[1px] rounded shadow-sm border border-amber-400">
                   Soon
                 </div>
               </div>
