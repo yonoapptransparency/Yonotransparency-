@@ -22,6 +22,24 @@ export default function GatewayPage() {
   const [progress, setProgress] = useState(0);
   const [verifyInterval, setVerifyInterval] = useState<ReturnType<typeof setInterval> | null>(null);
 
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!app?.is_coming_soon || !app?.publish_date) {
+      setTimeRemaining(null);
+      return;
+    }
+    const calculateRemaining = () => {
+      const remaining = new Date(app.publish_date!).getTime() - new Date().getTime();
+      setTimeRemaining(remaining > 0 ? remaining : 0);
+    };
+    calculateRemaining();
+    const interval = setInterval(calculateRemaining, 1000);
+    return () => clearInterval(interval);
+  }, [app?.is_coming_soon, app?.publish_date]);
+
+  const isActuallyComingSoon = app?.is_coming_soon && (timeRemaining === null || timeRemaining > 0);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     // Reset verification states on transition to another application
@@ -295,10 +313,34 @@ export default function GatewayPage() {
 
             {/* Right side: Dynamic Button */}
             <div className="flex flex-col items-center gap-3 w-full lg:w-auto shrink-0">
-              {app.is_coming_soon ? (
-                <button disabled className="w-full sm:w-96 py-4 px-10 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm text-base font-semibold shrink-0 cursor-not-allowed bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                  Coming Soon
-                </button>
+              {isActuallyComingSoon ? (
+                <div className="w-full sm:w-96 flex flex-col items-center">
+                  <button disabled className="w-full py-4 px-10 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm text-base font-semibold shrink-0 cursor-not-allowed bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    Coming Soon
+                  </button>
+                  {timeRemaining !== null && timeRemaining > 0 && (
+                    <div className="mt-2 flex gap-1 justify-center">
+                      {(() => {
+                        const s = Math.floor(timeRemaining / 1000);
+                        const d = Math.floor(s / 86400);
+                        const h = Math.floor((s % 86400) / 3600);
+                        const m = Math.floor((s % 3600) / 60);
+                        const sec = s % 60;
+                        return [
+                          { label: 'D', value: d.toString().padStart(2, '0') },
+                          { label: 'H', value: h.toString().padStart(2, '0') },
+                          { label: 'M', value: m.toString().padStart(2, '0') },
+                          { label: 'S', value: sec.toString().padStart(2, '0') }
+                        ].map((unit, i) => (
+                          <div key={i} className="flex flex-col items-center bg-zinc-100 dark:bg-zinc-800 rounded px-1.5 py-1 border border-black/5 dark:border-white/5">
+                            <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-200">{unit.value}</span>
+                            <span className="text-[8px] uppercase tracking-widest text-zinc-500">{unit.label}</span>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <ClearanceButton appId={app.id} status={app.safety_status as 'Verified' | 'Caution' | 'Unsafe'} />
               )}

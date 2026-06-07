@@ -81,6 +81,7 @@ export interface AppConfig {
   canonical_url?: string;
   category: string;
   is_coming_soon?: boolean;
+  publish_date?: string;
   description_html: string;
   custom_admin_box_html?: string;
   custom_admin_box_heading?: string;

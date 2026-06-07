@@ -271,6 +271,20 @@ interface TopChartItemProps {
 
 export const AppListItem = React.memo(({ app, index }: { app: any; index?: number }) => {
   const displayIndex = index !== undefined ? index : (app.serial_number || 1);
+  const [isActuallyComingSoon, setIsActuallyComingSoon] = React.useState(() => {
+    if (!app.is_coming_soon) return false;
+    if (!app.publish_date) return true;
+    return new Date(app.publish_date).getTime() > new Date().getTime();
+  });
+  
+  React.useEffect(() => {
+    if (!app.is_coming_soon || !app.publish_date) return;
+    const interval = setInterval(() => {
+      setIsActuallyComingSoon(new Date(app.publish_date).getTime() > new Date().getTime());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [app.is_coming_soon, app.publish_date]);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 5 }}
@@ -306,7 +320,7 @@ export const AppListItem = React.memo(({ app, index }: { app: any; index?: numbe
                 e.currentTarget.src = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop";
               }}
             />
-            {app.is_coming_soon && (
+            {isActuallyComingSoon && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
                 <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
                   Soon
@@ -338,7 +352,7 @@ export const AppListItem = React.memo(({ app, index }: { app: any; index?: numbe
         
         <div className="shrink-0 pr-1">
           <div className="bg-black/5 dark:bg-white/10 text-zinc-900 dark:text-zinc-100 px-4 py-1 text-[11px] font-bold rounded-full transition-all duration-300 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-zinc-900 shadow-sm border border-transparent group-hover:border-black/5 dark:group-hover:border-white/5">
-            {app.is_coming_soon ? 'SOON' : 'MORE'}
+            {isActuallyComingSoon ? 'SOON' : 'MORE'}
           </div>
         </div>
         
@@ -349,6 +363,20 @@ export const AppListItem = React.memo(({ app, index }: { app: any; index?: numbe
 });
 
 export const TopChartItem = React.memo(({ rank, app }: TopChartItemProps) => {
+  const [isActuallyComingSoon, setIsActuallyComingSoon] = React.useState(() => {
+    if (!app.is_coming_soon) return false;
+    if (!app.publish_date) return true;
+    return new Date(app.publish_date).getTime() > new Date().getTime();
+  });
+  
+  React.useEffect(() => {
+    if (!app.is_coming_soon || !app.publish_date) return;
+    const interval = setInterval(() => {
+      setIsActuallyComingSoon(new Date(app.publish_date).getTime() > new Date().getTime());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [app.is_coming_soon, app.publish_date]);
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -5 }}
@@ -384,7 +412,7 @@ export const TopChartItem = React.memo(({ rank, app }: TopChartItemProps) => {
                 e.currentTarget.src = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop";
               }}
             />
-            {app.is_coming_soon && (
+            {isActuallyComingSoon && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
                 <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
                   Soon
@@ -412,7 +440,7 @@ export const TopChartItem = React.memo(({ rank, app }: TopChartItemProps) => {
         
         <div className="shrink-0 pr-1">
           <div className="bg-black/5 dark:bg-white/10 text-zinc-900 dark:text-zinc-100 px-4 py-1 text-[11px] font-bold rounded-full transition-all duration-300 group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-zinc-900 shadow-sm border border-transparent group-hover:border-black/5 dark:group-hover:border-white/5">
-            {app.is_coming_soon ? 'SOON' : 'MORE'}
+            {isActuallyComingSoon ? 'SOON' : 'MORE'}
           </div>
         </div>
         

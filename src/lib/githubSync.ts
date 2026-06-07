@@ -123,6 +123,7 @@ export interface AppConfig {
   target_region?: string;
   category: string;
   is_coming_soon?: boolean;
+  publish_date?: string;
   version: string;
   file_size: string;
   developer: string;

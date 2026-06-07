@@ -189,7 +189,9 @@ export default function Home() {
                   <NewAdditionItemSkeleton key={i} />
                 ))
               ) : (
-                filteredApps.filter(app => app.is_new).slice(0, 10).map((app) => (
+                filteredApps.filter(app => app.is_new).slice(0, 10).map((app) => {
+                  const isActuallyComingSoon = app.is_coming_soon && (!app.publish_date || new Date(app.publish_date).getTime() > new Date().getTime());
+                  return (
                   <motion.div
                     key={app.id}
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -207,7 +209,7 @@ export default function Home() {
                           height={128}
                           className="w-full h-full object-cover group-hover:-translate-y-0.5 transition-transform duration-300" 
                         />
-                        {app.is_coming_soon && (
+                        {isActuallyComingSoon && (
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
                             <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
                               Soon
@@ -220,7 +222,8 @@ export default function Home() {
                       </div>
                     </Link>
                   </motion.div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

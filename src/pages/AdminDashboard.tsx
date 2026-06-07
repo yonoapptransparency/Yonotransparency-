@@ -225,14 +225,21 @@ const AppsTab = React.memo(({ appsList, editingAppId, setEditingAppId, handleDel
               </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-black/5 dark:bg-white/5 p-4 rounded-xl border border-amber-500/30">
-              <div className="flex-1">
-                <div className="font-semibold text-amber-500">Coming Soon Phase</div>
-                <div className="text-sm opacity-60 dark:text-white/60">Hide download links on the frontend for this app.</div>
+            <div className="flex flex-col gap-4 bg-black/5 dark:bg-white/5 p-4 rounded-xl border border-amber-500/30">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="font-semibold text-amber-500">Coming Soon Phase</div>
+                  <div className="text-sm opacity-60 dark:text-white/60">Hide download links on the frontend for this app.</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" name="is_coming_soon" defaultChecked={editApp ? editApp.is_coming_soon : false} className="w-5 h-5 accent-amber-500" />
+                  <span className="text-sm font-bold dark:text-white">Enable</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" name="is_coming_soon" defaultChecked={editApp ? editApp.is_coming_soon : false} className="w-5 h-5 accent-amber-500" />
-                <span className="text-sm font-bold dark:text-white">Enable</span>
+              <div>
+                <label className="block text-sm font-medium text-amber-500 mb-1">Publish Launch Timer (Local Time)</label>
+                <input type="datetime-local" name="publish_date" defaultValue={editApp?.publish_date ? new Date(new Date(editApp.publish_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''} className="w-full bg-white dark:bg-slate-900 border border-amber-500/30 rounded-lg p-3 dark:text-white" />
+                <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1 mt-1 font-medium">When this timer finishes, the "Coming Soon" tag is dropped and downloads are unlocked.</p>
               </div>
             </div>
           </div>
@@ -1453,6 +1460,7 @@ export default function AdminDashboard() {
         serial_number: parseInt(formData.get('serial_number') as string) || appsList.length + 1,
         is_featured: false,
         is_coming_soon: formData.get('is_coming_soon') === 'on',
+        publish_date: formData.get('publish_date') ? new Date(formData.get('publish_date') as string).toISOString() : undefined,
         is_new: formData.get('is_new') === 'on',
         release_notes: formData.get('release_notes') as string,
         rating: parseFloat(formData.get('rating') as string) || 5.0,

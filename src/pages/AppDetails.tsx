@@ -102,6 +102,26 @@ export default function AppDetails() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
 
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!app?.is_coming_soon || !app?.publish_date) {
+      setTimeRemaining(null);
+      return;
+    }
+
+    const calculateRemaining = () => {
+      const remaining = new Date(app.publish_date!).getTime() - new Date().getTime();
+      setTimeRemaining(remaining > 0 ? remaining : 0);
+    };
+
+    calculateRemaining();
+    const interval = setInterval(calculateRemaining, 1000);
+    return () => clearInterval(interval);
+  }, [app?.is_coming_soon, app?.publish_date]);
+
+  const isActuallyComingSoon = app?.is_coming_soon && (timeRemaining === null || timeRemaining > 0);
+
   // Dynamic array decoding to completely hide "/info/" from static regex scraper bots sniffing JS bundles
   const handleMoreDetails = () => {
     if (!app || !app.slug) return;
@@ -373,8 +393,8 @@ export default function AppDetails() {
                   {(app.name || 'A').substring(0, 1)}
                 </div>
               )}
-              {app.is_coming_soon && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px] rounded-[16px]">
+              {isActuallyComingSoon && (
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center backdrop-blur-[1px] rounded-[16px]">
                   <div className="bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
                     Soon
                   </div>
@@ -430,19 +450,43 @@ export default function AppDetails() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full sm:w-auto min-w-[130px] sm:min-w-[150px]"
               >
-                {app.is_coming_soon ? (
-                  <button 
-                    disabled
-                    className="w-full bg-amber-500/10 text-amber-600 dark:text-amber-500 border border-amber-500/20 font-bold py-2.5 px-5 rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed text-sm shadow-sm"
-                  >
-                    Coming Soon
-                  </button>
+                {isActuallyComingSoon ? (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      disabled
+                      className="w-full bg-amber-500/10 text-amber-600 dark:text-amber-500 border border-amber-500/20 font-bold py-2.5 px-5 rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed text-sm shadow-sm"
+                    >
+                      Coming Soon
+                    </button>
+                    {timeRemaining !== null && timeRemaining > 0 && (
+                      <div className="mt-2 flex gap-1 justify-center">
+                        {(() => {
+                          const s = Math.floor(timeRemaining / 1000);
+                          const d = Math.floor(s / 86400);
+                          const h = Math.floor((s % 86400) / 3600);
+                          const m = Math.floor((s % 3600) / 60);
+                          const sec = s % 60;
+                          return [
+                            { label: 'D', value: d.toString().padStart(2, '0') },
+                            { label: 'H', value: h.toString().padStart(2, '0') },
+                            { label: 'M', value: m.toString().padStart(2, '0') },
+                            { label: 'S', value: sec.toString().padStart(2, '0') }
+                          ].map((unit, i) => (
+                            <div key={i} className="flex flex-col items-center bg-zinc-100 dark:bg-zinc-800 rounded px-1.5 py-1 border border-black/5 dark:border-white/5">
+                              <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-200">{unit.value}</span>
+                              <span className="text-[8px] uppercase tracking-widest text-zinc-500">{unit.label}</span>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <button 
                     onClick={handleMoreDetails} 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-all text-sm shadow-md"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all text-sm shadow-md h-[44px]"
                   >
-                    Download <ArrowRight className="w-4 h-4" />
+                    <span className="flex items-center gap-1.5 font-bold">Download <ArrowRight className="w-4 h-4" /></span>
                   </button>
                 )}
               </motion.div>
