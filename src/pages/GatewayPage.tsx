@@ -141,10 +141,6 @@ export default function GatewayPage() {
     );
   }
 
-  if (app?.is_coming_soon) {
-    return <Navigate to={`/${app.slug}`} replace />;
-  }
-
   if (!app) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center px-4 max-w-md mx-auto">
@@ -299,7 +295,13 @@ export default function GatewayPage() {
 
             {/* Right side: Dynamic Button */}
             <div className="flex flex-col items-center gap-3 w-full lg:w-auto shrink-0">
-              <ClearanceButton appId={app.id} status={app.safety_status as 'Verified' | 'Caution' | 'Unsafe'} />
+              {app.is_coming_soon ? (
+                <button disabled className="w-full sm:w-96 py-4 px-10 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm text-base font-semibold shrink-0 cursor-not-allowed bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  Coming Soon
+                </button>
+              ) : (
+                <ClearanceButton appId={app.id} status={app.safety_status as 'Verified' | 'Caution' | 'Unsafe'} />
+              )}
             </div>
           </div>
         </div>

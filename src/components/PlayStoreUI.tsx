@@ -306,6 +306,13 @@ export const AppListItem = React.memo(({ app, index }: { app: any; index?: numbe
                 e.currentTarget.src = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop";
               }}
             />
+            {app.is_coming_soon && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
+                <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+                  Soon
+                </div>
+              </div>
+            )}
           </div>
         </div>
         
@@ -377,6 +384,13 @@ export const TopChartItem = React.memo(({ rank, app }: TopChartItemProps) => {
                 e.currentTarget.src = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=128&h=128&fit=crop";
               }}
             />
+            {app.is_coming_soon && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
+                <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+                  Soon
+                </div>
+              </div>
+            )}
           </div>
         </div>
         

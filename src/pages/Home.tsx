@@ -207,6 +207,13 @@ export default function Home() {
                           height={128}
                           className="w-full h-full object-cover group-hover:-translate-y-0.5 transition-transform duration-300" 
                         />
+                        {app.is_coming_soon && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
+                            <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+                              Soon
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="px-1 text-center">
                         <h3 className="text-[10px] sm:text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate">{app.name}</h3>

@@ -179,27 +179,6 @@ export default function AppDetails() {
     );
   }
 
-  if (app.is_coming_soon) {
-    return (
-      <div className="flex flex-col items-center justify-center py-32 text-center px-4 max-w-md mx-auto animate-fade-in select-none">
-        <div className="w-20 h-20 bg-amber-500/10 text-amber-500 rounded-[24px] flex items-center justify-center mb-6 border border-amber-500/20 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.3)] relative overflow-hidden group">
-          <div className="absolute inset-0 bg-amber-500/10 blur-xl group-hover:bg-amber-500/20 transition-colors duration-500" />
-          <Info className="w-10 h-10 relative z-10" />
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-3 tracking-tight">Coming Soon</h1>
-        <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1 leading-relaxed mb-10 max-w-sm">
-          The requested application "<strong className="text-zinc-800 dark:text-zinc-200 font-semibold">{app.name}</strong>" is currently in active development and will be available soon.
-        </p>
-        <Link 
-          to="/" 
-          className="flex items-center justify-center gap-2 px-8 py-3.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 rounded-2xl font-bold transition-all shadow-md active:scale-95 text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" /> Return to Store
-        </Link>
-      </div>
-    );
-  }
-
   const title = app.seo_title || app.name;
   
   const stripHtml = (html: string) => {
@@ -392,6 +371,13 @@ export default function AppDetails() {
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xl sm:text-3xl font-bold bg-zinc-800 text-zinc-500">
                   {(app.name || 'A').substring(0, 1)}
+                </div>
+              )}
+              {app.is_coming_soon && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px] rounded-[16px]">
+                  <div className="bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-400">
+                    Soon
+                  </div>
                 </div>
               )}
             </div>
