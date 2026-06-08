@@ -207,8 +207,8 @@ export default function NewsDetailPage() {
 
         {(newsItem as any).link && (
             <div className="mb-20">
-                <a href={newsItem.link} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center px-8 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-[16px] hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all active:scale-[0.98] shadow-md">
-                    Access External Feed
+                <a href={newsItem.link} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-[16px] hover:bg-blue-700 transition-all active:scale-[0.98] shadow-md">
+                    Get App Details
                 </a>
             </div>
         )}
