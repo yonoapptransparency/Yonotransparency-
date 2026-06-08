@@ -641,7 +641,7 @@ function renderVideosList(videos: any[], settings: any) {
 
 function renderVideoDetail(slug: string, videos: any[], settings: any) {
   const cleanSlug = decodeURIComponent(slug).toLowerCase();
-  const v = videos.find(item => getField(item, 'slug').toLowerCase() === cleanSlug);
+  const v = videos.find(item => getField(item, 'slug').toLowerCase() === cleanSlug || getField(item, 'id').toLowerCase() === cleanSlug);
   if (!v) return `<div class="py-12 text-center"><h1 class="text-2xl font-bold">Video not found.</h1><a href="/videos" class="text-blue-500 hover:underline">Go Back</a></div>`;
   const title = getField(v, 'title');
   const desc = getField(v, 'description');
@@ -798,7 +798,8 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
     const slug = decodeURIComponent(urlPath.split('/videos/')[1].split('/')[0].split('?')[0]);
     const videoItem = videos.find((v: any) => {
       const vSlug = getField(v, 'slug');
-      return vSlug && vSlug.toLowerCase() === slug.toLowerCase();
+      const vId = getField(v, 'id');
+      return (vSlug && vSlug.toLowerCase() === slug.toLowerCase()) || (vId && vId.toLowerCase() === slug.toLowerCase());
     });
     
     if (videoItem) {

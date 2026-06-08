@@ -15,7 +15,7 @@ interface Comment {
 export default function VideoDetailPage() {
   const { videos: mockVideos, settings: mockSettings, loading, videosSyncedWithServer, serverVideosFetched, refreshAll } = useData();
   const { slug } = useParams();
-  const videoItem = mockVideos.find(v => v.slug?.toLowerCase() === slug?.toLowerCase());
+  const videoItem = mockVideos.find(v => v.slug?.toLowerCase() === slug?.toLowerCase() || v.id?.toLowerCase() === slug?.toLowerCase());
   const [commentText, setCommentText] = useState('');
   
   const [triedRefresh, setTriedRefresh] = useState(false);
@@ -29,7 +29,7 @@ export default function VideoDetailPage() {
   useEffect(() => {
     let active = true;
     const fetchLatestVideo = async () => {
-      const found = mockVideos.some(v => v.slug?.toLowerCase() === slug?.toLowerCase());
+      const found = mockVideos.some(v => v.slug?.toLowerCase() === slug?.toLowerCase() || v.id?.toLowerCase() === slug?.toLowerCase());
       if (!found && !triedRefresh && !isRefreshing) {
         if (active) {
           setIsRefreshing(true);
@@ -123,17 +123,26 @@ export default function VideoDetailPage() {
   }
 
   // Extract YouTube ID
-  let videoId = '';
-  try {
-    const url = new URL(videoItem.youtube_url);
-    if (url.hostname.includes('youtube.com')) {
-      videoId = url.searchParams.get('v') || '';
-    } else if (url.hostname.includes('youtu.be')) {
-      videoId = url.pathname.slice(1);
+  function extractYoutubeId(urlStr: string) {
+    if (!urlStr) return '';
+    try {
+      const url = new URL(urlStr);
+      if (url.hostname.includes('youtube.com')) {
+        if (url.pathname.startsWith('/shorts/') || url.pathname.startsWith('/live/') || url.pathname.startsWith('/embed/') || url.pathname.startsWith('/v/')) {
+          return url.pathname.split('/')[2] || url.pathname.split('/')[1] || '';
+        }
+        return url.searchParams.get('v') || '';
+      } else if (url.hostname.includes('youtu.be')) {
+        return url.pathname.slice(1);
+      }
+    } catch (e) {
+      if (urlStr.length === 11 && !urlStr.includes('/')) return urlStr;
     }
-  } catch (e) {
-    videoId = videoItem.youtube_url.split('/').pop() || '';
+    const m = urlStr.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
+    if (m && m[1]) return m[1];
+    return urlStr.split('/').pop()?.split('?')[0] || '';
   }
+  const videoId = extractYoutubeId(videoItem.youtube_url);
 
   return (
     <div className="animate-fade-in max-w-[1550px] mx-auto px-3 sm:px-6 md:px-10 pb-12">

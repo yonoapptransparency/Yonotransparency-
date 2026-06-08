@@ -826,16 +826,31 @@ function AppContent() {
       }
     } else if (path.startsWith('/videos/') && path.length > 8) {
       const slug = decodeURIComponent(path.split('/videos/')[1]?.split('/')[0]?.split('?')[0] || '');
-      const videoItem = videos.find((v: any) => v?.slug?.toLowerCase() === slug.toLowerCase());
+      const videoItem = videos.find((v: any) => v?.slug?.toLowerCase() === slug.toLowerCase() || v?.id?.toLowerCase() === slug.toLowerCase());
       if (videoItem) {
-        const getYoutubeThumbnail = (url: string) => {
-          if (!url) return '';
-          const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-          const match = url.match(regExp);
-          if (match && match[2].length === 11) {
-            return `https://img.youtube.com/vi/${match[2]}/maxresdefault.jpg`;
+        const getYoutubeThumbnail = (urlStr: string) => {
+          if (!urlStr) return '';
+          let id = '';
+          try {
+            const url = new URL(urlStr);
+            if (url.hostname.includes('youtube.com')) {
+              if (url.pathname.startsWith('/shorts/') || url.pathname.startsWith('/live/') || url.pathname.startsWith('/embed/') || url.pathname.startsWith('/v/')) {
+                id = url.pathname.split('/')[2] || url.pathname.split('/')[1] || '';
+              } else {
+                id = url.searchParams.get('v') || '';
+              }
+            } else if (url.hostname.includes('youtu.be')) {
+              id = url.pathname.slice(1);
+            }
+          } catch (e) {
+            if (urlStr.length === 11 && !urlStr.includes('/')) id = urlStr;
           }
-          return '';
+          if (!id) {
+            const m = urlStr.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
+            if (m && m[1]) id = m[1];
+            else id = urlStr.split('/').pop()?.split('?')[0] || '';
+          }
+          return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : '';
         };
         pageTitle = videoItem.title ? `${videoItem.title} - ${siteTitle}` : siteTitle;
         pageDesc = videoItem.seo_description || videoItem.description || '';

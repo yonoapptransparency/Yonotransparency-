@@ -7,19 +7,22 @@ import { Link } from 'react-router-dom';
 
 function getYoutubeId(urlStr: string) {
   if (!urlStr) return '';
-  let videoId = '';
   try {
     const url = new URL(urlStr);
     if (url.hostname.includes('youtube.com')) {
-      videoId = url.searchParams.get('v') || '';
+      if (url.pathname.startsWith('/shorts/') || url.pathname.startsWith('/live/') || url.pathname.startsWith('/embed/') || url.pathname.startsWith('/v/')) {
+        return url.pathname.split('/')[2] || url.pathname.split('/')[1] || '';
+      }
+      return url.searchParams.get('v') || '';
     } else if (url.hostname.includes('youtu.be')) {
-      videoId = url.pathname.slice(1);
+      return url.pathname.slice(1);
     }
   } catch (e) {
-    const cleanStr = urlStr.trim();
-    videoId = cleanStr.split('/').pop() || '';
+    if (urlStr.length === 11 && !urlStr.includes('/')) return urlStr;
   }
-  return videoId;
+  const m = urlStr.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
+  if (m && m[1]) return m[1];
+  return urlStr.split('/').pop()?.split('?')[0] || '';
 }
 
 export default function VideosPage() {
@@ -104,7 +107,7 @@ export default function VideosPage() {
                 className="group flex flex-col bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-[24px] overflow-hidden hover:shadow-lg hover:shadow-black/5 hover:-translate-y-1 hover:border-black/10 dark:hover:border-white/10 transition-all duration-300"
               >
                 {/* Visual Thumbnail Frame */}
-                <Link to={`/videos/${video.slug}`} className="relative aspect-video w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 block">
+                <Link to={`/videos/${video.slug || video.id}`} className="relative aspect-video w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 block">
                   <img 
                     src={thumbUrl} 
                     alt={video.title}
@@ -146,7 +149,7 @@ export default function VideosPage() {
 
                   {/* Title & Description */}
                   <h3 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-                    <Link to={`/videos/${video.slug}`}>
+                    <Link to={`/videos/${video.slug || video.id}`}>
                       {video.title}
                     </Link>
                   </h3>
@@ -161,7 +164,7 @@ export default function VideosPage() {
                       REF: YT-{video.id.substring(0, 5).toUpperCase()}
                     </span>
                     <Link 
-                      to={`/videos/${video.slug}`}
+                      to={`/videos/${video.slug || video.id}`}
                       className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       Watch
