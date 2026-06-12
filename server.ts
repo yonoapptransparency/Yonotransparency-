@@ -15,16 +15,6 @@ function safeDecrypt(ciphertext: string, primarySecret: string) {
         if (text) return text;
     } catch(e) {}
     
-    // Fallback to old secret
-    try {
-        const fallbackSecret = ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
-        if (primarySecret !== fallbackSecret) {
-            const bytes = CryptoJS.AES.decrypt(ciphertext, fallbackSecret);
-            const text = bytes.toString(CryptoJS.enc.Utf8);
-            if (text) return text;
-        }
-    } catch(e) {}
-    
     return '';
 }
 
@@ -770,7 +760,7 @@ async function startServer() {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET; if (!AES_SECRET) throw new Error('AES_SECRET is required');
       const ciphertext = CryptoJS.AES.encrypt(url, AES_SECRET).toString();
       res.json({ encrypted: ciphertext });
     } catch (err) {
@@ -785,7 +775,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Valid links array payload is required.' });
     }
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET; if (!AES_SECRET) throw new Error('AES_SECRET is required');
       
       // Double encrypt: Encrypt the URL individually first
       const processedItems = items.map((item: any) => {
@@ -814,7 +804,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Encrypted payload ciphertext is required.' });
     }
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET; if (!AES_SECRET) throw new Error('AES_SECRET is required');
       const decryptedText = safeDecrypt(encryptedData, AES_SECRET);
       if (!decryptedText) {
         throw new Error("Empty decrypted block.");
@@ -858,7 +848,7 @@ async function startServer() {
            apps = apps.concat(chunk1Data.fields.items.arrayValue.values.map(v => v.mapValue.fields.id.stringValue));
        }
        
-       const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+       const AES_SECRET = process.env.AES_SECRET; if (!AES_SECRET) throw new Error('AES_SECRET is required');
        const sampleUrls = apps.map(id => ({ id, url: `https://example.com/demo/${id}` }));
        const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(sampleUrls), AES_SECRET).toString();
        
@@ -1000,9 +990,9 @@ const rateLimitMap = new Map<string, number[]>();
     }
 
     // Absolute replay protection - relaxed to allow retries, resumes, and back/forward cache
-    // if (usedTokens.has(token)) {
-    //   return res.status(403).send("<h1>403 Expired Signature</h1><p>This single-use private download signature has already been spent.</p>");
-    // }
+    if (usedTokens.has(token)) {
+          return res.status(403).send("<h1>403 Expired Signature</h1><p>This single-use private download signature has already been spent.</p>");
+    }
 
     // Determine verification scheme
     // Scheme A: Extended Fingerprint token (containing '::' signature splitter inside base64url encoded token)
@@ -1028,7 +1018,7 @@ const rateLimitMap = new Map<string, number[]>();
         // IP verification is relaxed for CGNAT / mobile tower handovers where client IP shifts rapidly
         // while maintaining top-notch security via HMAC signature and SameSite Session IDs
         // if (tIp !== ip) {
-        //   return res.status(403).send("<h1>403 Access Denied</h1><p>Origin IP mismatch. Tunnel compromised.</p>");
+        //      return res.status(403).send("<h1>403 IP mismatch</h1><p>IP has changed.</p>");
         // }
 
         if (tSession !== finalSid) {
@@ -1037,7 +1027,7 @@ const rateLimitMap = new Map<string, number[]>();
 
         let targetUrl = '';
         try {
-          const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+          const AES_SECRET = process.env.AES_SECRET; if (!AES_SECRET) throw new Error('AES_SECRET is required');
           const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf8'));
           
           try {
@@ -1159,7 +1149,7 @@ const rateLimitMap = new Map<string, number[]>();
 
     // Consume permanently - relaxed to allow retries and download manager compatibility
     // (tokenStore as any).delete(token);
-    // usedTokens.add(token);
+    usedTokens.add(token);
 
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     res.redirect(302, tokenData.targetUrl);
