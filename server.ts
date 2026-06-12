@@ -18,6 +18,28 @@ function safeDecrypt(ciphertext: string, primarySecret: string) {
     return '';
 }
 
+function getRawFirebaseConfig(): any {
+  try {
+    const rawData = fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf8');
+    const config = JSON.parse(rawData);
+    if (!config.projectId || config.projectId === 'PLACEHOLDER') throw new Error('is placeholder');
+    return config;
+  } catch (err) {
+    if (process.env.VITE_FIREBASE_PROJECT_ID) {
+      return {
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        appId: process.env.VITE_FIREBASE_APP_ID,
+        apiKey: process.env.VITE_FIREBASE_API_KEY,
+        authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+        firestoreDatabaseId: process.env.VITE_FIREBASE_DATABASE_ID,
+        storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID
+      };
+    }
+    throw new Error("Missing Real Firebase Config in Environment");
+  }
+}
+
 
 // Cryptographic secrets for hashing, signature verification, and session identifiers
 const TOKEN_SECRET = process.env.TOKEN_SECRET || crypto.randomBytes(32).toString('hex');
@@ -466,7 +488,7 @@ async function startServer() {
     }
 
     try {
-      const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf8'));
+      const config = getRawFirebaseConfig();
       
       const lookupRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${config.apiKey}`, {
         method: "POST",
@@ -834,7 +856,7 @@ async function startServer() {
   // Database fix endpoint - run once to fix broken secure links
   app.get("/api/v1/admin/fix-db-links", verifyAdminToken, async (req, res) => {
      try {
-       const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf8'));
+       const config = getRawFirebaseConfig();
        
        const chunkResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_chunk_0`);
        const chunkData = await chunkResponse.json();
@@ -1028,7 +1050,7 @@ const rateLimitMap = new Map<string, number[]>();
         let targetUrl = '';
         try {
           const AES_SECRET = process.env.AES_SECRET; if (!AES_SECRET) throw new Error('AES_SECRET is required');
-          const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf8'));
+          const config = getRawFirebaseConfig();
           
           try {
             const urlResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/secure_links`);

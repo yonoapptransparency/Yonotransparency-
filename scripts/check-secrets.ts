@@ -56,6 +56,23 @@ function scanDirectory(dir: string): boolean {
 
 console.log('🔍 Running pre-deployment secret scan...');
 const currentDir = process.cwd();
+
+// Synthesize placeholder firebase-applet-config.json if it doesn't exist
+const configPath = path.join(currentDir, 'firebase-applet-config.json');
+if (!fs.existsSync(configPath)) {
+  console.log('Creating placeholder firebase-applet-config.json...');
+  fs.writeFileSync(configPath, JSON.stringify({
+    projectId: "PLACEHOLDER",
+    appId: "PLACEHOLDER",
+    apiKey: "PLACEHOLDER",
+    authDomain: "PLACEHOLDER",
+    firestoreDatabaseId: "PLACEHOLDER",
+    storageBucket: "PLACEHOLDER",
+    messagingSenderId: "PLACEHOLDER",
+    measurementId: ""
+  }, null, 2));
+}
+
 const hasSecrets = scanDirectory(currentDir);
 
 if (hasSecrets) {

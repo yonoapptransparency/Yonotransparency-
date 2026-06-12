@@ -29,13 +29,21 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 function getRawFirebaseConfig(): any {
   try {
     const rawData = fs.readFileSync(path.join(process.cwd(), 'firebase-applet-config.json'), 'utf8');
-    return JSON.parse(rawData);
+    const config = JSON.parse(rawData);
+    if (!config.projectId || config.projectId === 'PLACEHOLDER') throw new Error('is placeholder');
+    return config;
   } catch (err) {
-    try {
-      const rawData = fs.readFileSync(path.resolve('firebase-applet-config.json'), 'utf8');
-      return JSON.parse(rawData);
-    } catch(e) {
-      console.error("Error reading config:", err);
+    // Fallback to Vercel/System environment variables
+    if (process.env.VITE_FIREBASE_PROJECT_ID) {
+      return {
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        appId: process.env.VITE_FIREBASE_APP_ID,
+        apiKey: process.env.VITE_FIREBASE_API_KEY,
+        authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+        firestoreDatabaseId: process.env.VITE_FIREBASE_DATABASE_ID,
+        storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_ID || process.env.VITE_FIREBASE_MESSAGING_SENDER_ID
+      };
     }
   }
   return null;
