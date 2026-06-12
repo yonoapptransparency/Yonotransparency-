@@ -921,6 +921,72 @@ async function startServer() {
 
 const rateLimitMap = new Map<string, number[]>();
 
+  app.get("/api/v1/debug-target", async (req, res) => {
+    let targetUrls = [];
+    const appId = req.query.id as string;
+    try {
+      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const config = getRawFirebaseConfig();
+      const urlResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/secure_links`);
+      let secureData = await urlResponse.json();
+      targetUrls.push({step: "secure_links", error: secureData.error});
+      
+      if (secureData.error || (!secureData.fields?.encryptedData && !secureData.fields?.items)) {
+          const vaultRes = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/sec_vault`);
+          const vaultData = await vaultRes.json();
+          targetUrls.push({step: "sec_vault", error: vaultData.error});
+          if (!vaultData.error) {
+              secureData = vaultData;
+          }
+      }
+      
+      let targetUrl = '';
+      if (!secureData.error) {
+        const fields = secureData.fields;
+        if (fields?.encryptedData?.stringValue) {
+          const decryptedText = safeDecrypt(fields.encryptedData.stringValue, AES_SECRET);
+          targetUrls.push({step: "decrypted", success: !!decryptedText});
+          if (decryptedText) {
+            const linksArray = JSON.parse(decryptedText);
+            const linkObj = linksArray.find((v: any) => v.id === appId);
+            targetUrls.push({step: "linksArray", size: linksArray.length, allIds: linksArray.map(m=>m.id), foundObj: !!linkObj });
+            if (linkObj && linkObj.url) {
+              targetUrl = linkObj.url.startsWith('U2FsdGVkX1') ? safeDecrypt(linkObj.url, AES_SECRET) : linkObj.url;
+              targetUrls.push({step: "found_in_vault", targetUrl});
+            }
+          }
+        }
+      }
+      
+      if (!targetUrl || !targetUrl.startsWith('http')) {
+        const metaResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_meta`);
+        const metaData = await metaResponse.json();
+        let numChunks = 1;
+        if (!metaData.error && metaData.fields?.numChunks?.integerValue) {
+            numChunks = parseInt(metaData.fields.numChunks.integerValue, 10);
+        }
+        for (let i = 0; i < numChunks; i++) {
+            const chunkResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/apps_chunk_${i}`);
+            const chunkData = await chunkResponse.json();
+            if (!chunkData.error && chunkData.fields?.items?.arrayValue?.values) {
+                const item = chunkData.fields.items.arrayValue.values.find((v: any) => v.mapValue.fields.id.stringValue === appId);
+                if (item && item.mapValue.fields) {
+                    const encryptedUrlField = item.mapValue.fields.more_information_url?.stringValue || item.mapValue.fields.download_url?.stringValue;
+                    if (encryptedUrlField) {
+                        targetUrl = encryptedUrlField.startsWith('U2FsdGVkX1') ? safeDecrypt(encryptedUrlField, AES_SECRET) : encryptedUrlField;
+                        targetUrls.push({step: "found_in_chunk", chunk: i, targetUrl, field: encryptedUrlField});
+                        break;
+                    }
+                }
+            }
+        }
+      }
+      return res.json({ targetUrl, process: targetUrls });
+    } catch(e) {
+      return res.json({ error: e.message });
+    }
+  });
+
   // API Route: Allocate seed & ephemeral nonce
   app.get("/api/v1/init-file", (req, res) => {
     if (isInvalidClient(req)) {
@@ -1091,6 +1157,7 @@ const rateLimitMap = new Map<string, number[]>();
                 console.log("Decrypted text length:", decryptedText ? decryptedText.length : 0);
                 if (decryptedText) {
                   const linksArray = JSON.parse(decryptedText);
+                  console.log("Looking for appId:", appId, "in linksArray length:", linksArray.length);
                   const linkObj = linksArray.find((v: any) => v.id === appId);
                   if (linkObj && linkObj.url) {
                     const encryptedUrl = linkObj.url;

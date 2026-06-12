@@ -368,11 +368,13 @@ export default function ClearanceButton({ appId, status }: ClearanceButtonProps)
         let errorMsg = '';
         try {
           const errorData = await challengeResponse.json();
-          errorMsg = errorData.error;
+          errorMsg = typeof errorData.error === 'object' && errorData.error !== null 
+            ? (errorData.error.message || JSON.stringify(errorData.error)) 
+            : errorData.error;
         } catch {
           errorMsg = 'Link generation request was denied.';
         }
-        throw new Error(errorMsg || 'Link generation request was denied.');
+        throw new Error(String(errorMsg || 'Link generation request was denied.'));
       }
 
       const { nonce, difficulty, sid } = await challengeResponse.json();
@@ -408,14 +410,16 @@ export default function ClearanceButton({ appId, status }: ClearanceButtonProps)
           const contentType = tokenResponse.headers.get("content-type");
           if (contentType && contentType.includes("application/json")) {
             const errorData = await tokenResponse.json();
-            errorMessage = errorData.error;
+            errorMessage = typeof errorData.error === 'object' && errorData.error !== null 
+              ? (errorData.error.message || JSON.stringify(errorData.error)) 
+              : errorData.error;
           } else {
             errorMessage = await tokenResponse.text();
           }
         } catch (e) {
           errorMessage = 'Link parameter validation failed.';
         }
-        throw new Error(errorMessage || 'Link parameter validation failed.');
+        throw new Error(String(errorMessage || 'Link parameter validation failed.'));
       }
 
       const { token } = await tokenResponse.json();
@@ -431,7 +435,9 @@ export default function ClearanceButton({ appId, status }: ClearanceButtonProps)
       triggerExecution(finalClearanceUrl);
     } catch (err: any) {
       console.error("Link generation failure:", err);
-      setErrorMsg(err.message || 'Link initialization did not successfully complete. Please refresh.');
+      let extractedMsg = err.message || err || 'Link initialization did not successfully complete. Please refresh.';
+      if (typeof extractedMsg === 'object') extractedMsg = extractedMsg.message || JSON.stringify(extractedMsg);
+      setErrorMsg(String(extractedMsg));
     } finally {
       setIsGenerating(false);
     }
@@ -445,9 +451,14 @@ export default function ClearanceButton({ appId, status }: ClearanceButtonProps)
 
     // Use a single, highly compatible trigger method to avoid double parallel HTTP requests
     try {
-      window.location.href = target;
+      if (window.parent !== window) {
+         window.open(target, '_blank', 'noopener,noreferrer');
+      } else {
+         window.location.href = target;
+      }
     } catch (e) {
       console.warn("Navigation failed, attempting location redirect.", e);
+      window.location.href = target;
     }
 
     // Safely auto-restore the button state so subsequent clicks or re-vists will trigger a fresh, valid clearance handshake
