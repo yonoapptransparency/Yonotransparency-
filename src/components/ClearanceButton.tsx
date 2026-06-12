@@ -424,15 +424,22 @@ export default function ClearanceButton({ appId, status }: ClearanceButtonProps)
 
       const { token } = await tokenResponse.json();
 
-      // Step 4: Configure dynamic transient link URL
-      const finalClearanceUrl = `/api/v1/file-payload?t=${token}&id=${appId}${sid ? `&sid=${encodeURIComponent(sid)}` : ''}`;
+      // Fetch the actual target URL securely over the proxy
+      const finalClearanceUrl = `/api/v1/file-payload?t=${token}&id=${appId}${sid ? `&sid=${encodeURIComponent(sid)}` : ''}&json=true`;
+      
+      const payloadResponse = await fetch(finalClearanceUrl);
+      const payloadData = await payloadResponse.json();
+      
+      if (!payloadResponse.ok || !payloadData.targetUrl) {
+         throw new Error(payloadData.error || 'Failed to securely negotiate destination link.');
+      }
 
-      setDynamicLink(finalClearanceUrl);
+      setDynamicLink(payloadData.targetUrl);
       setReady(true);
       setTokenCountdown(600); // Link valid for 10 minutes (600s) for maximum reliability
 
       // Trigger redirect to file immediately (No anchor tag is ever rendered in the DOM!)
-      triggerExecution(finalClearanceUrl);
+      triggerExecution(payloadData.targetUrl);
     } catch (err: any) {
       console.error("Link generation failure:", err);
       let extractedMsg = err.message || err || 'Link initialization did not successfully complete. Please refresh.';
@@ -451,10 +458,18 @@ export default function ClearanceButton({ appId, status }: ClearanceButtonProps)
 
     // Use a single, highly compatible trigger method to avoid double parallel HTTP requests
     try {
+      const absoluteTarget = new URL(target, window.location.href).href;
       if (window.parent !== window) {
-         window.open(target, '_blank', 'noopener,noreferrer');
+         // In an iframe (AI Studio), use a hidden anchor tag to open a new tab
+         const a = document.createElement('a');
+         a.href = absoluteTarget;
+         a.target = '_blank';
+         a.rel = 'noopener noreferrer';
+         document.body.appendChild(a);
+         a.click();
+         document.body.removeChild(a);
       } else {
-         window.location.href = target;
+         window.location.assign(absoluteTarget);
       }
     } catch (e) {
       console.warn("Navigation failed, attempting location redirect.", e);

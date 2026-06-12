@@ -1092,6 +1092,7 @@ const rateLimitMap = new Map<string, number[]>();
     const appId = req.query.id as string;
 
     if (!token || !appId) {
+      if (req.query.json === 'true') return res.status(400).json({ error: "Verification transmission tokens or App ID were omitted." });
       return res.status(400).send("<h1>400 Bad Request</h1><p>Verification transmission tokens or App ID were omitted.</p>");
     }
 
@@ -1118,6 +1119,7 @@ const rateLimitMap = new Map<string, number[]>();
         const finalSid = sid || tSession || "sandbox-bypass";
 
         if (!verifyToken(token, tIp, tSession, fingerprint)) {
+          if (req.query.json === 'true') return res.status(400).json({ error: "Validation failed." });
           return res.status(400).send("<h1>400 Bad Request</h1><p>Validation failed.</p>");
         }
 
@@ -1224,6 +1226,7 @@ const rateLimitMap = new Map<string, number[]>();
         
         if (!targetUrl || !targetUrl.startsWith('http')) {
           console.log("Rejecting targetUrl: redirecting to home page.");
+          if (req.query.json === 'true') return res.status(404).json({ error: "No secure link mapped to this app ID yet." });
           return res.redirect(302, "/");
         }
 
@@ -1237,8 +1240,12 @@ const rateLimitMap = new Map<string, number[]>();
         } catch (e) {}
 
         res.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        if (req.query.json === 'true') {
+          return res.json({ targetUrl });
+        }
         return res.redirect(302, targetUrl);
       } catch (err) {
+        if (req.query.json === 'true') return res.status(400).json({ error: "Error decoding parameter." });
         return res.status(400).send("<h1>400 Bad Request</h1><p>Error decoding parameter.</p>");
       }
     }
@@ -1246,11 +1253,13 @@ const rateLimitMap = new Map<string, number[]>();
     // Scheme B: Backward-compatible tokenStore checking
     const tokenData = (tokenStore as any).get(token);
     if (!tokenData) {
+      if (req.query.json === 'true') return res.status(404).json({ error: "Link expired or invalid." });
       return res.status(404).send("<h1>404 Not Found</h1><p>Link expired or invalid.</p>");
     }
 
     if (tokenData.expiresAt < Date.now()) {
       (tokenStore as any).delete(token);
+      if (req.query.json === 'true') return res.status(404).json({ error: "This connection timed out." });
       return res.status(404).send("<h1>404 Not Found</h1><p>This connection timed out.</p>");
     }
 
@@ -1259,6 +1268,9 @@ const rateLimitMap = new Map<string, number[]>();
     // usedTokens.add(token);
 
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    if (req.query.json === 'true') {
+      return res.json({ targetUrl: tokenData.targetUrl });
+    }
     res.redirect(302, tokenData.targetUrl);
   });
 
