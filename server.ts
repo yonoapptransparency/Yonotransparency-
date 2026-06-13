@@ -9,26 +9,12 @@ import { injectSeoTags, fetchStoreData, getField } from "./src/seoHelper";
 import CryptoJS from "crypto-js";
 
 function safeDecrypt(ciphertext: string, primarySecret: string) {
+    if (!primarySecret) return '';
     try {
         const bytes = CryptoJS.AES.decrypt(ciphertext, primarySecret);
         const text = bytes.toString(CryptoJS.enc.Utf8);
         if (text) return text;
     } catch(e) {}
-    
-    try {
-        const fallbackSecret = ['DATA', 'APP', 'KEY', '2026'].join('_');
-        const bytes = CryptoJS.AES.decrypt(ciphertext, fallbackSecret);
-        const text = bytes.toString(CryptoJS.enc.Utf8);
-        if (text) return text;
-    } catch(e) {}
-
-    try {
-        const fallbackSecret2 = ['RU'+'MMY', 'A'+'PP', 'SEC'+'RET', '2026'].join('_');
-        const bytes = CryptoJS.AES.decrypt(ciphertext, fallbackSecret2);
-        const text = bytes.toString(CryptoJS.enc.Utf8);
-        if (text) return text;
-    } catch(e) {}
-
     return '';
 }
 
@@ -51,17 +37,8 @@ function getRawFirebaseConfig(): any {
       };
     }
     
-    // Explicit Fallback for GitHub deployments on Vercel
-    return {
-      projectId: "gen-lang-client-0825832493",
-      appId: "1:103973989874:web:733a6afd8e837224900f6b",
-      apiKey: "AIzaSyBey9sUbeWlrcXS2kl" + "4ewOzkTy4arg03Ok",
-      authDomain: "gen-lang-client-0825832493.firebaseapp.com",
-      firestoreDatabaseId: "ai-studio-886315a4-8b9f-4ff6-8986-a90ad172210a",
-      storageBucket: "gen-lang-client-0825832493.firebasestorage.app",
-      messagingSenderId: "103973989874",
-      measurementId: ""
-    };
+    console.error("Firebase configuration is missing both on disk and in environment variables.");
+    return null;
   }
 }
 
@@ -138,7 +115,7 @@ function isFingerprintValid(fp: string): boolean {
 
 // Rolling IP request auditing: max 120 dynamic handshake attempts inside a 1-minute window to avoid blocking retry taps
 const WINDOW = 60 * 1000;
-const MAX_HITS = 120;
+const MAX_HITS = 30;
 interface IpEntry {
   count: number;
   start: number;
@@ -259,8 +236,8 @@ setInterval(() => {
 function ensureSession(req: express.Request, res: express.Response): string {
   if (!req.cookies || !req.cookies.__sid) {
     const sid = crypto.randomBytes(24).toString("hex");
-    // HttpOnly cookie secured with Strict SameSite rules to block cross-origin requests
-    res.cookie("__sid", sid, { httpOnly: true, sameSite: "strict", maxAge: 300000 });
+    // HttpOnly cookie secured with Lax SameSite rules to work through Cloudflare redirects
+    res.cookie("__sid", sid, { httpOnly: true, sameSite: "lax", maxAge: 300000 });
     return sid;
   }
   return req.cookies.__sid;
@@ -867,7 +844,7 @@ async function startServer() {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['DATA', 'APP', 'KEY', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       const ciphertext = CryptoJS.AES.encrypt(url, AES_SECRET).toString();
       res.json({ encrypted: ciphertext });
     } catch (err) {
@@ -882,7 +859,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Valid links array payload is required.' });
     }
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['DATA', 'APP', 'KEY', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       
       // Double encrypt: Encrypt the URL individually first
       const processedItems = items.map((item: any) => {
@@ -911,7 +888,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Encrypted payload ciphertext is required.' });
     }
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['DATA', 'APP', 'KEY', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       const decryptedText = safeDecrypt(encryptedData, AES_SECRET);
       if (!decryptedText) {
         throw new Error("Empty decrypted block.");
@@ -955,7 +932,7 @@ async function startServer() {
            apps = apps.concat(chunk1Data.fields.items.arrayValue.values.map(v => v.mapValue.fields.id.stringValue));
        }
        
-       const AES_SECRET = process.env.AES_SECRET || ['DATA', 'APP', 'KEY', '2026'].join('_');
+       const AES_SECRET = process.env.AES_SECRET || '';
        const sampleUrls = apps.map(id => ({ id, url: `https://example.com/demo/${id}` }));
        const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(sampleUrls), AES_SECRET).toString();
        
@@ -992,7 +969,7 @@ const rateLimitMap = new Map<string, number[]>();
     let targetUrls = [];
     const appId = req.query.id as string;
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['DATA', 'APP', 'KEY', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       const config = getRawFirebaseConfig();
       const urlResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/secure_links`);
       let secureData = await urlResponse.json();
@@ -1171,10 +1148,11 @@ const rateLimitMap = new Map<string, number[]>();
       return res.status(400).send("<h1>400 Bad Request</h1><p>Verification transmission tokens or App ID were omitted.</p>");
     }
 
-    // Absolute replay protection - relaxed to allow retries, resumes, and back/forward cache
-    // if (usedTokens.has(token)) {
-    //       return res.status(403).send("<h1>403 Expired Signature</h1><p>This single-use private download signature has already been spent.</p>");
-    // }
+    // Strict replay protection - re-enabled for security
+    if (usedTokens.has(token)) {
+      if (req.query.json === 'true') return res.status(403).json({ error: "This single-use private download signature has already been spent." });
+      return res.status(403).send("<h1>403 Expired Signature</h1><p>This single-use private download signature has already been spent.</p>");
+    }
 
     // Determine verification scheme
     // Scheme A: Extended Fingerprint token (containing '::' signature splitter inside base64url encoded token)
@@ -1194,24 +1172,26 @@ const rateLimitMap = new Map<string, number[]>();
         const finalSid = sid || tSession || "sandbox-bypass";
 
         if (!verifyToken(token, tIp, tSession, fingerprint)) {
-          if (req.query.json === 'true') return res.status(400).json({ error: "Validation failed." });
-          return res.status(400).send("<h1>400 Bad Request</h1><p>Validation failed.</p>");
+          if (req.query.json === 'true') return res.status(403).json({ error: "Cryptographic HMAC validation failed." });
+          return res.status(403).send("<h1>403 Forbidden</h1><p>Cryptographic HMAC validation failed.</p>");
         }
-
-        // IP verification is relaxed for CGNAT / mobile tower handovers where client IP shifts rapidly
-        // while maintaining top-notch security via HMAC signature and SameSite Session IDs
-        // if (tIp !== ip) {
-        //      return res.status(403).send("<h1>403 IP mismatch</h1><p>IP has changed.</p>");
-        // }
 
         if (tSession !== finalSid) {
-          console.warn(`[WARN] Session mismatch on download: ${tSession} !== ${finalSid} (bypassed for sandboxed iframe compatibility)`);
+          console.warn(`[WARN] Session mismatch on download: ${tSession} !== ${finalSid}`);
+          if (req.query.json === 'true') return res.status(403).json({ error: "Session identity verification failed." });
+          return res.status(403).send("<h1>403 Forbidden</h1><p>Session identity verification failed. Cross-origin downloading is restricted.</p>");
         }
+
+        // Spend token to prevent reuse / replay attacks
+        usedTokens.add(token);
 
         let targetUrl = '';
         try {
-          const AES_SECRET = process.env.AES_SECRET || ['DATA', 'APP', 'KEY', '2026'].join('_');
+          const AES_SECRET = process.env.AES_SECRET || '';
           const config = getRawFirebaseConfig();
+          if (!config) {
+            throw new Error("Missing Firebase configuration.");
+          }
           
           try {
             const urlResponse = await fetch(`https://firestore.googleapis.com/v1/projects/${config.projectId}/databases/${config.firestoreDatabaseId}/documents/store_data/secure_links`);
@@ -1300,7 +1280,7 @@ const rateLimitMap = new Map<string, number[]>();
         }
         
         if (!targetUrl || !targetUrl.startsWith('http')) {
-          console.log("Rejecting targetUrl: redirecting to home page.");
+          console.log("Rejecting targetUrl: redirecting to search/home page.");
           targetUrl = `https://google.com/search?q=${encodeURIComponent(appId)}`;
         }
 
@@ -1314,13 +1294,10 @@ const rateLimitMap = new Map<string, number[]>();
         } catch (e) {}
 
         res.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
-        if (req.query.json === 'true') {
-          return res.json({ targetUrl });
-        }
         return res.redirect(302, targetUrl);
       } catch (err) {
-        if (req.query.json === 'true') return res.status(400).json({ error: "Error decoding parameter." });
-        return res.status(400).send("<h1>400 Bad Request</h1><p>Error decoding parameter.</p>");
+        if (req.query.json === 'true') return res.status(403).json({ error: "Error decoding parameter." });
+        return res.status(403).send("<h1>403 Forbidden</h1><p>Error decoding parameter.</p>");
       }
     }
 
@@ -1337,15 +1314,12 @@ const rateLimitMap = new Map<string, number[]>();
       return res.status(404).send("<h1>404 Not Found</h1><p>This connection timed out.</p>");
     }
 
-    // Consume permanently - relaxed to allow retries and download manager compatibility
-    // (tokenStore as any).delete(token);
-    // usedTokens.add(token);
+    // Spend token to prevent replay
+    (tokenStore as any).delete(token);
+    usedTokens.add(token);
 
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    if (req.query.json === 'true') {
-      return res.json({ targetUrl: tokenData.targetUrl });
-    }
-    res.redirect(302, tokenData.targetUrl);
+    return res.redirect(302, tokenData.targetUrl);
   });
 
   // API Route: Public unsecure SEO friendly download endpoint redirects to gateway

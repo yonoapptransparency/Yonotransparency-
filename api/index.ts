@@ -7,26 +7,12 @@ import path from "path";
 import CryptoJS from "crypto-js";
 
 function safeDecrypt(ciphertext: string, primarySecret: string) {
+    if (!primarySecret) return '';
     try {
         const bytes = CryptoJS.AES.decrypt(ciphertext, primarySecret);
         const text = bytes.toString(CryptoJS.enc.Utf8);
         if (text) return text;
     } catch(e) {}
-    
-    try {
-        const fallbackSecret = ['DATA', 'APP', 'KEY', '2026'].join('_');
-        const bytes = CryptoJS.AES.decrypt(ciphertext, fallbackSecret);
-        const text = bytes.toString(CryptoJS.enc.Utf8);
-        if (text) return text;
-    } catch(e) {}
-
-    try {
-        const fallbackSecret2 = ['RU'+'MMY', 'A'+'PP', 'SEC'+'RET', '2026'].join('_');
-        const bytes = CryptoJS.AES.decrypt(ciphertext, fallbackSecret2);
-        const text = bytes.toString(CryptoJS.enc.Utf8);
-        if (text) return text;
-    } catch(e) {}
-
     return '';
 }
 
@@ -60,17 +46,8 @@ function getRawFirebaseConfig(): any {
       };
     }
     
-    // Explicit Fallback for GitHub deployments on Vercel
-    return {
-      projectId: "gen-lang-client-0825832493",
-      appId: "1:103973989874:web:733a6afd8e837224900f6b",
-      apiKey: "AIzaSyBey9sUbeWlrcXS2kl" + "4ewOzkTy4arg03Ok",
-      authDomain: "gen-lang-client-0825832493.firebaseapp.com",
-      firestoreDatabaseId: "ai-studio-886315a4-8b9f-4ff6-8986-a90ad172210a",
-      storageBucket: "gen-lang-client-0825832493.firebasestorage.app",
-      messagingSenderId: "103973989874",
-      measurementId: ""
-    };
+    console.error("Firebase configuration is missing both on disk and in environment variables.");
+    return null;
   }
 }
 
@@ -135,7 +112,7 @@ function isFingerprintValid(fp: string): boolean {
 
 // Rolling IP request auditing: max 120 dynamic handshake attempts inside a 1-minute window to avoid blocking retry taps
 const WINDOW = 60 * 1000;
-const MAX_HITS = 120;
+const MAX_HITS = 30;
 interface IpEntry {
   count: number;
   start: number;
@@ -206,8 +183,8 @@ if (cleanupTimer.unref) {
 function ensureSession(req: express.Request, res: express.Response): string {
   if (!req.cookies || !req.cookies.__sid) {
     const sid = crypto.randomBytes(24).toString("hex");
-    // HttpOnly cookie secured with Strict SameSite rules to block cross-origin requests
-    res.cookie("__sid", sid, { httpOnly: true, sameSite: "strict", maxAge: 300000 });
+    // HttpOnly cookie secured with Lax SameSite rules to work through Cloudflare redirects
+    res.cookie("__sid", sid, { httpOnly: true, sameSite: "lax", maxAge: 300000 });
     return sid;
   }
   return req.cookies.__sid;
@@ -252,8 +229,13 @@ function verifyToken(token: string, ip: string, sessionId: string, fingerprint: 
   }
 }
 
-// Strict bot & scraper filter algorithm (Bypassed for sandbox testing stability)
+// ✅ FIXED — actual bot detection enabled
 const isBotDetected = (req: express.Request): boolean => {
+  const ua = (req.headers['user-agent'] || '') as string;
+  if (!ua || ua.length < 20) return true;
+  if (BAD_UA.some(rx => rx.test(ua))) return true;
+  const accept = req.headers['accept'];
+  if (!accept) return true;
   return false;
 };
 
@@ -372,54 +354,6 @@ app.post(["/api/v1/_proc", "/api/v1/get-token", "/api/v1/process-file"], async (
   res.json({ token });
 });
 
-// API Route: Dynamic, secure 30-second transient token generator (Legacy interface backing with bot defense)
-app.post(["/api/v1/generate-secure-token", "/api/v1/generate-token"], (req, res) => {
-  const { id, obfuscatedUrl, challengeResponse } = req.body;
-
-  if (isBotDetected(req)) {
-    return res.status(403).json({ error: 'Security Exception: Automated request profile detected' });
-  }
-
-  if (challengeResponse !== "human_authorization_token_granted" && challengeResponse !== "authorization_granted" && challengeResponse !== "human_authorization_granted") {
-    return res.status(400).json({ error: 'Security Exception: Handshake failed verification' });
-  }
-
-  if (!obfuscatedUrl || typeof obfuscatedUrl !== 'string') {
-    return res.status(400).json({ error: 'Security Exception: Invalid signature payload' });
-  }
-
-  let targetUrl = '';
-  try {
-    targetUrl = Buffer.from(obfuscatedUrl, 'base64').toString('utf-8');
-  } catch (e) {
-    return res.status(400).json({ error: 'Security Exception: Payload transcription error' });
-  }
-
-  if (!targetUrl.startsWith('http')) {
-    targetUrl = 'https://' + targetUrl;
-  }
-
-  const token = crypto.randomBytes(24).toString('hex');
-  const EXPIRATION_TIME = 600 * 1000; // Increased to 10 minutes
-  const expiresAt = Date.now() + EXPIRATION_TIME;
-
-  const tokenStoreData = {
-    targetUrl,
-    expiresAt,
-    ip: getIp(req)
-  };
-  (tokenStore as any).set(token, tokenStoreData);
-
-  const isLegacy = req.path.endsWith('generate-token');
-  res.json({
-    token,
-    expiresInMs: EXPIRATION_TIME,
-    clearanceUrl: isLegacy
-      ? `/api/v1/file-payload?token=${token}&url=${encodeURIComponent(obfuscatedUrl)}`
-      : `/api/v1/secure-payload?token=${token}&url=${encodeURIComponent(obfuscatedUrl)}`
-  });
-});
-
 // API Route: Process temporary dynamic verification token (Multi-use allowed within validity lifespan!)
 app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => {
   // Note: Checking is already completed on the upstream post endpoints (/api/v1/process-file)
@@ -438,10 +372,13 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
     return res.status(400).send("<h1>400 Bad Request</h1><p>Verification transmission tokens or App ID were omitted.</p>");
   }
 
-  // Strict replay protection - relaxed to allow legitimate human retries, back/forward cache, and multi-downloads
-  // if (usedTokens.has(token)) {
-  //       return res.status(403).send("<h1>403 Expired Signature</h1><p>This single-use private download signature has already been spent.</p>");
-  // }
+  // Strict replay protection - re-enabled for security
+  if (usedTokens.has(token)) {
+    if (req.query.json === 'true') {
+      return res.status(403).json({ error: "This single-use private download signature has already been spent." });
+    }
+    return res.status(403).send("<h1>403 Expired Signature</h1><p>This single-use private download signature has already been spent.</p>");
+  }
 
   let isSchemeA = false;
   try {
@@ -466,11 +403,15 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
       }
 
       if (tSession !== finalSid) {
-        console.warn(`[DEFENSE_WARN] Session mismatch on download: ${tSession} !== ${finalSid} (bypassed for sandboxed iframe compatibility)`);
+        console.warn(`[DEFENSE_WARN] Session mismatch on download: ${tSession} !== ${finalSid}`);
+        if (req.query.json === 'true') {
+          return res.status(403).json({ error: "Session identity verification failed. Cross-origin downloading is restricted." });
+        }
+        return res.status(403).send("<h1>403 Access Denied</h1><p>Session identity verification failed. Cross-origin downloading is restricted.</p>");
       }
 
-      // Spend token - relaxed to allow multi-use downloads within safety window
-      // usedTokens.add(token);
+      // Spend token to prevent reuse / replay attacks
+      usedTokens.add(token);
 
       let targetUrl = '';
       if (obfuscatedUrl) {
@@ -483,7 +424,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
 
       if (!targetUrl && appId) {
         try {
-          const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+          const AES_SECRET = process.env.AES_SECRET || '';
           const config = getRawFirebaseConfig();
           if (!config) {
             throw new Error("Missing Firebase configuration.");
@@ -592,31 +533,37 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
       } catch (e) {}
 
       res.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
-      if (req.query.json === 'true') {
-        return res.json({ targetUrl });
-      }
       return res.redirect(302, targetUrl);
     } catch (err) {
+      if (req.query.json === 'true') {
+        return res.status(403).json({ error: "Transaction error decoding verification signature." });
+      }
       return res.status(403).send("<h1>403 Forbidden</h1><p>Transaction error decoding verification signature.</p>");
     }
   }
 
   const tokenData = (tokenStore as any).get(token);
   if (!tokenData) {
+    if (req.query.json === 'true') {
+      return res.status(403).json({ error: "Signature expired or already consumed." });
+    }
     return res.status(403).send("<h1>403 link Expired</h1><p>Signature expired or already consumed.</p>");
   }
 
   if (tokenData.expiresAt < Date.now()) {
     (tokenStore as any).delete(token);
+    if (req.query.json === 'true') {
+      return res.status(403).json({ error: "This ephemeral verification connection was only valid for 30 seconds." });
+    }
     return res.status(403).send("<h1>403 Link Expired</h1><p>This ephemeral verification connection was only valid for 30 seconds.</p>");
   }
 
-  // Consume token store items and usedTokens logs - relaxed to allow retries and download manager compatibility
-  // (tokenStore as any).delete(token);
-  // usedTokens.add(token);
+  // Spend token to prevent replay
+  (tokenStore as any).delete(token);
+  usedTokens.add(token);
 
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-  res.redirect(302, tokenData.targetUrl);
+  return res.redirect(302, tokenData.targetUrl);
 });
 
 // API Route: Legacy Secure Link Fallback (with bot protection)
@@ -747,7 +694,7 @@ app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       const ciphertext = CryptoJS.AES.encrypt(url, AES_SECRET).toString();
       res.json({ encrypted: ciphertext });
     } catch (err) {
@@ -762,7 +709,7 @@ app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
       return res.status(400).json({ error: 'Valid links array payload is required.' });
     }
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       const plainText = JSON.stringify(items);
       const ciphertext = CryptoJS.AES.encrypt(plainText, AES_SECRET).toString();
       res.json({ encrypted: ciphertext });
@@ -778,7 +725,7 @@ app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
       return res.status(400).json({ error: 'Encrypted payload ciphertext is required.' });
     }
     try {
-      const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+      const AES_SECRET = process.env.AES_SECRET || '';
       const decryptedText = safeDecrypt(encryptedData, AES_SECRET);
       if (!decryptedText) {
         throw new Error("Empty decrypted block.");
@@ -791,7 +738,7 @@ app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
   });
 
   // Database fix endpoint - run once to fix broken secure links
-  app.get("/api/v1/admin/fix-db-links", async (req, res) => {
+  app.get("/api/v1/admin/fix-db-links", verifyAdminToken, async (req, res) => {
      try {
        const config = getRawFirebaseConfig();
        if (!config) {
@@ -810,7 +757,7 @@ app.get(["/api/v1/secure-fetch", "/api/v1/fetch-file"], (req, res) => {
            apps = apps.concat(chunk1Data.fields.items.arrayValue.values.map((v: any) => v.mapValue.fields.id.stringValue));
        }
        
-       const AES_SECRET = process.env.AES_SECRET || ['RUMMY', 'APP', 'SECRET', '2026'].join('_');
+       const AES_SECRET = process.env.AES_SECRET || '';
        const sampleUrls = apps.map(id => ({ id, url: `https://example.com/demo/${id}` }));
        const ciphertext = CryptoJS.AES.encrypt(JSON.stringify(sampleUrls), AES_SECRET).toString();
        

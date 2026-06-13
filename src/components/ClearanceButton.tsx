@@ -398,7 +398,7 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
   const triggerHandshake = async () => {
     setPhase('working');
     setErrorMsg('');
-    
+
     try {
       if (window.turnstile && cfWidgetId.current) {
         window.turnstile.execute(cfWidgetId.current);
@@ -406,9 +406,11 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
 
       const score = computeScore();
 
+      // Step 1: Get challenge nonce
       const challengeResponse = await fetch(_EP.challenge, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' }
+        headers: { 'Accept': 'application/json' },
+        credentials: 'include',
       });
 
       if (!challengeResponse.ok) {
@@ -418,17 +420,17 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
 
       const { nonce, difficulty, sid } = await challengeResponse.json();
 
+      // Step 2: Solve PoW + fingerprint in parallel
       const [fingerprint, solution] = await Promise.all([
         getFingerprint(),
-        solveVerification(nonce, difficulty)
+        solveVerification(nonce, difficulty),
       ]);
 
+      // Step 3: Submit verification → receive HMAC token
       const tokenResponse = await fetch(_EP.process, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           nonce,
           solution,
@@ -437,50 +439,45 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
           moved: moveCount.current,
           touch: touchUsed.current,
           cfToken: cfTokenRef.current,
-          sid
-        })
+          sid,
+        }),
       });
 
       if (!tokenResponse.ok) {
         const errorData = await tokenResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Parameter validation failed.');
+        throw new Error(errorData.error || 'Verification failed. Please try again.');
       }
 
       const { token } = await tokenResponse.json();
+      if (!token) throw new Error('No token received. Please try again.');
 
-      const finalClearanceUrl = `${_EP.payload}?t=${token}&id=${appId}${sid ? `&sid=${encodeURIComponent(sid)}` : ''}&json=true`;
-      
-      const payloadResponse = await fetch(finalClearanceUrl);
-      
-      if (!payloadResponse.ok) {
-        throw new Error('Failed to negotiate destination link.');
-      }
+      // Step 4: Build the clearance URL — the backend 302-redirects to the real link.
+      // DO NOT fetch() this URL — fetch follows the redirect to the external site (HTML),
+      // which cannot be parsed as JSON. Just open it directly in the browser.
+      const params = new URLSearchParams({ t: token, id: appId });
+      if (sid) params.set('sid', sid);
+      const finalUrl = `${_EP.payload}?${params.toString()}`;
 
-      const payloadData = await payloadResponse.json().catch(() => null);
-      if (payloadData && payloadData.targetUrl) {
-         setDynamicLink(payloadData.targetUrl);
-         setPhase('ready');
-         setTokenCountdown(600);
+      setDynamicLink(finalUrl);
+      setPhase('ready');
+      setTokenCountdown(600);
 
-         // Open the real destination URL directly, or fallback to current tab redirection if blocked
-         try {
-           const realWin = window.open(payloadData.targetUrl, '_blank');
-           if (!realWin) {
-             console.warn("Popup blocked. Redirecting current tab to guarantee one-click download.");
-             window.location.href = payloadData.targetUrl;
-           }
-         } catch (e) {
-           console.warn("window.open failed, redirecting current tab.", e);
-           window.location.href = payloadData.targetUrl;
-         }
-      } else {
-        throw new Error(payloadData?.error || 'Destination not ready.');
+      // Open in new tab — if popup is blocked, show the Download button as fallback
+      try {
+        const win = window.open(finalUrl, '_blank');
+        if (!win) {
+          // Popup blocked — user can click the Download button shown in 'ready' phase
+          console.info('Popup blocked. Download button shown as fallback.');
+        }
+      } catch (e) {
+        console.warn('window.open failed.', e);
       }
 
     } catch (err: any) {
-      console.error("Link failure:", err);
-      setErrorMsg(err.message || 'Initialization did not complete.');
+      console.error('Clearance handshake failed:', err);
+      setErrorMsg(err.message || 'Initialization did not complete. Please retry.');
       setPhase('error');
+      setTimeout(resetState, 4000);
     }
   };
 
