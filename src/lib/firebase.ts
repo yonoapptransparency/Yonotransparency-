@@ -63,15 +63,16 @@ const firebaseConfig = getSafeWindowConfig() || {
   messagingSenderId: resolvedMessagingId,
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+export const app = firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null as any;
+
+export const auth = app ? getAuth(app) : null as any;
 
 // EXPERIMENTAL FORCE LONG POLLING IS REQUIRED for Indian Mobile ISPs and Sandbox environments!
-export const db = initializeFirestore(app, {
+export const db = app ? initializeFirestore(app, {
   experimentalForceLongPolling: true
-}, firebaseConfig.firestoreDatabaseId === '(default)' ? undefined : firebaseConfig.firestoreDatabaseId);
+}, firebaseConfig.firestoreDatabaseId === '(default)' ? undefined : firebaseConfig.firestoreDatabaseId) : null as any;
 
-export const isFirebaseConfigured = firebaseConfig.apiKey !== 'PLACEHOLDER' && firebaseConfig.apiKey.trim() !== '' && !firebaseConfig.apiKey.includes('YOUR_API_KEY');
+export const isFirebaseConfigured = !!app && firebaseConfig.apiKey !== 'PLACEHOLDER' && firebaseConfig.apiKey.trim() !== '' && !firebaseConfig.apiKey.includes('YOUR_API_KEY');
 
 
 
