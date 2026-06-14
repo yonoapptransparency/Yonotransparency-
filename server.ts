@@ -9,9 +9,8 @@ import { injectSeoTags, fetchStoreData, getField } from "./src/seoHelper";
 import CryptoJS from "crypto-js";
 
 function safeDecrypt(ciphertext: string, primarySecret: string) {
-    if (!primarySecret) return '';
     try {
-        const bytes = CryptoJS.AES.decrypt(ciphertext, primarySecret);
+        const bytes = CryptoJS.AES.decrypt(ciphertext, primarySecret || '');
         const text = bytes.toString(CryptoJS.enc.Utf8);
         if (text) return text;
     } catch(e) {}
