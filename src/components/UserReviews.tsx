@@ -82,7 +82,7 @@ export default function UserReviews({ appId, appTitle, overallRating = 5.0 }: Us
       app_id: appId,
       username: 'Priyanka Sen',
       rating: 4,
-      comment: `Great UI analysis. The touch lag test reports and detailed screenshots helped me decide whether to use this app on my device. The strict ethics and zero-download protocols keep players fully safe. Submitting my 4-star rating gladly.`,
+      comment: `Great UI analysis. The touch lag test reports and detailed screenshots helped me decide whether to use this app on my device. The strict ethics and zero-trace validation protocols keep players fully safe. Submitting my 4-star rating gladly.`,
       created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1050).toISOString(),
       helpful_count: 14,
       source: 'community',

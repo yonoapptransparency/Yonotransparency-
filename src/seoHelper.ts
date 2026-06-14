@@ -758,7 +758,7 @@ export async function injectSeoTags(template: string, urlPath: string, hostUrl?:
   if (!description) description = "A premium digital platform for applications and tools.";
   
   let keywords = getField(settings, 'seo_keywords', '');
-  if (!keywords) keywords = "app download, digital tools, platform, premium applications, safe download";
+  if (!keywords) keywords = "app clearance, premium applications, digital tools, platform, tech specs, verified apps";
   // Limit keywords to 15 terms to prevent keyword stuffing penalties
   if (keywords) {
     const keywordArray = keywords.split(',').map(k => k.trim()).filter(Boolean);

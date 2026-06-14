@@ -549,11 +549,11 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
         <div className="w-full sm:w-96 flex flex-col items-center gap-2">
           <div className="w-full py-4 px-6 rounded-2xl flex items-center justify-center gap-3 bg-zinc-100 dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed select-none">
             <Lock className="w-4 h-4 shrink-0" />
-            <span className="font-semibold text-sm">Link Not Available</span>
+            <span className="font-semibold text-sm">Service Clearance Pending</span>
           </div>
           <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center leading-relaxed">
-            The download link for this app has not been set up yet.<br/>
-            Please check back later or contact support.
+            The secure access gateway for this application is currently undergoing scheduled system synchronization or administrative integration.<br/>
+            You can dispatch a notice to the Support Desk to expedite this configuration.
           </p>
 
           {reportingStatus === 'idle' && (
@@ -562,7 +562,7 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
               className="mt-2.5 px-4 py-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-zinc-200 dark:border-zinc-700 rounded-xl transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
             >
               <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-              <span>Notify Customer Support</span>
+              <span>Contact Support Desk</span>
             </button>
           )}
 
@@ -652,7 +652,7 @@ export default function ClearanceButton({ appId, status, variant = 'default' }: 
                 </>
               ) : (
                 <span className={variant === 'compact' ? "flex items-center gap-1.5 font-bold" : "text-current"}>
-                  {variant === 'compact' ? 'Download' : 'More Information'}
+                  {variant === 'compact' ? 'Get Access' : 'More Information'}
                 </span>
               )}
             </button>

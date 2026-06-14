@@ -139,7 +139,7 @@ export default function StarRatingFeedback() {
                   id="feedback-subtitle" 
                   className="text-xs text-zinc-500 dark:text-zinc-400 font-medium"
                 >
-                  Help us make this download directory safer and better for everyone.
+                  Help us make this clearance portal safer and better for everyone.
                 </p>
               </div>
             </div>
@@ -230,7 +230,7 @@ export default function StarRatingFeedback() {
                     <div className="flex-1">
                       <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200">How can we win back your trust?</h4>
                       <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed mt-1">
-                        We take safety and platform reliability extremely seriously. Tell us what went wrong so we can debug, update the download links, or enhance security.
+                        We take safety and platform reliability extremely seriously. Tell us what went wrong so we can debug, update the gateway clearance routes, or enhance security.
                       </p>
                     </div>
                   </div>

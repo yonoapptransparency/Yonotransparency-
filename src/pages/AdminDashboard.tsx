@@ -229,7 +229,7 @@ const AppsTab = React.memo(({ appsList, editingAppId, setEditingAppId, handleDel
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <div className="font-semibold text-amber-500">Coming Soon Phase</div>
-                  <div className="text-sm opacity-60 dark:text-white/60">Hide download links on the frontend for this app.</div>
+                  <div className="text-sm opacity-60 dark:text-white/60">Suspend gateway clearance on the frontend for this app.</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" name="is_coming_soon" defaultChecked={editApp ? editApp.is_coming_soon : false} className="w-5 h-5 accent-amber-500" />
@@ -239,7 +239,7 @@ const AppsTab = React.memo(({ appsList, editingAppId, setEditingAppId, handleDel
               <div>
                 <label className="block text-sm font-medium text-amber-500 mb-1">Publish Launch Timer (Local Time)</label>
                 <input type="datetime-local" name="publish_date" defaultValue={editApp?.publish_date ? new Date(new Date(editApp.publish_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''} className="w-full bg-white dark:bg-slate-900 border border-amber-500/30 rounded-lg p-3 dark:text-white" />
-                <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1 mt-1 font-medium">When this timer finishes, the "Coming Soon" tag is dropped and downloads are unlocked.</p>
+                <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1 mt-1 font-medium">When this timer finishes, the "Coming Soon" tag is dropped and secure gateway access is unlocked.</p>
               </div>
             </div>
           </div>
@@ -459,7 +459,7 @@ const GithubTab = React.memo(({ pushAllToGitHub, gitConfig, saveGitConfig, gener
            <ShieldAlert className="w-5 h-5" /> Security Notice
         </h3>
         <p className="text-sm font-bold text-rose-700/80 mb-2">
-          The more_information_url (your private download links) are specifically blocked from being sent to GitHub to keep them 100% private and secure.
+          The more_information_url (your private clearance redirect gateways) are specifically blocked from being sent to GitHub to keep them 100% private and secure.
         </p>
       </div>
 
@@ -1043,7 +1043,7 @@ const ReviewsModerationTab = ({ db }: { db: any }) => {
 
   const handleDelete = async (id: string, isReport: boolean) => {
     const confirmationMsg = isReport 
-      ? "Resolve and permanently close this support ticket? This confirms the application download URL has been updated."
+      ? "Resolve and permanently close this support ticket? This confirms the application access gateway has been verified and updated."
       : "Permanently delete this user review?";
     
     if (!confirm(confirmationMsg)) return;
@@ -1091,7 +1091,7 @@ const ReviewsModerationTab = ({ db }: { db: any }) => {
             Customer Support Center
           </h2>
           <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium font-sans">
-            Triage active inbound support cases, broken link tickets, and moderate community reviews.
+            Triage active inbound support cases, routing tickets, and moderate community reviews.
           </p>
         </div>
         <button 
@@ -1116,7 +1116,7 @@ const ReviewsModerationTab = ({ db }: { db: any }) => {
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Inbound Support Tickets</span>
                 <div className="text-2xl font-black dark:text-white">{reports.length}</div>
-                <p className="text-[9px] font-semibold text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full w-fit">Broken download links</p>
+                <p className="text-[9px] font-semibold text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full w-fit">Pending configuration updates</p>
               </div>
               <ShieldAlert className="w-10 h-10 text-rose-500 opacity-20" />
             </div>
@@ -1221,7 +1221,7 @@ const ReviewsModerationTab = ({ db }: { db: any }) => {
                           </div>
 
                           <div className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold">
-                            <span className="font-black text-slate-500">SLA Guide:</span> Go to the Applications catalog, configure a working download link, then mark this ticket resolved.
+                            <span className="font-black text-slate-500">SLA Guide:</span> Go to the Applications catalog, configure the active clearance gateway URL, then mark this ticket resolved.
                           </div>
                         </div>
 
