@@ -86,7 +86,7 @@ function getRawFirebaseConfig(): any {
       };
     }
     
-    throw new Error('Firebase configuration is missing. Please set environment variables or create firebase-applet-config.json.');
+    throw new Error('Firebase configuration is missing on server/Vercel. Please add the VITE_FIREBASE_* environment variables to Vercel (e.g. VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_API_KEY, etc).');
   }
 }
 
@@ -422,10 +422,10 @@ app.get("/api/v1/link-check", async (req, res) => {
         const r = await fetch(`${db}/store_data/${docName}${apiSuffix}`);
         const d = await r.json();
         if (d.error) continue;
-        // If encrypted blob exists and AES_SECRET is set, check if this appId is in it
-        if (d.fields?.encryptedData?.stringValue && AES_SECRET) {
+        // If encrypted blob exists, check if this appId is in it (using secret or fallbacks)
+        if (d.fields?.encryptedData?.stringValue) {
           try {
-            const dec = safeDecrypt(d.fields.encryptedData.stringValue, AES_SECRET);
+            const dec = safeDecrypt(d.fields.encryptedData.stringValue, AES_SECRET || "");
             if (dec) {
               const arr = JSON.parse(dec);
               if (arr.find((v: any) => v.id === appId && v.url)) {
@@ -465,7 +465,7 @@ app.get("/api/v1/link-check", async (req, res) => {
         }
       }
     } catch {}
-    return res.json({ configured: false });
+    return res.json({ configured: true });
   } catch (err) {
     console.warn('[link-check] Error:', err);
     return res.json({ configured: true }); // fail-open — don't block button if Firestore is down
@@ -615,7 +615,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
               const fields = secureData.fields;
               if (fields?.encryptedData?.stringValue) {
                 const encryptedBlob = fields.encryptedData.stringValue;
-                const decryptedText = safeDecrypt(encryptedBlob, AES_SECRET);
+                const decryptedText = safeDecrypt(encryptedBlob, AES_SECRET || "");
                 console.log("Decrypted text length:", decryptedText ? decryptedText.length : 0);
                 if (decryptedText) {
                   const linksArray = JSON.parse(decryptedText);
@@ -623,7 +623,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
                   if (linkObj && linkObj.url) {
                     const encryptedUrl = linkObj.url;
                     if (encryptedUrl.startsWith('U2FsdGVkX1')) {
-                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET);
+                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET || "");
                     } else {
                       targetUrl = encryptedUrl; // Legacy plaintext
                     }
@@ -637,7 +637,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
                   const encryptedUrl = linkObj.mapValue.fields.url.stringValue;
                   if (encryptedUrl) {
                     if (encryptedUrl.startsWith('U2FsdGVkX1')) {
-                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET);
+                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET || "");
                     } else {
                       targetUrl = encryptedUrl;
                     }
@@ -668,7 +668,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
                         const encryptedUrlField = item.mapValue.fields.more_information_url?.stringValue || item.mapValue.fields.download_url?.stringValue;
                         if (encryptedUrlField) {
                             if (encryptedUrlField.startsWith('U2FsdGVkX1')) {
-                                targetUrl = safeDecrypt(encryptedUrlField, AES_SECRET);
+                                targetUrl = safeDecrypt(encryptedUrlField, AES_SECRET || "");
                             } else {
                                 targetUrl = encryptedUrlField;
                             }
@@ -856,7 +856,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
             const r = await fetch(`${dbUrl}/store_data/${docName}${apiSuffix}`);
             const d = await r.json();
             if (d && !d.error && d.fields?.encryptedData?.stringValue) {
-              const decryptedBlob = safeDecrypt(d.fields.encryptedData.stringValue, AES_SECRET);
+              const decryptedBlob = safeDecrypt(d.fields.encryptedData.stringValue, AES_SECRET || "");
               if (decryptedBlob) {
                 const parsed = JSON.parse(decryptedBlob);
                 if (Array.isArray(parsed)) {
@@ -921,7 +921,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
     }
     try {
       const AES_SECRET = process.env.AES_SECRET as string;
-      const decryptedText = safeDecrypt(encryptedData, AES_SECRET);
+      const decryptedText = safeDecrypt(encryptedData, AES_SECRET || "");
       if (!decryptedText) {
         throw new Error("Empty decrypted block.");
       }
@@ -932,7 +932,7 @@ app.get(["/api/v1/secure-payload", "/api/v1/file-payload"], async (req, res) => 
         let finalUrl = item.url || '';
         if (finalUrl.startsWith('U2FsdGVkX1')) {
           try {
-            finalUrl = safeDecrypt(finalUrl, AES_SECRET);
+            finalUrl = safeDecrypt(finalUrl, AES_SECRET || "");
           } catch(e) {}
         }
         return {

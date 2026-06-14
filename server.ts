@@ -64,7 +64,7 @@ function getRawFirebaseConfig(): any {
       };
     }
     
-    throw new Error('Firebase configuration is missing. Please set environment variables or create firebase-applet-config.json.');
+    throw new Error('Firebase configuration is missing on server/Vercel. Please add the VITE_FIREBASE_* environment variables to Vercel (e.g. VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_API_KEY, etc).');
   }
 }
 
@@ -316,7 +316,7 @@ function verifyToken(token: string, ip: string, sessionId: string, fingerprint: 
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = 3000;
 
   // File Logging Middleware for Diagnostics in Sandbox Environment
   app.use((req, res, next) => {
@@ -955,7 +955,7 @@ async function startServer() {
       const ciphertext = data.fields.encryptedData.stringValue;
       const AES_SECRET = process.env.AES_SECRET as string;
       
-      const decrypted = safeDecrypt(ciphertext, AES_SECRET);
+      const decrypted = safeDecrypt(ciphertext, AES_SECRET || "");
       res.json({ decrypted: JSON.parse(decrypted) });
     } catch (err) {
       res.status(500).json({ error: 'Failed to decrypt vault: ' + err });
@@ -970,7 +970,7 @@ async function startServer() {
     }
     try {
       const AES_SECRET = process.env.AES_SECRET as string;
-      const decryptedText = safeDecrypt(encryptedData, AES_SECRET);
+      const decryptedText = safeDecrypt(encryptedData, AES_SECRET || "");
       if (!decryptedText) {
         throw new Error("Empty decrypted block.");
       }
@@ -981,7 +981,7 @@ async function startServer() {
         let finalUrl = item.url || '';
         if (finalUrl.startsWith('U2FsdGVkX1')) {
           try {
-            finalUrl = safeDecrypt(finalUrl, AES_SECRET);
+            finalUrl = safeDecrypt(finalUrl, AES_SECRET || "");
           } catch(e) {}
         }
         return {
@@ -1155,11 +1155,11 @@ const rateLimitMap = new Map<string, number[]>();
           const r = await fetch(`${db}/store_data/${docName}${apiSuffix}`);
           const d = await r.json();
           if (d.error) continue;
-          // If encrypted blob exists and AES_SECRET is set, check if this appId is in it
+          // If encrypted blob exists, check if this appId is in it (using secret or fallbacks)
           let foundInEncrypted = false;
-          if (d.fields?.encryptedData?.stringValue && AES_SECRET) {
+          if (d.fields?.encryptedData?.stringValue) {
             try {
-              const dec = safeDecrypt(d.fields.encryptedData.stringValue, AES_SECRET);
+              const dec = safeDecrypt(d.fields.encryptedData.stringValue, AES_SECRET || "");
               if (dec) {
                 const arr = JSON.parse(dec);
                 const foundEntry = arr.find((v: any) => v.id === appId && v.url);
@@ -1345,7 +1345,7 @@ const rateLimitMap = new Map<string, number[]>();
               const fields = secureData.fields;
               if (fields?.encryptedData?.stringValue) {
                 const encryptedBlob = fields.encryptedData.stringValue;
-                const decryptedText = safeDecrypt(encryptedBlob, AES_SECRET);
+                const decryptedText = safeDecrypt(encryptedBlob, AES_SECRET || "");
                 console.log("Decrypted text length:", decryptedText ? decryptedText.length : 0);
                 if (decryptedText) {
                   const linksArray = JSON.parse(decryptedText);
@@ -1356,7 +1356,7 @@ const rateLimitMap = new Map<string, number[]>();
                     const encryptedUrl = linkObj.url;
                     fs.appendFileSync('debug.log', `DEBUG: encryptedUrl: ${encryptedUrl}\n`);
                     if (encryptedUrl.startsWith('U2FsdGVkX1')) {
-                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET);
+                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET || "");
                     } else {
                       targetUrl = encryptedUrl; // Legacy plaintext
                     }
@@ -1372,7 +1372,7 @@ const rateLimitMap = new Map<string, number[]>();
                   const encryptedUrl = linkObj.mapValue.fields.url.stringValue;
                   if (encryptedUrl) {
                     if (encryptedUrl.startsWith('U2FsdGVkX1')) {
-                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET);
+                      targetUrl = safeDecrypt(encryptedUrl, AES_SECRET || "");
                     } else {
                       targetUrl = encryptedUrl;
                     }
@@ -1403,7 +1403,7 @@ const rateLimitMap = new Map<string, number[]>();
                         const encryptedUrlField = item.mapValue.fields.more_information_url?.stringValue || item.mapValue.fields.download_url?.stringValue;
                         if (encryptedUrlField) {
                             if (encryptedUrlField.startsWith('U2FsdGVkX1')) {
-                                targetUrl = safeDecrypt(encryptedUrlField, AES_SECRET);
+                                targetUrl = safeDecrypt(encryptedUrlField, AES_SECRET || "");
                             } else {
                                 targetUrl = encryptedUrlField;
                             }
